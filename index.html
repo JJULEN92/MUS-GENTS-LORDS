@@ -31,7 +31,10 @@
           <p class="text-sm">Usuario activo: <span id="activeUser" class="font-bold text-amber-400">No identificado</span></p>
           <p class="text-xs text-slate-400">Estado: <span id="appStatus">Cargando datos...</span></p>
         </div>
-        <button onclick="loadData()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg text-sm font-bold">🔄 Actualizar datos</button>
+        <div class="flex flex-wrap gap-2 items-center">
+          <button onclick="loadData()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg text-sm font-bold">🔄 Actualizar datos</button>
+          <button id="autoRefreshBtn" onclick="toggleAutoRefresh()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⏱️ Auto 15s: ON</button>
+        </div>
       </div>
     </section>
 
@@ -99,15 +102,15 @@
           <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
             <h4 class="font-bold text-emerald-400 mb-2">Pareja A</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <select id="teamA1" class="field playerSelect"></select>
-              <select id="teamA2" class="field playerSelect"></select>
+              <select id="teamA1" class="field playerSelect" onchange="previewMatchResult()"></select>
+              <select id="teamA2" class="field playerSelect" onchange="previewMatchResult()"></select>
             </div>
           </div>
           <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
             <h4 class="font-bold text-cyan-400 mb-2">Pareja B</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <select id="teamB1" class="field playerSelect"></select>
-              <select id="teamB2" class="field playerSelect"></select>
+              <select id="teamB1" class="field playerSelect" onchange="previewMatchResult()"></select>
+              <select id="teamB2" class="field playerSelect" onchange="previewMatchResult()"></select>
             </div>
           </div>
         </div>
@@ -115,13 +118,26 @@
         <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
           <h4 class="font-bold text-white mb-2">Resultado por vacas</h4>
           <p class="text-xs text-slate-400 mb-3">Introduce solo las vacas jugadas. Ejemplo: 30 / 13 / 31.</p>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <input id="vaca1" placeholder="Vaca 1, ej. 30" class="field" oninput="previewMatchResult()" />
-            <input id="vaca2" placeholder="Vaca 2, ej. 13" class="field" oninput="previewMatchResult()" />
-            <input id="vaca3" placeholder="Vaca 3, ej. 31" class="field" oninput="previewMatchResult()" />
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+              <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 1</label>
+              <input id="vaca1" placeholder="30 / 31 / 32 / 03 / 13 / 23" class="field mb-2" oninput="previewMatchResult()" />
+              <div class="grid grid-cols-3 gap-1 resultButtons" data-target="vaca1"></div>
+            </div>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+              <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 2</label>
+              <input id="vaca2" placeholder="30 / 31 / 32 / 03 / 13 / 23" class="field mb-2" oninput="previewMatchResult()" />
+              <div class="grid grid-cols-3 gap-1 resultButtons" data-target="vaca2"></div>
+            </div>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+              <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 3</label>
+              <input id="vaca3" placeholder="Solo si hace falta desempate" class="field mb-2" oninput="previewMatchResult()" />
+              <div class="grid grid-cols-3 gap-1 resultButtons" data-target="vaca3"></div>
+            </div>
           </div>
           <div class="mt-3 bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm">
             <div id="matchPreview" class="text-slate-300">Resultado pendiente de calcular.</div>
+            <div id="matchValidation" class="text-xs mt-2 text-slate-400"></div>
           </div>
         </div>
 
@@ -182,8 +198,12 @@
       matches: [],
       logs: [],
       currentUser: null,
-      calculatedStandings: []
+      calculatedStandings: [],
+      isEditing: false
     };
+
+    let autoRefreshEnabled = true;
+    let autoRefreshTimer = null;
 
     document.querySelectorAll(".field").forEach(el => {
       el.className = "bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm w-full";
@@ -429,14 +449,65 @@
         document.getElementById("vaca3").value
       );
       const preview = document.getElementById("matchPreview");
-      if (!calc.valid) {
-        preview.innerHTML = '<span class="text-red-400">Resultado inválido. Usa 30, 31, 32, 03, 13 o 23.</span>';
-        return;
-      }
+      const validation = document.getElementById("matchValidation");
       const teamA = [document.getElementById("teamA1").value, document.getElementById("teamA2").value].filter(Boolean).join(" / ") || "Pareja A";
       const teamB = [document.getElementById("teamB1").value, document.getElementById("teamB2").value].filter(Boolean).join(" / ") || "Pareja B";
+
+      if (validation) {
+        const playerValidation = validateSelectedPlayers(false);
+        validation.innerHTML = playerValidation.ok
+          ? '<span class="text-emerald-400">Jugadores correctos: 4 jugadores distintos.</span>'
+          : `<span class="text-amber-400">${escapeHtml(playerValidation.message)}</span>`;
+      }
+
+      if (!calc.valid) {
+        preview.innerHTML = '<span class="text-red-400 font-bold">Resultado inválido.</span> Usa 30, 31, 32, 03, 13 o 23.';
+        return;
+      }
+
       const winner = calc.winnerSide === "A" ? teamA : calc.winnerSide === "B" ? teamB : "Sin ganador todavía";
-      preview.innerHTML = `Vacas: <b>${calc.vacasA}-${calc.vacasB}</b> · Juegos: <b>${calc.gamesA}-${calc.gamesB}</b> · Ganador: <span class="text-emerald-400 font-bold">${escapeHtml(winner)}</span>`;
+      const completion = calc.complete
+        ? '<span class="text-emerald-400 font-bold">Partida completa</span>'
+        : '<span class="text-amber-400 font-bold">Partida incompleta: debe acabar 2-0 o 2-1 en vacas</span>';
+
+      preview.innerHTML = `Vacas: <b>${calc.vacasA}-${calc.vacasB}</b> · Juegos: <b>${calc.gamesA}-${calc.gamesB}</b> · Ganador: <span class="text-emerald-400 font-bold">${escapeHtml(winner)}</span><br>${completion}`;
+    }
+
+    function renderResultButtons() {
+      const values = ["30", "31", "32", "03", "13", "23"];
+      document.querySelectorAll(".resultButtons").forEach(container => {
+        const target = container.dataset.target;
+        container.innerHTML = values.map(v => `
+          <button type="button" onclick="setVacaValue('${target}','${v}')" class="bg-slate-800 hover:bg-amber-500 hover:text-slate-950 border border-slate-700 rounded-lg py-1.5 text-xs font-black transition-all">${v}</button>
+        `).join("");
+      });
+    }
+
+    function setVacaValue(target, value) {
+      document.getElementById(target).value = value;
+      previewMatchResult();
+    }
+
+    function validateSelectedPlayers(showAlert = true) {
+      const teamA1 = document.getElementById("teamA1").value;
+      const teamA2 = document.getElementById("teamA2").value;
+      const teamB1 = document.getElementById("teamB1").value;
+      const teamB2 = document.getElementById("teamB2").value;
+      const allPlayers = [teamA1, teamA2, teamB1, teamB2];
+
+      if (allPlayers.some(x => !x)) {
+        const msg = "Selecciona los 4 jugadores.";
+        if (showAlert) alert(msg);
+        return { ok: false, message: msg };
+      }
+
+      if (new Set(allPlayers).size !== 4) {
+        const msg = "No puede repetirse ningún jugador en la misma partida.";
+        if (showAlert) alert(msg);
+        return { ok: false, message: msg };
+      }
+
+      return { ok: true, message: "OK" };
     }
 
     function login() {
@@ -482,12 +553,15 @@
     function openMatchForm() {
       if (!requireLogin()) return;
       clearMatchForm();
+      state.isEditing = true;
       document.getElementById("matchForm").classList.remove("hidden");
+      renderResultButtons();
       previewMatchResult();
     }
 
     function closeMatchForm() {
       document.getElementById("matchForm").classList.add("hidden");
+      state.isEditing = false;
       clearMatchForm();
     }
 
@@ -500,7 +574,9 @@
 
     function editMatch(m) {
       if (!requireLogin()) return;
+      state.isEditing = true;
       document.getElementById("matchForm").classList.remove("hidden");
+      renderResultButtons();
       document.getElementById("matchId").value = m.id || "";
       document.getElementById("matchFecha").value = m.fecha || "";
       document.getElementById("matchRound").value = m.round || "";
@@ -531,9 +607,8 @@
       const teamA2 = document.getElementById("teamA2").value;
       const teamB1 = document.getElementById("teamB1").value;
       const teamB2 = document.getElementById("teamB2").value;
-      const allPlayers = [teamA1, teamA2, teamB1, teamB2];
 
-      if (new Set(allPlayers).size !== 4 || allPlayers.some(x => !x)) return alert("Selecciona 4 jugadores distintos.");
+      if (!validateSelectedPlayers(true).ok) return;
 
       const teamA = `${teamA1}/${teamA2}`;
       const teamB = `${teamB1}/${teamB2}`;
@@ -607,7 +682,8 @@
     }
 
     function setStatus(txt) {
-      document.getElementById("appStatus").textContent = txt;
+      const now = new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      document.getElementById("appStatus").textContent = `${txt} · ${now}`;
     }
 
     function normalizeName(name) {
@@ -625,7 +701,26 @@
         .replaceAll("'", "&#039;");
     }
 
+
+    function toggleAutoRefresh() {
+      autoRefreshEnabled = !autoRefreshEnabled;
+      document.getElementById("autoRefreshBtn").textContent = autoRefreshEnabled ? "⏱️ Auto 15s: ON" : "⏱️ Auto 15s: OFF";
+      document.getElementById("autoRefreshBtn").className = autoRefreshEnabled
+        ? "bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold"
+        : "bg-red-900 hover:bg-red-800 px-4 py-2 rounded-lg text-sm font-bold";
+    }
+
+    function startAutoRefresh() {
+      if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+      autoRefreshTimer = setInterval(() => {
+        if (autoRefreshEnabled && !state.isEditing) {
+          loadData();
+        }
+      }, 15000);
+    }
+
     loadData();
+    startAutoRefresh();
   </script>
 </body>
 </html>
