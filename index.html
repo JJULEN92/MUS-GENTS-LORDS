@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Torneo de Mus Gents & Lords - MVP Vacas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <header class="bg-slate-900 border-b border-emerald-800 p-4 sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+      <div>
+        <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
+        <p class="text-xs text-slate-400">MVP · Partidas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+      </div>
+      <div class="flex flex-wrap gap-2 items-center">
+        <select id="loginPlayer" class="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm">
+          <option value="">Selecciona jugador</option>
+        </select>
+        <input id="loginPassword" type="password" placeholder="Clave" class="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm w-28" />
+        <button onclick="login()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-lg text-sm">Entrar</button>
+        <button onclick="logout()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-lg text-sm">Salir</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-4 space-y-6">
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <p class="text-sm">Usuario activo: <span id="activeUser" class="font-bold text-amber-400">No identificado</span></p>
+          <p class="text-xs text-slate-400">Estado: <span id="appStatus">Cargando datos...</span></p>
+        </div>
+        <button onclick="loadData()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg text-sm font-bold">🔄 Actualizar datos</button>
+      </div>
+    </section>
+
+    <nav class="flex flex-wrap gap-2">
+      <button onclick="showTab(event,'standings')" class="tabBtn bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Clasificación calculada</button>
+      <button onclick="showTab(event,'matches')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Partidas</button>
+      <button onclick="showTab(event,'players')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Jugadores</button>
+      <button onclick="showTab(event,'logs')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Log</button>
+    </nav>
+
+    <section id="tab-standings" class="tabContent bg-slate-900 border border-slate-800 rounded-2xl p-4">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
+        <div>
+          <h2 class="text-xl font-black">📊 Clasificación automática</h2>
+          <p class="text-xs text-slate-400">Orden: Puntos → JG → menor JP → menor Penal → Sin Avatar</p>
+        </div>
+        <button onclick="saveCalculatedStandings()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-lg text-sm">💾 Volcar clasificación al Sheet</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="text-xs uppercase text-slate-400 border-b border-slate-700">
+            <tr>
+              <th class="text-left p-2">Pos</th>
+              <th class="text-left p-2">Jugador</th>
+              <th class="text-center p-2">PJ</th>
+              <th class="text-center p-2 text-amber-400">Puntos</th>
+              <th class="text-center p-2">V+</th>
+              <th class="text-center p-2">V-</th>
+              <th class="text-center p-2 text-emerald-400">JG</th>
+              <th class="text-center p-2 text-red-400">JP</th>
+              <th class="text-center p-2">Penal</th>
+              <th class="text-center p-2">Avatar</th>
+              <th class="text-center p-2">Sin Avatar</th>
+            </tr>
+          </thead>
+          <tbody id="standingsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-matches" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-5">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-black">🎴 Partidas</h2>
+          <p class="text-xs text-slate-400">Formato vaca: 30, 31, 32 si gana Pareja A; 03, 13, 23 si gana Pareja B.</p>
+        </div>
+        <button onclick="openMatchForm()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-lg text-sm">➕ Añadir/Editar partida</button>
+      </div>
+
+      <div id="matchForm" class="hidden bg-slate-950 border border-slate-700 rounded-2xl p-4 space-y-4">
+        <h3 class="font-bold text-amber-400">Registrar partida</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <input id="matchId" placeholder="ID, ej. J1-M1" class="field" />
+          <input id="matchFecha" placeholder="Fecha, ej. 26/12/2025" class="field" />
+          <input id="matchRound" placeholder="Jornada, ej. 1" class="field" />
+          <select id="matchStatus" class="field">
+            <option value="confirmed">Confirmada</option>
+            <option value="pending">Pendiente</option>
+            <option value="cancelled">Cancelada</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+            <h4 class="font-bold text-emerald-400 mb-2">Pareja A</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <select id="teamA1" class="field playerSelect"></select>
+              <select id="teamA2" class="field playerSelect"></select>
+            </div>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+            <h4 class="font-bold text-cyan-400 mb-2">Pareja B</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <select id="teamB1" class="field playerSelect"></select>
+              <select id="teamB2" class="field playerSelect"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+          <h4 class="font-bold text-white mb-2">Resultado por vacas</h4>
+          <p class="text-xs text-slate-400 mb-3">Introduce solo las vacas jugadas. Ejemplo: 30 / 13 / 31.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <input id="vaca1" placeholder="Vaca 1, ej. 30" class="field" oninput="previewMatchResult()" />
+            <input id="vaca2" placeholder="Vaca 2, ej. 13" class="field" oninput="previewMatchResult()" />
+            <input id="vaca3" placeholder="Vaca 3, ej. 31" class="field" oninput="previewMatchResult()" />
+          </div>
+          <div class="mt-3 bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm">
+            <div id="matchPreview" class="text-slate-300">Resultado pendiente de calcular.</div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button onclick="saveMatch()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg font-bold text-sm">💾 Guardar partida</button>
+          <button onclick="closeMatchForm()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold text-sm">Cancelar</button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="text-xs uppercase text-slate-400 border-b border-slate-700">
+            <tr>
+              <th class="text-left p-2">ID</th>
+              <th class="text-center p-2">Fecha</th>
+              <th class="text-center p-2">J</th>
+              <th class="text-left p-2">Pareja A</th>
+              <th class="text-left p-2">Pareja B</th>
+              <th class="text-center p-2">Vacas</th>
+              <th class="text-center p-2">Juegos</th>
+              <th class="text-center p-2">Ganador</th>
+              <th class="text-center p-2">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="matchesBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-players" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4">
+      <h2 class="text-xl font-black mb-4">👤 Jugadores</h2>
+      <div id="playersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3"></div>
+    </section>
+
+    <section id="tab-logs" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4">
+      <h2 class="text-xl font-black mb-4">🧾 Log de cambios</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="text-xs uppercase text-slate-400 border-b border-slate-700">
+            <tr>
+              <th class="text-left p-2">Fecha</th>
+              <th class="text-left p-2">Usuario</th>
+              <th class="text-left p-2">Acción</th>
+              <th class="text-left p-2">Detalle</th>
+            </tr>
+          </thead>
+          <tbody id="logsBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbyjj_H1WHtp-satb9eC1mY0I46sISa5g6MDrnYUVgGyuZe0X_26wmzBAzZZ_8SpMMvo/exec";
+
+    let state = {
+      players: [],
+      matches: [],
+      logs: [],
+      currentUser: null,
+      calculatedStandings: []
+    };
+
+    document.querySelectorAll(".field").forEach(el => {
+      el.className = "bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm w-full";
+    });
+
+    async function api(action, payload = {}) {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action, ...payload })
+      });
+      const txt = await res.text();
+      try {
+        return JSON.parse(txt);
+      } catch (e) {
+        throw new Error("Respuesta no JSON del backend: " + txt.slice(0, 200));
+      }
+    }
+
+    async function loadData() {
+      setStatus("Cargando datos...");
+      try {
+        const data = await api("getData");
+        if (!data.ok) throw new Error(data.error || "Error desconocido");
+        state.players = normalizePlayers(data.players || []);
+        state.matches = data.matches || [];
+        state.logs = data.logs || [];
+        renderAll();
+        setStatus("Datos cargados correctamente");
+      } catch (err) {
+        console.error(err);
+        setStatus("Error cargando datos: " + err.message);
+      }
+    }
+
+    function normalizePlayers(players) {
+      return players.filter(p => p.id !== "" && p.name).map(p => ({
+        ...p,
+        id: String(p.id),
+        name: normalizeName(p.name),
+        role: p.role || "player",
+        penal: Number(p.penal || 0),
+        avatar: Number(p.avatar || 0)
+      }));
+    }
+
+    function renderAll() {
+      renderLoginPlayers();
+      renderPlayerSelects();
+      state.calculatedStandings = calculateStandings();
+      renderStandings();
+      renderMatches();
+      renderPlayers();
+      renderLogs();
+      renderActiveUser();
+    }
+
+    function renderLoginPlayers() {
+      const select = document.getElementById("loginPlayer");
+      const current = select.value;
+      select.innerHTML = '<option value="">Selecciona jugador</option>' + state.players.map(p =>
+        `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}${p.role === "admin" ? " 👑" : ""}</option>`
+      ).join("");
+      select.value = current;
+    }
+
+    function renderPlayerSelects() {
+      const options = '<option value="">Jugador</option>' + state.players.map(p => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`).join("");
+      document.querySelectorAll(".playerSelect").forEach(sel => {
+        const current = sel.value;
+        sel.innerHTML = options;
+        sel.value = current;
+      });
+    }
+
+    function calculateStandings() {
+      const table = new Map();
+
+      state.players.forEach(p => {
+        table.set(p.name, {
+          player: p.name, pj: 0, points: 0, vacasWon: 0, vacasLost: 0,
+          jg: 0, jp: 0, penal: Number(p.penal || 0), avatar: Number(p.avatar || 0), sinAvatar: 0
+        });
+      });
+
+      state.matches.filter(m => (m.status || "confirmed") === "confirmed").forEach(m => {
+        const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3);
+        if (!calc.valid || !calc.complete) return;
+
+        const aPlayers = [normalizeName(m.teamA_player1 || m.teamA1), normalizeName(m.teamA_player2 || m.teamA2)].filter(Boolean);
+        const bPlayers = [normalizeName(m.teamB_player1 || m.teamB1), normalizeName(m.teamB_player2 || m.teamB2)].filter(Boolean);
+
+        [...aPlayers, ...bPlayers].forEach(name => {
+          if (!table.has(name)) {
+            table.set(name, { player: name, pj: 0, points: 0, vacasWon: 0, vacasLost: 0, jg: 0, jp: 0, penal: 0, avatar: 0, sinAvatar: 0 });
+          }
+        });
+
+        aPlayers.forEach(name => {
+          const r = table.get(name);
+          r.pj += 1;
+          r.vacasWon += calc.vacasA;
+          r.vacasLost += calc.vacasB;
+          r.jg += calc.gamesA;
+          r.jp += calc.gamesB;
+          if (calc.winnerSide === "A") r.points += 3;
+        });
+
+        bPlayers.forEach(name => {
+          const r = table.get(name);
+          r.pj += 1;
+          r.vacasWon += calc.vacasB;
+          r.vacasLost += calc.vacasA;
+          r.jg += calc.gamesB;
+          r.jp += calc.gamesA;
+          if (calc.winnerSide === "B") r.points += 3;
+        });
+      });
+
+      return [...table.values()].map(r => ({
+        ...r,
+        points: Number(r.points) - Number(r.penal || 0),
+        sinAvatar: Math.max(0, Number(r.pj || 0) - Number(r.avatar || 0))
+      })).sort((a,b) =>
+        b.points - a.points ||
+        b.jg - a.jg ||
+        a.jp - b.jp ||
+        a.penal - b.penal ||
+        b.sinAvatar - a.sinAvatar ||
+        a.player.localeCompare(b.player)
+      );
+    }
+
+    function renderStandings() {
+      const rows = state.calculatedStandings;
+      document.getElementById("standingsBody").innerHTML = rows.map((r, i) => `
+        <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+          <td class="p-2 font-bold">${i+1}</td>
+          <td class="p-2 font-bold">${escapeHtml(r.player)}</td>
+          <td class="p-2 text-center">${r.pj}</td>
+          <td class="p-2 text-center text-amber-400 font-black">${r.points}</td>
+          <td class="p-2 text-center">${r.vacasWon}</td>
+          <td class="p-2 text-center">${r.vacasLost}</td>
+          <td class="p-2 text-center text-emerald-400">${r.jg}</td>
+          <td class="p-2 text-center text-red-400">${r.jp}</td>
+          <td class="p-2 text-center">${r.penal}</td>
+          <td class="p-2 text-center">${r.avatar}</td>
+          <td class="p-2 text-center">${r.sinAvatar}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="11" class="p-4 text-slate-400">No hay clasificación calculada.</td></tr>`;
+    }
+
+    function renderMatches() {
+      const rows = [...state.matches].filter(m => m.id).sort((a,b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true }));
+      document.getElementById("matchesBody").innerHTML = rows.map(m => {
+        const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3);
+        const teamA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].filter(Boolean).map(normalizeName).join(" / ");
+        const teamB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].filter(Boolean).map(normalizeName).join(" / ");
+        const vacasText = calc.valid ? `${calc.vacasA}-${calc.vacasB} (${[m.vaca1,m.vaca2,m.vaca3].filter(Boolean).join("/")})` : "Error";
+        const gamesText = calc.valid ? `${calc.gamesA}-${calc.gamesB}` : "-";
+        const winner = calc.winnerSide === "A" ? teamA : calc.winnerSide === "B" ? teamB : "";
+        return `
+          <tr class="border-b border-slate-800 hover:bg-slate-800/40 cursor-pointer" onclick='editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})'>
+            <td class="p-2 font-bold">${escapeHtml(m.id)}</td>
+            <td class="p-2 text-center">${escapeHtml(m.fecha)}</td>
+            <td class="p-2 text-center">${escapeHtml(m.round)}</td>
+            <td class="p-2">${escapeHtml(teamA)}</td>
+            <td class="p-2">${escapeHtml(teamB)}</td>
+            <td class="p-2 text-center font-mono">${escapeHtml(vacasText)}</td>
+            <td class="p-2 text-center font-mono">${escapeHtml(gamesText)}</td>
+            <td class="p-2 text-center text-emerald-400">${escapeHtml(winner)}</td>
+            <td class="p-2 text-center">${escapeHtml(m.status || "confirmed")}</td>
+          </tr>`;
+      }).join("") || `<tr><td colspan="9" class="p-4 text-slate-400">No hay partidas cargadas todavía.</td></tr>`;
+    }
+
+    function renderPlayers() {
+      document.getElementById("playersGrid").innerHTML = state.players.map(p => `
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+          <div class="text-lg font-black">${escapeHtml(p.name)}</div>
+          <div class="text-xs text-slate-400">Rol: ${escapeHtml(p.role || "player")}</div>
+          <div class="text-xs text-slate-400 mt-2">Penal: ${p.penal || 0} · Avatar: ${p.avatar || 0}</div>
+        </div>
+      `).join("") || `<p class="text-slate-400">No hay jugadores cargados.</p>`;
+    }
+
+    function renderLogs() {
+      const rows = [...state.logs].reverse().slice(0, 50);
+      document.getElementById("logsBody").innerHTML = rows.map(l => `
+        <tr class="border-b border-slate-800">
+          <td class="p-2 text-xs">${escapeHtml(l.timestamp)}</td>
+          <td class="p-2">${escapeHtml(l.user)}</td>
+          <td class="p-2">${escapeHtml(l.action)}</td>
+          <td class="p-2 text-xs text-slate-400 max-w-xl truncate">${escapeHtml(l.details)}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="4" class="p-4 text-slate-400">Sin cambios registrados.</td></tr>`;
+    }
+
+    function calculateMatch(v1, v2, v3) {
+      const vacas = [v1, v2, v3].filter(v => String(v || "").trim() !== "");
+      let vacasA = 0, vacasB = 0, gamesA = 0, gamesB = 0;
+      for (const v of vacas) {
+        const parsed = parseVaca(v);
+        if (!parsed.valid) return { valid: false, complete: false, error: parsed.error, vacasA: 0, vacasB: 0, gamesA: 0, gamesB: 0, winnerSide: "" };
+        gamesA += parsed.a;
+        gamesB += parsed.b;
+        if (parsed.winner === "A") vacasA++;
+        if (parsed.winner === "B") vacasB++;
+      }
+      const complete = vacasA === 2 || vacasB === 2;
+      return {
+        valid: true,
+        complete,
+        vacasA,
+        vacasB,
+        gamesA,
+        gamesB,
+        winnerSide: vacasA === 2 ? "A" : vacasB === 2 ? "B" : ""
+      };
+    }
+
+    function parseVaca(value) {
+      let s = String(value ?? "").trim().replace("-", "").replace(" ", "");
+
+      // Google Sheets puede convertir 03 en número 3.
+      // En ese caso recuperamos el formato correcto como 03.
+      if (/^\d$/.test(s)) s = "0" + s;
+
+      if (!/^\d{2}$/.test(s)) return { valid: false, error: "Formato inválido" };
+
+      const a = Number(s[0]);
+      const b = Number(s[1]);
+
+      const validScores = (a === 3 && [0,1,2].includes(b)) || (b === 3 && [0,1,2].includes(a));
+      if (!validScores) return { valid: false, error: "Una vaca debe ser 30/31/32 o 03/13/23" };
+
+      return { valid: true, a, b, winner: a === 3 ? "A" : "B", normalized: s };
+    }
+
+    function previewMatchResult() {
+      const calc = calculateMatch(
+        document.getElementById("vaca1").value,
+        document.getElementById("vaca2").value,
+        document.getElementById("vaca3").value
+      );
+      const preview = document.getElementById("matchPreview");
+      if (!calc.valid) {
+        preview.innerHTML = '<span class="text-red-400">Resultado inválido. Usa 30, 31, 32, 03, 13 o 23.</span>';
+        return;
+      }
+      const teamA = [document.getElementById("teamA1").value, document.getElementById("teamA2").value].filter(Boolean).join(" / ") || "Pareja A";
+      const teamB = [document.getElementById("teamB1").value, document.getElementById("teamB2").value].filter(Boolean).join(" / ") || "Pareja B";
+      const winner = calc.winnerSide === "A" ? teamA : calc.winnerSide === "B" ? teamB : "Sin ganador todavía";
+      preview.innerHTML = `Vacas: <b>${calc.vacasA}-${calc.vacasB}</b> · Juegos: <b>${calc.gamesA}-${calc.gamesB}</b> · Ganador: <span class="text-emerald-400 font-bold">${escapeHtml(winner)}</span>`;
+    }
+
+    function login() {
+      const id = document.getElementById("loginPlayer").value;
+      const pass = document.getElementById("loginPassword").value;
+      const player = state.players.find(p => String(p.id) === String(id));
+      if (!player) return alert("Selecciona un jugador.");
+      if (String(player.password || "") !== String(pass || "")) return alert("Clave incorrecta.");
+      state.currentUser = player;
+      localStorage.setItem("mus_current_user_id", player.id);
+      renderActiveUser();
+      alert("Bienvenido, " + player.name);
+    }
+
+    function logout() {
+      state.currentUser = null;
+      localStorage.removeItem("mus_current_user_id");
+      renderActiveUser();
+    }
+
+    function restoreLogin() {
+      const id = localStorage.getItem("mus_current_user_id");
+      if (!id) return;
+      const player = state.players.find(p => String(p.id) === String(id));
+      if (player) state.currentUser = player;
+    }
+
+    function renderActiveUser() {
+      restoreLogin();
+      document.getElementById("activeUser").textContent = state.currentUser
+        ? `${state.currentUser.name} (${state.currentUser.role || "player"})`
+        : "No identificado";
+    }
+
+    function requireLogin() {
+      if (!state.currentUser) {
+        alert("Debes identificarte primero.");
+        return false;
+      }
+      return true;
+    }
+
+    function openMatchForm() {
+      if (!requireLogin()) return;
+      clearMatchForm();
+      document.getElementById("matchForm").classList.remove("hidden");
+      previewMatchResult();
+    }
+
+    function closeMatchForm() {
+      document.getElementById("matchForm").classList.add("hidden");
+      clearMatchForm();
+    }
+
+    function clearMatchForm() {
+      ["matchId","matchFecha","matchRound","vaca1","vaca2","vaca3"].forEach(id => document.getElementById(id).value = "");
+      ["teamA1","teamA2","teamB1","teamB2"].forEach(id => document.getElementById(id).value = "");
+      document.getElementById("matchStatus").value = "confirmed";
+      previewMatchResult();
+    }
+
+    function editMatch(m) {
+      if (!requireLogin()) return;
+      document.getElementById("matchForm").classList.remove("hidden");
+      document.getElementById("matchId").value = m.id || "";
+      document.getElementById("matchFecha").value = m.fecha || "";
+      document.getElementById("matchRound").value = m.round || "";
+      document.getElementById("teamA1").value = normalizeName(m.teamA_player1 || m.teamA1 || "");
+      document.getElementById("teamA2").value = normalizeName(m.teamA_player2 || m.teamA2 || "");
+      document.getElementById("teamB1").value = normalizeName(m.teamB_player1 || m.teamB1 || "");
+      document.getElementById("teamB2").value = normalizeName(m.teamB_player2 || m.teamB2 || "");
+      document.getElementById("vaca1").value = m.vaca1 || "";
+      document.getElementById("vaca2").value = m.vaca2 || "";
+      document.getElementById("vaca3").value = m.vaca3 || "";
+      document.getElementById("matchStatus").value = m.status || "confirmed";
+      previewMatchResult();
+    }
+
+    async function saveMatch() {
+      if (!requireLogin()) return;
+
+      const calc = calculateMatch(
+        document.getElementById("vaca1").value,
+        document.getElementById("vaca2").value,
+        document.getElementById("vaca3").value
+      );
+
+      if (!calc.valid) return alert("Resultado inválido. Usa 30, 31, 32, 03, 13 o 23.");
+      if (!calc.complete) return alert("La partida no está completa. Debe terminar 2-0 o 2-1 en vacas.");
+
+      const teamA1 = document.getElementById("teamA1").value;
+      const teamA2 = document.getElementById("teamA2").value;
+      const teamB1 = document.getElementById("teamB1").value;
+      const teamB2 = document.getElementById("teamB2").value;
+      const allPlayers = [teamA1, teamA2, teamB1, teamB2];
+
+      if (new Set(allPlayers).size !== 4 || allPlayers.some(x => !x)) return alert("Selecciona 4 jugadores distintos.");
+
+      const teamA = `${teamA1}/${teamA2}`;
+      const teamB = `${teamB1}/${teamB2}`;
+
+      const payload = {
+        id: document.getElementById("matchId").value.trim(),
+        fecha: document.getElementById("matchFecha").value.trim(),
+        round: document.getElementById("matchRound").value.trim(),
+        teamA_player1: teamA1,
+        teamA_player2: teamA2,
+        teamB_player1: teamB1,
+        teamB_player2: teamB2,
+        vaca1: document.getElementById("vaca1").value.trim(),
+        vaca2: document.getElementById("vaca2").value.trim(),
+        vaca3: document.getElementById("vaca3").value.trim(),
+        vacasA: calc.vacasA,
+        vacasB: calc.vacasB,
+        gamesA: calc.gamesA,
+        gamesB: calc.gamesB,
+        winner: calc.winnerSide === "A" ? teamA : teamB,
+        status: document.getElementById("matchStatus").value,
+        updatedBy: state.currentUser.name,
+        updatedAt: new Date().toISOString()
+      };
+
+      if (!payload.id || !payload.fecha || !payload.round) return alert("Faltan ID, fecha o jornada.");
+
+      setStatus("Guardando partida...");
+      try {
+        const res = await api("saveMatch", payload);
+        if (!res.ok) throw new Error(res.error || "Error guardando");
+        closeMatchForm();
+        await loadData();
+        alert("Partida guardada.");
+      } catch (err) {
+        console.error(err);
+        alert("Error guardando partida: " + err.message);
+        setStatus("Error guardando partida");
+      }
+    }
+
+    async function saveCalculatedStandings() {
+      if (!requireLogin()) return;
+      if ((state.currentUser.role || "") !== "admin") return alert("Solo admin puede volcar la clasificación.");
+
+      const ok = confirm("Esto guardará la clasificación calculada en la pestaña standings. ¿Continuar?");
+      if (!ok) return;
+
+      setStatus("Guardando clasificación...");
+      try {
+        for (const r of state.calculatedStandings) {
+          await api("saveStanding", r);
+        }
+        setStatus("Clasificación guardada en Sheet");
+        alert("Clasificación volcada.");
+      } catch (err) {
+        alert("El backend todavía no tiene saveStanding. Te paso ahora el Apps Script actualizado.");
+        console.error(err);
+      }
+    }
+
+    function showTab(event, tab) {
+      document.querySelectorAll(".tabContent").forEach(el => el.classList.add("hidden"));
+      document.getElementById("tab-" + tab).classList.remove("hidden");
+      document.querySelectorAll(".tabBtn").forEach(el => {
+        el.classList.remove("bg-emerald-700");
+        el.classList.add("bg-slate-800");
+      });
+      event.target.classList.add("bg-emerald-700");
+      event.target.classList.remove("bg-slate-800");
+    }
+
+    function setStatus(txt) {
+      document.getElementById("appStatus").textContent = txt;
+    }
+
+    function normalizeName(name) {
+      const n = String(name || "").trim();
+      if (n.toLowerCase() === "chetin") return "Chete";
+      return n;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
