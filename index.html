@@ -131,7 +131,7 @@
       <button onclick="showTab(event,'rounds')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Jornadas</button>
       <button onclick="showTab(event,'stats')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Estadísticas</button>
       <button onclick="showTab(event,'venues')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Sedes</button>
-      <button onclick="showTab(event,'history')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Hall of Fame</button>
+      <button onclick="showTab(event,'history')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Histórico</button>
       <button onclick="showTab(event,'rules')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Reglas</button>
       <button onclick="showTab(event,'players')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Jugadores</button>
       <button onclick="showTab(event,'logs')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Log</button>
@@ -320,6 +320,107 @@
 
 
 
+
+    <section id="tab-matches" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-5">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-black">🎴 Partidas</h2>
+          <p class="text-xs text-slate-400">Formato vaca: 30, 31, 32 si gana Pareja A; 03, 13, 23 si gana Pareja B.</p>
+        </div>
+        <button onclick="openMatchForm()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-lg text-sm">➕ Añadir/Editar partida</button>
+      </div>
+
+      <div id="matchForm" class="hidden bg-slate-950 border border-slate-700 rounded-2xl p-4 space-y-4">
+        <h3 class="font-bold text-amber-400">Registrar partida</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <input id="matchId" placeholder="ID, ej. J1-M1" class="field" />
+          <input id="matchFecha" placeholder="Fecha, ej. 26/12/2025" class="field" />
+          <input id="matchRound" placeholder="Jornada, ej. 1" class="field" />
+          <select id="matchStatus" class="field">
+            <option value="confirmed">Confirmada</option>
+            <option value="pending">Pendiente</option>
+            <option value="rejected">Rechazada</option>
+            <option value="cancelled">Cancelada</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+            <h4 class="font-bold text-emerald-400 mb-2">Pareja A</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <select id="teamA1" class="field playerSelect" onchange="previewMatchResult()"></select>
+              <select id="teamA2" class="field playerSelect" onchange="previewMatchResult()"></select>
+            </div>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+            <h4 class="font-bold text-cyan-400 mb-2">Pareja B</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <select id="teamB1" class="field playerSelect" onchange="previewMatchResult()"></select>
+              <select id="teamB2" class="field playerSelect" onchange="previewMatchResult()"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+          <h4 class="font-bold text-white mb-2">Resultado por vacas</h4>
+          <p class="text-xs text-slate-400 mb-3">Introduce solo las vacas jugadas. Ejemplo: 30 / 13 / 31.</p>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+              <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 1</label>
+              <input id="vaca1" placeholder="30 / 31 / 32 / 03 / 13 / 23" class="field mb-2" oninput="previewMatchResult()" />
+              <div class="grid grid-cols-3 gap-1 resultButtons" data-target="vaca1"></div>
+            </div>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+              <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 2</label>
+              <input id="vaca2" placeholder="30 / 31 / 32 / 03 / 13 / 23" class="field mb-2" oninput="previewMatchResult()" />
+              <div class="grid grid-cols-3 gap-1 resultButtons" data-target="vaca2"></div>
+            </div>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+              <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 3</label>
+              <input id="vaca3" placeholder="Solo si hace falta desempate" class="field mb-2" oninput="previewMatchResult()" />
+              <div class="grid grid-cols-3 gap-1 resultButtons" data-target="vaca3"></div>
+            </div>
+          </div>
+          <div class="mt-3 bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm">
+            <div id="matchPreview" class="text-slate-300">Resultado pendiente de calcular.</div>
+            <div id="matchValidation" class="text-xs mt-2 text-slate-400"></div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+          <h4 class="font-bold text-white mb-2">🧞 Avatar usado</h4>
+          <p class="text-xs text-slate-400 mb-3">Marca bajo cada jugador si esa plaza fue cubierta por avatar. Puede haber varios.</p>
+          <div id="matchAvatarFlags" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2"></div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button onclick="saveMatch()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg font-bold text-sm">💾 Guardar partida</button>
+          <button onclick="closeMatchForm()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold text-sm">Cancelar</button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="text-xs uppercase text-slate-400 border-b border-slate-700">
+            <tr>
+              <th class="text-left p-2">ID</th>
+              <th class="text-center p-2">Fecha</th>
+              <th class="text-center p-2">J</th>
+              <th class="text-left p-2">Pareja A</th>
+              <th class="text-left p-2">Pareja B</th>
+              <th class="text-center p-2">Vacas</th>
+              <th class="text-center p-2">Juegos</th>
+              <th class="text-center p-2">Ganador</th>
+              <th class="text-center p-2">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="matchesBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    
 
     <section id="tab-players" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6">
       <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
@@ -604,7 +705,7 @@
       document.getElementById("standingsBody").innerHTML = rows.map((r, i) => `
         <tr class="border-b border-slate-800 hover:bg-slate-800/40">
           <td class="p-2 font-bold">${i+1}</td>
-          <td class="p-2 font-bold"><div class="flex items-center gap-2"><img src="${playerImage(r.player)}" onerror="this.src='assets/logo.png?v=0132'" class="w-7 h-7 rounded-full object-cover border border-slate-700 bg-white p-[1px]" /><span>${escapeHtml(r.player)}</span></div></td>
+          <td class="p-2 font-bold">${escapeHtml(r.player)}</td>
           <td class="p-2 text-center">${r.pj}</td>
           <td class="p-2 text-center text-amber-400 font-black">${r.points}</td>
           <td class="p-2 text-center">${r.vacasWon}</td>
@@ -649,24 +750,7 @@
       if (!state.currentUser) return false;
       if (isAdmin()) return true;
       if (!userIsInMatch(m)) return false;
-
-      const current = normalizeName(state.currentUser.name);
-      const teamA = [
-        normalizeName(m.teamA_player1 || m.teamA1 || ""),
-        normalizeName(m.teamA_player2 || m.teamA2 || "")
-      ];
-
-      const teamB = [
-        normalizeName(m.teamB_player1 || m.teamB1 || ""),
-        normalizeName(m.teamB_player2 || m.teamB2 || "")
-      ];
-
-      const creator = normalizeName(m.createdBy || m.updatedBy || "");
-
-      const creatorTeam = teamA.includes(creator) ? teamA : teamB.includes(creator) ? teamB : [];
-
-      if (creatorTeam.includes(current)) return false;
-
+      if (normalizeName(m.createdBy || m.updatedBy || "") === normalizeName(state.currentUser.name)) return false;
       return true;
     }
 
@@ -839,8 +923,8 @@
             <div class="font-black">${escapeHtml(m.id)} · ${escapeHtml(m.fecha || "")}</div>
             <span class="text-[10px] px-2 py-1 border rounded-full font-bold ${meta.stateClass}">${meta.stateLabel}</span>
           </div>
-          <div class="text-sm text-slate-300 flex items-center gap-2"><b class="text-emerald-400">A</b><img src="${playerImage((m.teamA_player1||m.teamA1||''))}" onerror="this.src='assets/logo.png?v=0132'" class="w-6 h-6 rounded-full object-cover bg-white p-[1px]" /><img src="${playerImage((m.teamA_player2||m.teamA2||''))}" onerror="this.src='assets/logo.png?v=0132'" class="w-6 h-6 rounded-full object-cover bg-white p-[1px]" /><span>${escapeHtml(meta.teamA || "-")}</span></div>
-          <div class="text-sm text-slate-300 flex items-center gap-2"><b class="text-cyan-400">B</b><img src="${playerImage((m.teamB_player1||m.teamB1||''))}" onerror="this.src='assets/logo.png?v=0132'" class="w-6 h-6 rounded-full object-cover bg-white p-[1px]" /><img src="${playerImage((m.teamB_player2||m.teamB2||''))}" onerror="this.src='assets/logo.png?v=0132'" class="w-6 h-6 rounded-full object-cover bg-white p-[1px]" /><span>${escapeHtml(meta.teamB || "-")}</span></div>
+          <div class="text-sm text-slate-300"><b class="text-emerald-400">A</b> ${escapeHtml(meta.teamA || "-")}</div>
+          <div class="text-sm text-slate-300"><b class="text-cyan-400">B</b> ${escapeHtml(meta.teamB || "-")}</div>
           <div class="text-xs text-slate-400 mt-2">Resultado: <b>${escapeHtml(results)}</b> · Vacas: <b>${vacas}</b> · Juegos: <b>${juegos}</b></div>
           <div class="text-xs text-emerald-300 mt-1">Ganador: ${escapeHtml(meta.winner || "-")}</div>
           ${getAvatarPlayersFromMatch(m).length ? `<div class="text-xs text-amber-300 mt-1">🧞 Avatar: ${escapeHtml(getAvatarPlayersFromMatch(m).join(" / "))}</div>` : ""}
@@ -1017,7 +1101,7 @@
       renderSimpleTable(
         "winRatioTable",
         [...stats].sort((a,b) => b.winRate - a.winRate).map(s => ({
-          jugador: `<div class="flex items-center gap-2"><img src="${playerImage(s.name)}" onerror="this.src=\'assets/logo.png?v=0132\'" class="w-6 h-6 rounded-full object-cover bg-white p-[1px]" /><span>${s.name}</span></div>`,
+          jugador: s.name,
           ratio: s.winRate + "%",
           balance: `${s.wins}-${s.losses}`
         })),
@@ -1031,7 +1115,7 @@
       renderSimpleTable(
         "streakTable",
         [...stats].sort((a,b) => parseInt((b.streak||"").slice(1)||0) - parseInt((a.streak||"").slice(1)||0)).map(s => ({
-          jugador: `<div class="flex items-center gap-2"><img src="${playerImage(s.name)}" onerror="this.src=\'assets/logo.png?v=0132\'" class="w-6 h-6 rounded-full object-cover bg-white p-[1px]" /><span>${s.name}</span></div>`,
+          jugador: s.name,
           racha: s.streak || "-"
         })),
         [
@@ -1076,7 +1160,7 @@
       renderSimpleTable(
         "gamesWonTable",
         [...stats].sort((a,b) => b.gamesWon - a.gamesWon).map(s => ({
-          jugador: `<div class="flex items-center gap-2"><img src="${playerImage(s.name)}" onerror="this.src=\'assets/logo.png?v=0132\'" class="w-6 h-6 rounded-full object-cover bg-white p-[1px]" /><span>${s.name}</span></div>`,
+          jugador: s.name,
           juegos: s.gamesWon,
           balance: s.gamesWon - s.gamesLost
         })),
@@ -2021,20 +2105,7 @@
       return n;
     }
 
-    
-    function playerImage(name) {
-      const clean = normalizeName(name)
-        .toLowerCase()
-        .replaceAll("á","a")
-        .replaceAll("é","e")
-        .replaceAll("í","i")
-        .replaceAll("ó","o")
-        .replaceAll("ú","u")
-        .replaceAll(" ","");
-      return `players/${clean}.jpg`;
-    }
-
-function escapeHtml(value) {
+    function escapeHtml(value) {
       return String(value ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
