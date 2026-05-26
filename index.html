@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v0.16.0</title>
+  <title>Torneo de Mus Gents & Lords · v0.17.0</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json?v=0132" />
   <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
@@ -52,7 +52,7 @@
     }
   </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    VERSION 0.16.0 · JORNADAS ÚNICAS</div>
+    VERSION 0.17.0 · JORNADAS RESULTADOS</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
     <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0153') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
@@ -71,7 +71,7 @@
       </div>
 
       <div class="text-center text-[11px] text-slate-500 mt-5">
-        v0.16.0 · La sesión se recordará en este dispositivo
+        v0.17.0 · La sesión se recordará en este dispositivo
       </div>
     </div>
   </section>
@@ -83,7 +83,7 @@
           <img src="assets/logo.png?v=0132" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
           <div>
             <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-xs text-amber-300 font-black">v0.16.0 · Jornadas operativas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-xs text-amber-300 font-black">v0.17.0 · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -108,7 +108,7 @@
         </div>
         <div class="flex flex-wrap gap-2 items-center">
           <button onclick="loadData()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg text-sm font-bold">🔄 Actualizar datos</button>
-          <button id="autoRefreshBtn" onclick="toggleAutoRefresh()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⏱️ Auto 15s: ON</button>
+          <button id="autoRefreshBtn" onclick="toggleAutoRefresh()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⏱️ Auto: OFF</button>
           <button id="installBtn" onclick="installApp()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-lg text-sm font-black">📲 Instalar</button>
           <button onclick="exportBackupJson()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⬇️ Backup</button>
         </div>
@@ -175,7 +175,6 @@
           <p class="text-xs text-slate-400">Vista principal para consultar, editar, confirmar o rechazar resultados.</p>
         </div>
         <div class="flex flex-wrap gap-2 items-center">
-          <button onclick="openMatchForm()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl text-sm">➕ Nueva partida</button>
           <select id="roundFilter" onchange="renderRoundDashboard()" class="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm">
             <option value="all">Todas las jornadas</option>
           </select>
@@ -322,101 +321,6 @@
 
 
 
-    <section id="tab-matches" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-5">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div>
-          <h2 class="text-xl font-black">🎴 Partidas</h2>
-          <p class="text-xs text-slate-400">Formato vaca: 30, 31, 32 si gana Pareja A; 03, 13, 23 si gana Pareja B.</p>
-        </div>
-        <button onclick="openMatchForm()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-lg text-sm">➕ Añadir/Editar partida</button>
-      </div>
-
-      <div id="matchForm" class="hidden bg-slate-950 border border-slate-700 rounded-2xl p-4 space-y-4">
-        <h3 class="font-bold text-amber-400">Registrar partida</h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-          <input id="matchId" placeholder="ID, ej. J1-M1" class="field" />
-          <input id="matchFecha" placeholder="Fecha, ej. 26/12/2025" class="field" />
-          <input id="matchRound" placeholder="Jornada, ej. 1" class="field" />
-          <select id="matchStatus" class="field">
-            <option value="confirmed">Confirmada</option>
-            <option value="pending">Pendiente</option>
-            <option value="rejected">Rechazada</option>
-            <option value="cancelled">Cancelada</option>
-          </select>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
-            <h4 class="font-bold text-emerald-400 mb-2">Pareja A</h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <select id="teamA1" class="field playerSelect" onchange="previewMatchResult()"></select>
-              <select id="teamA2" class="field playerSelect" onchange="previewMatchResult()"></select>
-            </div>
-          </div>
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
-            <h4 class="font-bold text-cyan-400 mb-2">Pareja B</h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <select id="teamB1" class="field playerSelect" onchange="previewMatchResult()"></select>
-              <select id="teamB2" class="field playerSelect" onchange="previewMatchResult()"></select>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
-          <h4 class="font-bold text-white mb-2">Resultado por vacas</h4>
-          <p class="text-xs text-slate-400 mb-3">Introduce solo las vacas jugadas. Ejemplo: 30 / 13 / 31.</p>
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
-            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
-              <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 1</label>
-              <input id="vaca1" placeholder="30 / 31 / 32 / 03 / 13 / 23" class="field mb-2" oninput="previewMatchResult()" />
-              <div class="grid grid-cols-3 gap-1 resultButtons" data-target="vaca1"></div>
-            </div>
-            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
-              <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 2</label>
-              <input id="vaca2" placeholder="30 / 31 / 32 / 03 / 13 / 23" class="field mb-2" oninput="previewMatchResult()" />
-              <div class="grid grid-cols-3 gap-1 resultButtons" data-target="vaca2"></div>
-            </div>
-            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
-              <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 3</label>
-              <input id="vaca3" placeholder="Solo si hace falta desempate" class="field mb-2" oninput="previewMatchResult()" />
-              <div class="grid grid-cols-3 gap-1 resultButtons" data-target="vaca3"></div>
-            </div>
-          </div>
-          <div class="mt-3 bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm">
-            <div id="matchPreview" class="text-slate-300">Resultado pendiente de calcular.</div>
-            <div id="matchValidation" class="text-xs mt-2 text-slate-400"></div>
-          </div>
-        </div>
-
-        <div class="flex flex-wrap gap-2">
-          <button onclick="saveMatch()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg font-bold text-sm">💾 Guardar partida</button>
-          <button onclick="closeMatchForm()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold text-sm">Cancelar</button>
-        </div>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="text-xs uppercase text-slate-400 border-b border-slate-700">
-            <tr>
-              <th class="text-left p-2">ID</th>
-              <th class="text-center p-2">Fecha</th>
-              <th class="text-center p-2">J</th>
-              <th class="text-left p-2">Pareja A</th>
-              <th class="text-left p-2">Pareja B</th>
-              <th class="text-center p-2">Vacas</th>
-              <th class="text-center p-2">Juegos</th>
-              <th class="text-center p-2">Ganador</th>
-              <th class="text-center p-2">Estado</th>
-            </tr>
-          </thead>
-          <tbody id="matchesBody"></tbody>
-        </table>
-      </div>
-    </section>
-
-    
-
     <section id="tab-players" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6">
       <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
         <div>
@@ -506,7 +410,7 @@
       isEditing: false
     };
 
-    let autoRefreshEnabled = true;
+    let autoRefreshEnabled = false;
     let autoRefreshTimer = null;
     let deferredInstallPrompt = null;
 
@@ -628,32 +532,6 @@
       }
     }
 
-    
-    function playerPhoto(name) {
-      const clean = String(name || "")
-        .toLowerCase()
-        .trim()
-        .replaceAll("á","a")
-        .replaceAll("é","e")
-        .replaceAll("í","i")
-        .replaceAll("ó","o")
-        .replaceAll("ú","u")
-        .replaceAll(" ","");
-      return `players/${clean}.jpg`;
-    }
-
-    function playerBadge(name) {
-      return `
-        <div class="flex items-center gap-2">
-          <img src="${playerPhoto(name)}"
-               onerror="this.style.display='none'"
-               class="w-8 h-8 rounded-full object-cover border border-slate-600">
-          <span>${escapeHtml(name || "-")}</span>
-        </div>
-      `;
-    }
-
-
     function renderPlayerSelects() {
       const options = '<option value="">Jugador</option>' + state.players.map(p => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`).join("");
       document.querySelectorAll(".playerSelect").forEach(sel => {
@@ -726,7 +604,7 @@
       document.getElementById("standingsBody").innerHTML = rows.map((r, i) => `
         <tr class="border-b border-slate-800 hover:bg-slate-800/40">
           <td class="p-2 font-bold">${i+1}</td>
-          <td class="p-2 font-bold">${escapeHtml(r.player)}</td>
+          <td class="p-2 font-bold"><div class="flex items-center gap-2"><img src="${playerImage(r.player)}" onerror="this.src='assets/logo.png?v=0132'" class="w-7 h-7 rounded-full object-cover border border-slate-700 bg-white p-[1px]" /><span>${escapeHtml(r.player)}</span></div></td>
           <td class="p-2 text-center">${r.pj}</td>
           <td class="p-2 text-center text-amber-400 font-black">${r.points}</td>
           <td class="p-2 text-center">${r.vacasWon}</td>
@@ -773,22 +651,21 @@
       if (!userIsInMatch(m)) return false;
 
       const current = normalizeName(state.currentUser.name);
-      const creator = normalizeName(m.createdBy || m.updatedBy || "");
-
-      if (creator === current) return false;
-
       const teamA = [
-        normalizeName(m.teamA_player1 || m.teamA1),
-        normalizeName(m.teamA_player2 || m.teamA2)
+        normalizeName(m.teamA_player1 || m.teamA1 || ""),
+        normalizeName(m.teamA_player2 || m.teamA2 || "")
       ];
 
       const teamB = [
-        normalizeName(m.teamB_player1 || m.teamB1),
-        normalizeName(m.teamB_player2 || m.teamB2)
+        normalizeName(m.teamB_player1 || m.teamB1 || ""),
+        normalizeName(m.teamB_player2 || m.teamB2 || "")
       ];
 
-      if (teamA.includes(creator) && teamA.includes(current)) return false;
-      if (teamB.includes(creator) && teamB.includes(current)) return false;
+      const creator = normalizeName(m.createdBy || m.updatedBy || "");
+
+      const creatorTeam = teamA.includes(creator) ? teamA : teamB.includes(creator) ? teamB : [];
+
+      if (creatorTeam.includes(current)) return false;
 
       return true;
     }
@@ -800,19 +677,41 @@
       return (Date.now() - d.getTime()) / 36e5;
     }
 
+    function hasAnyMatchResult(m) {
+      return [m.vaca1, m.vaca2, m.vaca3].some(v => String(v || "").trim() !== "");
+    }
+
+    function hasCompleteValidMatchResult(m) {
+      const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3);
+      return calc.valid && calc.complete;
+    }
+
     function isAutoConfirmed(m) {
-      return (m.status || "") === "pending" && hoursSince(m.createdAt || m.updatedAt) >= 24;
+      return (m.status || "") === "pending" && hasCompleteValidMatchResult(m) && hoursSince(m.createdAt || m.updatedAt) >= 24;
     }
 
     function effectiveStatus(m) {
+      const rawStatus = (m.status || "").toLowerCase();
+
+      if (rawStatus === "cancelled") return "cancelled";
+      if (rawStatus === "rejected") return "rejected";
+
+      // Si se borran las vacas en Excel, la partida vuelve a Pendiente aunque el status siguiera como confirmed.
+      if (!hasAnyMatchResult(m)) return "pending";
+
+      // Una partida solo puede estar confirmada si tiene resultado completo y válido.
+      if (rawStatus === "confirmed") return hasCompleteValidMatchResult(m) ? "confirmed" : "pending";
       if (isAutoConfirmed(m)) return "confirmed";
-      return m.status || "confirmed";
+
+      return "pending";
     }
 
     function statusLabel(m) {
       const status = effectiveStatus(m);
       if (status === "confirmed" && (m.status || "") === "pending") return "Confirmada auto 24h";
       if (status === "confirmed") return "Confirmada";
+      if (status === "pending" && hasAnyMatchResult(m) && !hasCompleteValidMatchResult(m)) return "Resultado incompleto";
+      if (status === "pending" && hasCompleteValidMatchResult(m)) return "Pendiente de confirmación";
       if (status === "pending") return "Pendiente";
       if (status === "rejected") return "Rechazada";
       if (status === "cancelled") return "Cancelada";
@@ -824,7 +723,7 @@
       const txt = document.getElementById("pendingPanelText");
       if (!panel || !txt) return;
 
-      const pending = state.matches.filter(m => m.id && (m.status || "") === "pending" && !isAutoConfirmed(m));
+      const pending = state.matches.filter(m => m.id && effectiveStatus(m) === "pending" && hasCompleteValidMatchResult(m));
       if (!pending.length) {
         panel.classList.add("hidden");
         return;
@@ -873,11 +772,11 @@
       const status = effectiveStatus(m);
       const buttons = [];
 
-      if (canEditMatch(m) && status !== "cancelled") {
-        buttons.push(`<button onclick='event.stopPropagation(); editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})' class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg font-bold">✏️ Editar</button>`);
+      if (canEditMatch(m) && status !== "confirmed" && status !== "cancelled") {
+        buttons.push(`<button onclick='event.stopPropagation(); editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})' class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg font-bold">✏️ Meter resultado</button>`);
       }
 
-      if ((m.status || "") === "pending" && canConfirmMatch(m)) {
+      if (effectiveStatus(m) === "pending" && hasCompleteValidMatchResult(m) && canConfirmMatch(m)) {
         buttons.push(`<button onclick='event.stopPropagation(); confirmMatch("${escapeHtml(m.id)}")' class="bg-emerald-700 hover:bg-emerald-600 px-3 py-1.5 rounded-lg font-bold">✅ Confirmar</button>`);
         buttons.push(`<button onclick='event.stopPropagation(); rejectMatch("${escapeHtml(m.id)}")' class="bg-red-800 hover:bg-red-700 px-3 py-1.5 rounded-lg font-bold">❌ Rechazar</button>`);
       }
@@ -893,12 +792,13 @@
       const filterEl = document.getElementById("roundFilter");
       if (!filterEl) return;
 
-      const rounds = [...new Set(state.matches.filter(m => m.round).map(m => String(m.round)))].sort((a,b) => Number(a)-Number(b));
+      const allMatches = state.matches.filter(m => m.id);
+      const rounds = [...new Set(allMatches.filter(m => m.round).map(m => String(m.round)))].sort((a,b) => Number(a)-Number(b));
       const current = filterEl.value || "all";
       filterEl.innerHTML = '<option value="all">Todas las jornadas</option>' + rounds.map(r => `<option value="${escapeHtml(r)}">Jornada ${escapeHtml(r)}</option>`).join("");
       filterEl.value = rounds.includes(current) ? current : "all";
 
-      const matches = state.matches.filter(m => m.id && (filterEl.value === "all" || String(m.round) === String(filterEl.value)));
+      const matches = allMatches.filter(m => filterEl.value === "all" || String(m.round) === String(filterEl.value));
       const summary = { total: matches.length, confirmed: 0, pending: 0, errors: 0 };
       matches.forEach(m => {
         const meta = getMatchMeta(m);
@@ -914,38 +814,76 @@
         card("Pendientes", summary.pending, "text-amber-400") +
         card("Errores / canceladas", summary.errors, "text-red-400");
 
-      const grouped = {};
-      matches.forEach(m => {
-        const r = String(m.round || "Sin jornada");
-        grouped[r] = grouped[r] || [];
-        grouped[r].push(m);
-      });
+      const isFinished = (m) => effectiveStatus(m) === "confirmed";
+      const isOpen = (m) => !isFinished(m);
+      const hasAnyResult = (m) => [m.vaca1, m.vaca2, m.vaca3].some(Boolean);
+      const roundNumber = (m) => Number(m.round || 999999);
 
-      document.getElementById("roundDashboard").innerHTML = Object.keys(grouped).sort((a,b) => Number(a)-Number(b)).map(round => `
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-          <h3 class="font-black text-lg mb-3">Jornada ${escapeHtml(round)}</h3>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            ${grouped[round].map(m => {
-              const meta = getMatchMeta(m);
-              const vacas = meta.calc.valid ? `${meta.calc.vacasA}-${meta.calc.vacasB}` : "Error";
-              const juegos = meta.calc.valid ? `${meta.calc.gamesA}-${meta.calc.gamesB}` : "-";
-              return `<div onclick='editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})' class="cursor-pointer bg-slate-900 border border-slate-800 rounded-xl p-4 hover:border-amber-500/50 transition-all">
-                <div class="flex items-center justify-between gap-2 mb-2">
-                  <div class="font-black">${escapeHtml(m.id)} · ${escapeHtml(m.fecha || "")}</div>
-                  <span class="text-[10px] px-2 py-1 border rounded-full font-bold ${meta.stateClass}">${meta.stateLabel}</span>
-                </div>
-                <div class="text-sm text-slate-300"><b class="text-emerald-400">A</b> ${escapeHtml(meta.teamA || "-")}</div>
-                <div class="text-sm text-slate-300"><b class="text-cyan-400">B</b> ${escapeHtml(meta.teamB || "-")}</div>
-                <div class="text-xs text-slate-400 mt-2">Vacas: <b>${vacas}</b> · Juegos: <b>${juegos}</b> · ${[m.vaca1,m.vaca2,m.vaca3].filter(Boolean).join("/")}</div>
-                <div class="text-xs text-emerald-300 mt-1">Ganador: ${escapeHtml(meta.winner || "-")}</div>
-                <div class="mt-3 flex flex-wrap gap-2">
-                  ${renderMatchActionButtons(m)}
-                </div>
-              </div>`;
-            }).join("")}
+      const openMatches = matches.filter(isOpen).sort((a,b) => roundNumber(a) - roundNumber(b) || String(a.id).localeCompare(String(b.id), undefined, { numeric: true }));
+      const confirmedMatches = matches.filter(isFinished).sort((a,b) => roundNumber(b) - roundNumber(a) || String(a.id).localeCompare(String(b.id), undefined, { numeric: true }));
+
+      const nextRoundNumber = openMatches.length ? roundNumber(openMatches[0]) : null;
+      const nextMatches = nextRoundNumber === null ? [] : openMatches.filter(m => roundNumber(m) === nextRoundNumber);
+      const followingMatches = nextRoundNumber === null ? [] : openMatches.filter(m => roundNumber(m) !== nextRoundNumber);
+
+      function renderMatchCard(m) {
+        const meta = getMatchMeta(m);
+        const vacas = meta.calc.valid ? `${meta.calc.vacasA}-${meta.calc.vacasB}` : "Error";
+        const juegos = meta.calc.valid ? `${meta.calc.gamesA}-${meta.calc.gamesB}` : "-";
+        const results = [m.vaca1,m.vaca2,m.vaca3].filter(Boolean).join("/") || "Sin resultado";
+        const editable = effectiveStatus(m) !== "confirmed" && effectiveStatus(m) !== "cancelled" && canEditMatch(m);
+        const clickAttr = editable ? `onclick='editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})'` : "";
+        const cursorClass = editable ? "cursor-pointer hover:border-amber-500/50" : "cursor-default opacity-95";
+        return `<div ${clickAttr} class="${cursorClass} bg-slate-900 border border-slate-800 rounded-xl p-4 transition-all">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="font-black">${escapeHtml(m.id)} · ${escapeHtml(m.fecha || "")}</div>
+            <span class="text-[10px] px-2 py-1 border rounded-full font-bold ${meta.stateClass}">${meta.stateLabel}</span>
           </div>
-        </div>
-      `).join("") || `<div class="text-slate-400 bg-slate-950 rounded-xl p-4">No hay partidas para mostrar.</div>`;
+          <div class="text-sm text-slate-300 flex items-center gap-2"><b class="text-emerald-400">A</b><img src="${playerImage((m.teamA_player1||m.teamA1||''))}" onerror="this.src='assets/logo.png?v=0132'" class="w-6 h-6 rounded-full object-cover bg-white p-[1px]" /><img src="${playerImage((m.teamA_player2||m.teamA2||''))}" onerror="this.src='assets/logo.png?v=0132'" class="w-6 h-6 rounded-full object-cover bg-white p-[1px]" /><span>${escapeHtml(meta.teamA || "-")}</span></div>
+          <div class="text-sm text-slate-300 flex items-center gap-2"><b class="text-cyan-400">B</b><img src="${playerImage((m.teamB_player1||m.teamB1||''))}" onerror="this.src='assets/logo.png?v=0132'" class="w-6 h-6 rounded-full object-cover bg-white p-[1px]" /><img src="${playerImage((m.teamB_player2||m.teamB2||''))}" onerror="this.src='assets/logo.png?v=0132'" class="w-6 h-6 rounded-full object-cover bg-white p-[1px]" /><span>${escapeHtml(meta.teamB || "-")}</span></div>
+          <div class="text-xs text-slate-400 mt-2">Resultado: <b>${escapeHtml(results)}</b> · Vacas: <b>${vacas}</b> · Juegos: <b>${juegos}</b></div>
+          <div class="text-xs text-emerald-300 mt-1">Ganador: ${escapeHtml(meta.winner || "-")}</div>
+          ${getAvatarPlayersFromMatch(m).length ? `<div class="text-xs text-amber-300 mt-1">🧞 Avatar: ${escapeHtml(getAvatarPlayersFromMatch(m).join(" / "))}</div>` : ""}
+          <div class="mt-3 flex flex-wrap gap-2">
+            ${renderMatchActionButtons(m)}
+          </div>
+        </div>`;
+      }
+
+      function groupByRound(list) {
+        const grouped = {};
+        list.forEach(m => {
+          const r = String(m.round || "Sin jornada");
+          grouped[r] = grouped[r] || [];
+          grouped[r].push(m);
+        });
+        return grouped;
+      }
+
+      function renderRoundGroup(title, list, subtitle = "", order = "asc") {
+        if (!list.length) return "";
+        const grouped = groupByRound(list);
+        const keys = Object.keys(grouped).sort((a,b) => order === "desc" ? Number(b)-Number(a) : Number(a)-Number(b));
+        return `<div class="space-y-4">
+          <div>
+            <h3 class="font-black text-xl">${title}</h3>
+            ${subtitle ? `<p class="text-xs text-slate-400 mt-1">${subtitle}</p>` : ""}
+          </div>
+          ${keys.map(round => `<div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+            <h4 class="font-black text-lg mb-3">Jornada ${escapeHtml(round)}</h4>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              ${grouped[round].map(renderMatchCard).join("")}
+            </div>
+          </div>`).join("")}
+        </div>`;
+      }
+
+      let html = "";
+      html += renderRoundGroup("🔥 Próxima jornada", nextMatches, "Primera jornada con partidas pendientes o sin resultado.");
+      html += renderRoundGroup("⏭️ Siguientes jornadas", followingMatches, "Partidas futuras pendientes cargadas desde Excel.");
+      html += renderRoundGroup("✅ Jornadas terminadas", confirmedMatches, "Partidas confirmadas, al final de la vista.", "desc");
+
+      document.getElementById("roundDashboard").innerHTML = html || `<div class="text-slate-400 bg-slate-950 rounded-xl p-4">No hay partidas para mostrar.</div>`;
     }
 
 
@@ -969,7 +907,7 @@
 
       state.matches.forEach(m => {
         const meta = getMatchMeta(m);
-        if (!meta.calc.valid || !meta.calc.complete) return;
+        if (!meta.calc.valid || !meta.calc.complete || effectiveStatus(m) !== "confirmed") return;
 
         const teamA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].filter(Boolean);
         const teamB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].filter(Boolean);
@@ -1079,7 +1017,7 @@
       renderSimpleTable(
         "winRatioTable",
         [...stats].sort((a,b) => b.winRate - a.winRate).map(s => ({
-          jugador: s.name,
+          jugador: `<div class="flex items-center gap-2"><img src="${playerImage(s.name)}" onerror="this.src=\'assets/logo.png?v=0132\'" class="w-6 h-6 rounded-full object-cover bg-white p-[1px]" /><span>${s.name}</span></div>`,
           ratio: s.winRate + "%",
           balance: `${s.wins}-${s.losses}`
         })),
@@ -1093,7 +1031,7 @@
       renderSimpleTable(
         "streakTable",
         [...stats].sort((a,b) => parseInt((b.streak||"").slice(1)||0) - parseInt((a.streak||"").slice(1)||0)).map(s => ({
-          jugador: s.name,
+          jugador: `<div class="flex items-center gap-2"><img src="${playerImage(s.name)}" onerror="this.src=\'assets/logo.png?v=0132\'" class="w-6 h-6 rounded-full object-cover bg-white p-[1px]" /><span>${s.name}</span></div>`,
           racha: s.streak || "-"
         })),
         [
@@ -1105,7 +1043,7 @@
       const pairs = {};
       state.matches.forEach(m => {
         const meta = getMatchMeta(m);
-        if (!meta.calc.valid || !meta.calc.complete) return;
+        if (!meta.calc.valid || !meta.calc.complete || effectiveStatus(m) !== "confirmed") return;
 
         const pairA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].sort().join(" + ");
         const pairB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].sort().join(" + ");
@@ -1138,7 +1076,7 @@
       renderSimpleTable(
         "gamesWonTable",
         [...stats].sort((a,b) => b.gamesWon - a.gamesWon).map(s => ({
-          jugador: s.name,
+          jugador: `<div class="flex items-center gap-2"><img src="${playerImage(s.name)}" onerror="this.src=\'assets/logo.png?v=0132\'" class="w-6 h-6 rounded-full object-cover bg-white p-[1px]" /><span>${s.name}</span></div>`,
           juegos: s.gamesWon,
           balance: s.gamesWon - s.gamesLost
         })),
@@ -1804,48 +1742,127 @@
       return true;
     }
 
+    function ensureMatchFormInRounds() {
+      const form = document.getElementById("matchForm");
+      const roundsTab = document.getElementById("tab-rounds");
+      const dashboard = document.getElementById("roundDashboard");
+      if (!form || !roundsTab || !dashboard) return;
+      if (!roundsTab.contains(form)) {
+        roundsTab.insertBefore(form, dashboard);
+      }
+    }
+
+    function setMatchFormResultMode() {
+      ["matchId", "matchFecha", "matchRound"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.readOnly = true;
+      });
+      ["teamA1", "teamA2", "teamB1", "teamB2", "matchStatus"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+      const title = document.querySelector("#matchForm h3");
+      if (title) title.textContent = "Meter / editar resultado";
+    }
+
+    function ensureSelectOption(selectId, value) {
+      const el = document.getElementById(selectId);
+      const safeValue = normalizeName(value || "");
+      if (!el) return;
+      if (!safeValue) {
+        el.value = "";
+        return;
+      }
+      const exists = Array.from(el.options || []).some(opt => normalizeName(opt.value) === safeValue || normalizeName(opt.textContent) === safeValue);
+      if (!exists) {
+        const opt = document.createElement("option");
+        opt.value = safeValue;
+        opt.textContent = safeValue;
+        el.appendChild(opt);
+      }
+      el.value = safeValue;
+    }
+
+    function getAvatarPlayersFromMatch(m = {}) {
+      const raw = m.avatarPlayers || m.avatarPlayer || m.avatarUsedBy || "";
+      return String(raw)
+        .split(/[;,|]/)
+        .map(normalizeName)
+        .filter(Boolean);
+    }
+
+    function populateAvatarFlagsFromMatch(m = {}) {
+      const container = document.getElementById("matchAvatarFlags");
+      if (!container) return;
+
+      const players = [
+        m.teamA_player1 || m.teamA1 || document.getElementById("teamA1")?.value || "",
+        m.teamA_player2 || m.teamA2 || document.getElementById("teamA2")?.value || "",
+        m.teamB_player1 || m.teamB1 || document.getElementById("teamB1")?.value || "",
+        m.teamB_player2 || m.teamB2 || document.getElementById("teamB2")?.value || ""
+      ].map(normalizeName).filter(Boolean);
+
+      const selected = new Set(getAvatarPlayersFromMatch(m));
+      container.innerHTML = players.map((p, idx) => `
+        <label class="flex items-center justify-between gap-3 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm">
+          <span class="font-bold text-slate-200">${escapeHtml(p)}</span>
+          <span class="inline-flex items-center gap-2 text-xs text-slate-400">
+            Avatar
+            <input type="checkbox" class="avatarFlag w-5 h-5 accent-amber-500" data-player="${escapeHtml(p)}" ${selected.has(p) ? "checked" : ""} />
+          </span>
+        </label>
+      `).join("") || `<div class="text-xs text-amber-300">Selecciona los 4 jugadores antes de marcar avatares.</div>`;
+    }
+
+    function getSelectedAvatarPlayers() {
+      return Array.from(document.querySelectorAll("#matchAvatarFlags .avatarFlag:checked"))
+        .map(cb => normalizeName(cb.dataset.player || ""))
+        .filter(Boolean);
+    }
+
     function openMatchForm() {
-      if (!requireLogin()) return;
-      clearMatchForm();
-      state.isEditing = true;
-      document.getElementById("matchForm").classList.remove("hidden");
-      renderResultButtons();
-      document.getElementById("matchStatus").disabled = !isAdmin();
-      previewMatchResult();
+      alert("Las partidas se crean manualmente en Google Sheets. Desde la app solo se introducen resultados.");
     }
 
     function closeMatchForm() {
-      document.getElementById("matchForm").classList.add("hidden");
+      const form = document.getElementById("matchForm");
+      if (form) form.classList.add("hidden");
       state.isEditing = false;
       clearMatchForm();
     }
 
     function clearMatchForm() {
-      ["matchId","matchFecha","matchRound","vaca1","vaca2","vaca3"].forEach(id => document.getElementById(id).value = "");
-      ["teamA1","teamA2","teamB1","teamB2"].forEach(id => document.getElementById(id).value = "");
-      document.getElementById("matchStatus").value = "confirmed";
+      ["matchId","matchFecha","matchRound","vaca1","vaca2","vaca3"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+      ["teamA1","teamA2","teamB1","teamB2"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+      const status = document.getElementById("matchStatus");
+      if (status) status.value = "confirmed";
+      const avatarFlags = document.getElementById("matchAvatarFlags");
+      if (avatarFlags) avatarFlags.innerHTML = "";
       previewMatchResult();
     }
 
     function editMatch(m) {
       if (!requireLogin()) return;
       if (!canEditMatch(m)) return alert("Solo puedes editar partidas en las que participas.");
+      ensureMatchFormInRounds();
       state.isEditing = true;
       document.getElementById("matchForm").classList.remove("hidden");
       renderResultButtons();
-      document.getElementById("matchStatus").disabled = !isAdmin();
+      setMatchFormResultMode();
       document.getElementById("matchId").value = m.id || "";
       document.getElementById("matchFecha").value = m.fecha || "";
       document.getElementById("matchRound").value = m.round || "";
-      document.getElementById("teamA1").value = normalizeName(m.teamA_player1 || m.teamA1 || "");
-      document.getElementById("teamA2").value = normalizeName(m.teamA_player2 || m.teamA2 || "");
-      document.getElementById("teamB1").value = normalizeName(m.teamB_player1 || m.teamB1 || "");
-      document.getElementById("teamB2").value = normalizeName(m.teamB_player2 || m.teamB2 || "");
+      ensureSelectOption("teamA1", m.teamA_player1 || m.teamA1 || "");
+      ensureSelectOption("teamA2", m.teamA_player2 || m.teamA2 || "");
+      ensureSelectOption("teamB1", m.teamB_player1 || m.teamB1 || "");
+      ensureSelectOption("teamB2", m.teamB_player2 || m.teamB2 || "");
       document.getElementById("vaca1").value = m.vaca1 || "";
       document.getElementById("vaca2").value = m.vaca2 || "";
       document.getElementById("vaca3").value = m.vaca3 || "";
       document.getElementById("matchStatus").value = m.status || "confirmed";
+      populateAvatarFlagsFromMatch(m);
       previewMatchResult();
+      document.getElementById("matchForm").scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     async function saveMatch() {
@@ -1886,13 +1903,16 @@
         gamesA: calc.gamesA,
         gamesB: calc.gamesB,
         winner: calc.winnerSide === "A" ? teamA : teamB,
-        status: isAdmin() ? document.getElementById("matchStatus").value : "pending",
+        status: "pending",
+        avatarPlayers: getSelectedAvatarPlayers().join(";"),
+        avatarPlayer: getSelectedAvatarPlayers().join(";"),
+        avatarUsedBy: getSelectedAvatarPlayers().join(";"),
         createdBy: state.currentUser.name,
         createdAt: new Date().toISOString(),
         updatedBy: state.currentUser.name,
         updatedAt: new Date().toISOString(),
-        confirmedBy: isAdmin() && document.getElementById("matchStatus").value === "confirmed" ? state.currentUser.name : "",
-        confirmedAt: isAdmin() && document.getElementById("matchStatus").value === "confirmed" ? new Date().toISOString() : "",
+        confirmedBy: "",
+        confirmedAt: "",
         rejectedBy: "",
         rejectedAt: "",
         rejectionReason: ""
@@ -1919,6 +1939,7 @@
       if (!requireLogin()) return;
       const match = state.matches.find(m => String(m.id) === String(matchId));
       if (!match) return alert("Partida no encontrada.");
+      if (newStatus === "confirmed" && !hasCompleteValidMatchResult(match)) return alert("No se puede confirmar una partida sin resultado completo.");
 
       const updated = {
         ...match,
@@ -2000,7 +2021,20 @@
       return n;
     }
 
-    function escapeHtml(value) {
+    
+    function playerImage(name) {
+      const clean = normalizeName(name)
+        .toLowerCase()
+        .replaceAll("á","a")
+        .replaceAll("é","e")
+        .replaceAll("í","i")
+        .replaceAll("ó","o")
+        .replaceAll("ú","u")
+        .replaceAll(" ","");
+      return `players/${clean}.jpg`;
+    }
+
+function escapeHtml(value) {
       return String(value ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
@@ -2056,7 +2090,7 @@
 
     function toggleAutoRefresh() {
       autoRefreshEnabled = !autoRefreshEnabled;
-      document.getElementById("autoRefreshBtn").textContent = autoRefreshEnabled ? "⏱️ Auto 15s: ON" : "⏱️ Auto 15s: OFF";
+      document.getElementById("autoRefreshBtn").textContent = autoRefreshEnabled ? "⏱️ Auto 5m: ON" : "⏱️ Auto: OFF";
       document.getElementById("autoRefreshBtn").className = autoRefreshEnabled
         ? "bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold"
         : "bg-red-900 hover:bg-red-800 px-4 py-2 rounded-lg text-sm font-bold";
@@ -2068,7 +2102,7 @@
         if (autoRefreshEnabled && !state.isEditing) {
           loadData();
         }
-      }, 15000);
+      }, 300000);
     }
 
     loadData();
