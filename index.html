@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v0.15.1</title>
+  <title>Torneo de Mus Gents & Lords · v0.15.2</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json?v=0132" />
   <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
@@ -52,7 +52,7 @@
     }
   </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    VERSION 0.15.1 · LOGIN + HOF/SEDES FIX</div>
+    VERSION 0.15.2 · API FIX HOF/SEDES</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
     <div class="absolute inset-0 opacity-40" style="background: url('assets/background.jpg?v=0150') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
@@ -72,7 +72,7 @@
       </div>
 
       <div class="text-center text-[11px] text-slate-500 mt-5">
-        v0.15.0 · La sesión se recordará en este dispositivo
+        v0.15.2 · La sesión se recordará en este dispositivo
       </div>
     </div>
   </section>
@@ -84,7 +84,7 @@
           <img src="assets/logo.png?v=0132" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
           <div>
             <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-xs text-amber-300 font-black">v0.15.1 · Partidas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-xs text-amber-300 font-black">v0.15.2 · Partidas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -492,7 +492,7 @@
   </main>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyjj_H1WHtp-satb9eC1mY0I46sISa5g6MDrnYUVgGyuZe0X_26wmzBAzZZ_8SpMMvo/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxLVAivtSJmnjluEyGOesCDuSUu7qiaV5kSn13cy1yQ2UXsvZs5hIF8-eDcoZOG_j8/exec";
 
     let state = {
       players: [],
@@ -531,6 +531,7 @@
       setStatus("Cargando datos...");
       try {
         const data = await api("getData");
+        console.log("getData keys", Object.keys(data));
         if (!data.ok) throw new Error(data.error || "Error desconocido");
         state.players = normalizePlayers(data.players || []);
         restoreLogin();
