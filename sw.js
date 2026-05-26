@@ -1,4 +1,4 @@
-const CACHE_NAME = "mus-gents-lords-v0100";
+const CACHE_NAME = "mus-gents-lords-v0130";
 const ASSETS = ["./?v=082", "./index.html?v=082", "./manifest.json?v=082", "./tournament-icon.png?v=082", "./hero-bg.png?v=082"];
 
 self.addEventListener("install", (event) => {

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v0.10.0</title>
+  <title>Torneo de Mus Gents & Lords · v0.13.0</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json?v=082" />
   <link rel="apple-touch-icon" href="tournament-icon.png?v=082" />
@@ -24,7 +24,7 @@
     }
   </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    VERSION 0.10.0 · SPRINT 9-10 · PERMISOS + CONFIRMACIÓN</div>
+    VERSION 0.13.0 · SPRINT 12-13 · HISTÓRICO + SEDES DINÁMICAS</div>
   <header class="hero-bg border-b border-emerald-800 p-4 sticky top-0 z-10 shadow-2xl">
     <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
       <div>
@@ -32,7 +32,7 @@
           <img src="tournament-icon.png?v=082" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
           <div>
             <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-xs text-amber-300 font-black">v0.10.0 · Partidas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-xs text-amber-300 font-black">v0.13.0 · Partidas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -242,102 +242,31 @@
       </div>
     </section>
 
-    <section id="tab-venues" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6">
-      <div>
-        <div class="inline-flex px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-black uppercase tracking-wider">Mapa social del torneo</div>
-        <h2 class="text-2xl font-black mt-3">🏨 Sedes oficiales</h2>
-        <p class="text-sm text-slate-400 max-w-3xl">Los templos reconocidos del campeonato: lugares donde se mezclan cartas, comida, presión competitiva y sobremesa.</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        <div class="venueCard border-emerald-800/40">
-          <div class="text-4xl">🍽️</div>
-          <h3>Restaurante Urumea</h3><p>La sede de mesa seria: comida, tensión y partida con galones.</p><a href="https://share.google/LciTNQjVFdbsnIvA6" target="_blank" class="text-cyan-400 text-sm font-bold">📍 Abrir en Google Maps</a><br><span>Clásico competitivo</span>
-        </div>
-        <div class="venueCard border-lime-800/40">
-          <div class="text-4xl">🌳</div>
-          <h3>El Jardín del Abuelo</h3><p>Ambiente de torneo largo, conversación amplia y cierre con honra.</p><a href="https://share.google/tH5Hc353iFy9dpS2C" target="_blank" class="text-cyan-400 text-sm font-bold">📍 Abrir en Google Maps</a><br><span>Sede de sobremesa</span>
-        </div>
-        <div class="venueCard border-cyan-800/40">
-          <div class="text-4xl">❄️</div>
-          <h3>Taberna La Escarcha</h3><p>Territorio de mus directo: cerveza fría, señas discretas y cuchillo entre dientes.</p><a href="https://share.google/xyw5hfASSQ9S8rWAo" target="_blank" class="text-cyan-400 text-sm font-bold">📍 Abrir en Google Maps</a><br><span>Taberna de batalla</span>
-        </div>
-        <div class="venueCard border-amber-800/40">
-          <div class="text-4xl">🏡</div>
-          <h3>Ca Javi</h3><p>Formato casa: confianza, presión psicológica y posibilidad alta de discusión reglamentaria.</p><div class="text-sm text-slate-400 mt-2">📍 C/José de Fentanes 21, sótano · Madrid</div><span>Territorio local</span>
-        </div>
-        <div class="venueCard border-fuchsia-800/40">
-          <div class="text-4xl">🏡</div>
-          <h3>Ca Álvaro</h3><p>Sede con historial ganador: no se entra sin respeto ni se sale sin revisar la clasificación.</p><div class="text-sm text-slate-400 mt-2">📍 Calle del Miño 4 · Terraza planta 3</div><span>Casa de campeón</span>
+    
+    <section id="tab-venues" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6">
+      <div class="flex items-end justify-between gap-4 mb-5">
+        <div>
+          <h2 class="text-2xl font-black">📍 Sedes del circuito</h2>
+          <p class="text-sm text-slate-400">Gestionadas dinámicamente desde Google Sheets.</p>
         </div>
       </div>
 
-      <style>
-        .venueCard { background:#020617; border-width:1px; border-radius:1rem; padding:1.25rem; transition:all .2s; }
-        .venueCard:hover { transform:translateY(-2px); border-color:#f59e0b; }
-        .venueCard h3 { font-weight:900; font-size:1.05rem; margin-top:.6rem; color:white; }
-        .venueCard p { color:#94a3b8; font-size:.875rem; margin-top:.4rem; min-height:3.5rem; }
-        .venueCard span { display:inline-block; margin-top:.7rem; font-size:.7rem; font-weight:900; text-transform:uppercase; letter-spacing:.06em; color:#facc15; background:rgba(250,204,21,.08); border:1px solid rgba(250,204,21,.2); border-radius:999px; padding:.25rem .55rem; }
-      </style>
+      <div id="venuesGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
     </section>
 
-    <section id="tab-history" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6">
-      <div>
-        <div class="inline-flex px-3 py-1 rounded-full bg-fuchsia-500/10 border border-fuchsia-500/30 text-fuchsia-300 text-xs font-black uppercase tracking-wider">Memoria noble del torneo</div>
-        <h2 class="text-2xl font-black mt-3">🏛️ Ranking histórico & Hall of Fame</h2>
-        <p class="text-sm text-slate-400 max-w-3xl">Los nombres que ya forman parte de la aristocracia musística de Gents & Lords.</p>
-      </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div class="bg-slate-950 border border-amber-500/40 rounded-2xl p-5 relative overflow-hidden">
-          <div class="absolute top-0 right-0 bg-amber-500 text-slate-950 text-[10px] font-black px-3 py-1 rounded-bl-xl">LIGUILLA</div>
-          <div class="text-5xl mb-3">📍</div>
-          <h3 class="font-black text-amber-300">EL PUTO AMO</h3>
-          <p class="text-2xl font-black mt-3">Álvaro Millán</p>
-          <p class="text-sm text-slate-400">Temporada 2024-2025</p>
-          <p class="text-xs text-slate-500 mt-3">Ganador de la fase regular y portador legítimo del PIN de gala.</p>
-        </div>
-
-        <div class="bg-gradient-to-b from-amber-500/20 to-slate-950 border-2 border-amber-400 rounded-2xl p-5 relative overflow-hidden">
-          <div class="absolute top-0 right-0 bg-amber-400 text-slate-950 text-[10px] font-black px-3 py-1 rounded-bl-xl">CAMPEONES</div>
-          <div class="text-5xl mb-3">👑</div>
-          <h3 class="font-black text-amber-200">THE CHAMPIONS</h3>
-          <p class="text-2xl font-black mt-3">Álvaro Millán<br><span class="text-slate-300">&</span> Jorge Royo</p>
-          <p class="text-sm text-slate-400">Temporada 2024-2025</p>
-          <p class="text-xs text-slate-500 mt-3">Campeones certificados y habilitados para impartir doctrina musística.</p>
-        </div>
-
-        <div class="bg-slate-950 border border-orange-500/40 rounded-2xl p-5 relative overflow-hidden">
-          <div class="absolute top-0 right-0 bg-orange-500 text-slate-950 text-[10px] font-black px-3 py-1 rounded-bl-xl">HONOR</div>
-          <div class="text-5xl mb-3">🥄</div>
-          <h3 class="font-black text-orange-300">CUCHARA DE MADERA</h3>
-          <p class="text-2xl font-black mt-3">Paco Ruíz</p>
-          <p class="text-sm text-slate-400">Temporada 2024-2025</p>
-          <p class="text-xs text-slate-500 mt-3">Reconocimiento al compromiso competitivo pese al resultado adverso.</p>
+    
+    <section id="tab-history" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6">
+      <div class="flex items-end justify-between gap-4 mb-5">
+        <div>
+          <h2 class="text-2xl font-black">🏛️ Histórico del torneo</h2>
+          <p class="text-sm text-slate-400">Hall of Fame y temporadas históricas gestionadas desde Google Sheets.</p>
         </div>
       </div>
 
-      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5">
-        <h3 class="font-black text-lg mb-3">📚 Línea histórica</h3>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="text-slate-400 border-b border-slate-800">
-              <tr>
-                <th class="text-left py-2">Temporada</th>
-                <th class="text-left py-2">Categoría</th>
-                <th class="text-left py-2">Ganador/es</th>
-                <th class="text-left py-2">Notas</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="border-b border-slate-900"><td class="py-2">2024-2025</td><td>El Puto Amo</td><td>Álvaro Millán</td><td>Ganador fase liguilla</td></tr>
-              <tr class="border-b border-slate-900"><td class="py-2">2024-2025</td><td>The Champions</td><td>Álvaro Millán / Jorge Royo</td><td>Campeones de la gran final</td></tr>
-              <tr class="border-b border-slate-900"><td class="py-2">2024-2025</td><td>Cuchara de Madera</td><td>Paco Ruíz</td><td>Premio de honor al último clasificado elegible</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <div id="historyGrid" class="space-y-4"></div>
     </section>
+
 
 
     <section id="tab-matches" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-5">
@@ -434,10 +363,18 @@
     </section>
 
     
+
     <section id="tab-players" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6">
-      <div>
-        <h2 class="text-2xl font-black">👥 Jugadores y perfiles</h2>
-        <p class="text-sm text-slate-400 mt-1">Cada jugador puede personalizar su ficha con foto y descripción.</p>
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-black">👥 Jugadores y perfiles</h2>
+          <p class="text-sm text-slate-400 mt-1">Ficha de jugador con foto, descripción, insignias y estadísticas personales.</p>
+        </div>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+          <label class="block text-xs uppercase font-bold text-slate-400 mb-2">Ver ficha de</label>
+          <select id="profilePlayerSelect" onchange="selectProfilePlayer(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm min-w-[220px]"></select>
+        </div>
+      </div>
 
       <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-4">
         <h3 class="font-black text-lg mb-3">🏷️ Leyenda de símbolos</h3>
@@ -452,7 +389,7 @@
         </div>
       </div>
 
-      </div>
+      <div id="playerFeaturedCard"></div>
 
       <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
         <h3 class="font-black text-lg mb-3">🪪 Mi perfil</h3>
@@ -475,8 +412,12 @@
         </div>
       </div>
 
-      <div id="playersGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      <div>
+        <h3 class="font-black text-lg mb-3">📇 Todos los jugadores</h3>
+        <div id="playersGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      </div>
     </section>
+
 
 
     <section id="tab-logs" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4">
@@ -504,8 +445,11 @@
       players: [],
       matches: [],
       logs: [],
+      history: [],
+      venues: [],
       currentUser: null,
       calculatedStandings: [],
+      selectedProfilePlayer: '',
       isEditing: false
     };
 
@@ -544,6 +488,27 @@
         console.error(err);
         setStatus("Error cargando datos: " + err.message);
       }
+    }
+
+
+    function normalizeHistory(history) {
+      return (history || []).filter(h => h.season || h.category || h.winners).map(h => ({
+        season: h.season || "",
+        category: h.category || "",
+        winners: h.winners || "",
+        notes: h.notes || ""
+      }));
+    }
+
+    function normalizeVenues(venues) {
+      return (venues || []).filter(v => v.name).map(v => ({
+        name: v.name || "",
+        type: v.type || "",
+        address: v.address || "",
+        mapsUrl: v.mapsUrl || "",
+        description: v.description || "",
+        image: v.image || ""
+      }));
     }
 
     function normalizePlayers(players) {
@@ -1134,9 +1099,121 @@
       }).join("");
     }
 
+
+    function getDetailedPlayerStats(playerName) {
+      const name = normalizeName(playerName);
+      const stats = {
+        name,
+        played: 0,
+        wins: 0,
+        losses: 0,
+        gamesWon: 0,
+        gamesLost: 0,
+        vacasWon: 0,
+        vacasLost: 0,
+        points: 0,
+        partners: {},
+        rivals: {},
+        matches: []
+      };
+
+      state.matches.forEach(m => {
+        const meta = getMatchMeta(m);
+        if (!meta.calc.valid || !meta.calc.complete || effectiveStatus(m) !== "confirmed") return;
+
+        const teamA = [normalizeName(m.teamA_player1 || m.teamA1), normalizeName(m.teamA_player2 || m.teamA2)].filter(Boolean);
+        const teamB = [normalizeName(m.teamB_player1 || m.teamB1), normalizeName(m.teamB_player2 || m.teamB2)].filter(Boolean);
+
+        const inA = teamA.includes(name);
+        const inB = teamB.includes(name);
+        if (!inA && !inB) return;
+
+        const ownTeam = inA ? teamA : teamB;
+        const rivals = inA ? teamB : teamA;
+        const partner = ownTeam.find(p => p !== name) || "";
+        const playerWon = (inA && meta.calc.winnerSide === "A") || (inB && meta.calc.winnerSide === "B");
+
+        const ownGames = inA ? meta.calc.gamesA : meta.calc.gamesB;
+        const oppGames = inA ? meta.calc.gamesB : meta.calc.gamesA;
+        const ownVacas = inA ? meta.calc.vacasA : meta.calc.vacasB;
+        const oppVacas = inA ? meta.calc.vacasB : meta.calc.vacasA;
+
+        stats.played++;
+        stats.gamesWon += ownGames;
+        stats.gamesLost += oppGames;
+        stats.vacasWon += ownVacas;
+        stats.vacasLost += oppVacas;
+
+        if (playerWon) {
+          stats.wins++;
+          stats.points += 3;
+        } else {
+          stats.losses++;
+        }
+
+        if (partner) {
+          stats.partners[partner] = stats.partners[partner] || { name: partner, played: 0, wins: 0, losses: 0 };
+          stats.partners[partner].played++;
+          playerWon ? stats.partners[partner].wins++ : stats.partners[partner].losses++;
+        }
+
+        rivals.forEach(rival => {
+          stats.rivals[rival] = stats.rivals[rival] || { name: rival, played: 0, wins: 0, losses: 0 };
+          stats.rivals[rival].played++;
+          playerWon ? stats.rivals[rival].wins++ : stats.rivals[rival].losses++;
+        });
+
+        stats.matches.push({
+          id: m.id,
+          round: m.round,
+          fecha: m.fecha,
+          partner,
+          rivals: rivals.join(" / "),
+          result: playerWon ? "Victoria" : "Derrota",
+          vacas: `${ownVacas}-${oppVacas}`,
+          games: `${ownGames}-${oppGames}`
+        });
+      });
+
+      stats.winRate = stats.played ? Math.round((stats.wins / stats.played) * 100) : 0;
+      stats.gameBalance = stats.gamesWon - stats.gamesLost;
+      stats.vacaBalance = stats.vacasWon - stats.vacasLost;
+
+      const partnerList = Object.values(stats.partners);
+      const rivalList = Object.values(stats.rivals);
+
+      stats.worstPartner = partnerList.sort((a,b) => b.losses - a.losses || b.played - a.played)[0] || null;
+      stats.bestPartner = partnerList.sort((a,b) => b.wins - a.wins || b.played - a.played)[0] || null;
+      stats.bestRival = rivalList.sort((a,b) => b.wins - a.wins || b.played - a.played)[0] || null;
+      stats.worstRival = rivalList.sort((a,b) => b.losses - a.losses || b.played - a.played)[0] || null;
+
+      return stats;
+    }
+
+    function selectProfilePlayer(playerName) {
+      state.selectedProfilePlayer = playerName;
+      renderPlayers();
+    }
+
+    function renderStatPill(label, value, cls = "text-white") {
+      return `<div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+        <div class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">${label}</div>
+        <div class="text-xl font-black ${cls}">${value}</div>
+      </div>`;
+    }
+
+    function renderMiniTable(rows, cols) {
+      if (!rows.length) return `<div class="text-sm text-slate-500">Sin datos todavía.</div>`;
+      return `<div class="overflow-x-auto"><table class="w-full text-sm">
+        <thead><tr class="text-slate-400 border-b border-slate-800">${cols.map(c => `<th class="text-left py-2">${c.label}</th>`).join("")}</tr></thead>
+        <tbody>${rows.map(r => `<tr class="border-b border-slate-900">${cols.map(c => `<td class="py-2">${r[c.key] ?? ""}</td>`).join("")}</tr>`).join("")}</tbody>
+      </table></div>`;
+    }
+
     function renderPlayers() {
       const avatarInput = document.getElementById("profileAvatar");
       const descInput = document.getElementById("profileDescription");
+      const profileSelect = document.getElementById("profilePlayerSelect");
 
       if (state.currentUser && avatarInput && descInput) {
         const me = state.players.find(p => normalizeName(p.name) === normalizeName(state.currentUser.name));
@@ -1146,15 +1223,95 @@
         }
       }
 
+      if (profileSelect) {
+        const current = state.selectedProfilePlayer || (state.currentUser ? state.currentUser.name : (state.players[0]?.name || ""));
+        profileSelect.innerHTML = state.players.map(p => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`).join("");
+        profileSelect.value = current;
+        state.selectedProfilePlayer = current;
+      }
+
+      const selected = state.players.find(p => normalizeName(p.name) === normalizeName(state.selectedProfilePlayer)) || state.players[0];
+      const featured = document.getElementById("playerFeaturedCard");
+
+      if (featured && selected) {
+        const st = getDetailedPlayerStats(selected.name);
+        const img = selected.avatar || "tournament-icon.png?v=082";
+        const flags = renderPlayerFlags(selected);
+        const recentMatches = st.matches.slice(-5).reverse();
+
+        featured.innerHTML = `
+          <div class="bg-gradient-to-br from-slate-950 to-slate-900 border border-amber-500/30 rounded-3xl p-5 sm:p-6 shadow-2xl">
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+              <div class="xl:col-span-4">
+                <div class="flex flex-col items-center text-center">
+                  <img src="${escapeHtml(img)}" onerror="this.src='tournament-icon.png?v=082'"
+                       class="w-44 h-44 rounded-3xl object-contain bg-white p-2 border-2 border-amber-400/60 shadow-xl" />
+                  <h3 class="text-3xl font-black mt-4">${escapeHtml(selected.name)}</h3>
+                  <div class="text-xs uppercase tracking-wider text-slate-500 font-bold">${escapeHtml(selected.role || "player")}</div>
+                  <div class="flex flex-wrap justify-center gap-2 mt-4">${flags || '<span class="text-xs text-slate-600">Sin insignias todavía</span>'}</div>
+                </div>
+                <div class="mt-5 bg-slate-950/70 border border-slate-800 rounded-2xl p-4 text-sm text-slate-300 leading-relaxed">
+                  ${escapeHtml(selected.description || "Jugador oficial del circuito Gents & Lords.")}
+                </div>
+              </div>
+
+              <div class="xl:col-span-8 space-y-5">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  ${renderStatPill("Partidas", st.played, "text-white")}
+                  ${renderStatPill("Balance", `${st.wins}-${st.losses}`, "text-emerald-400")}
+                  ${renderStatPill("Win rate", `${st.winRate}%`, "text-cyan-400")}
+                  ${renderStatPill("Puntos", st.points, "text-amber-400")}
+                  ${renderStatPill("Juegos", `${st.gamesWon}-${st.gamesLost}`, "text-emerald-300")}
+                  ${renderStatPill("Balance JG", st.gameBalance, st.gameBalance >= 0 ? "text-emerald-400" : "text-red-400")}
+                  ${renderStatPill("Vacas", `${st.vacasWon}-${st.vacasLost}`, "text-fuchsia-300")}
+                  ${renderStatPill("Balance V", st.vacaBalance, st.vacaBalance >= 0 ? "text-emerald-400" : "text-red-400")}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+                    <div class="text-xs uppercase text-slate-500 font-bold">Peor compañero</div>
+                    <div class="text-lg font-black text-red-300 mt-1">${st.worstPartner ? escapeHtml(st.worstPartner.name) : "-"}</div>
+                    <div class="text-xs text-slate-400">${st.worstPartner ? `${st.worstPartner.losses} derrotas juntos` : "Sin datos"}</div>
+                  </div>
+                  <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+                    <div class="text-xs uppercase text-slate-500 font-bold">Mejor compañero</div>
+                    <div class="text-lg font-black text-emerald-300 mt-1">${st.bestPartner ? escapeHtml(st.bestPartner.name) : "-"}</div>
+                    <div class="text-xs text-slate-400">${st.bestPartner ? `${st.bestPartner.wins} victorias juntos` : "Sin datos"}</div>
+                  </div>
+                  <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+                    <div class="text-xs uppercase text-slate-500 font-bold">Mejor rival</div>
+                    <div class="text-lg font-black text-amber-300 mt-1">${st.bestRival ? escapeHtml(st.bestRival.name) : "-"}</div>
+                    <div class="text-xs text-slate-400">${st.bestRival ? `${st.bestRival.wins} victorias contra él` : "Sin datos"}</div>
+                  </div>
+                </div>
+
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+                  <h4 class="font-black mb-3">📜 Últimas partidas</h4>
+                  ${renderMiniTable(recentMatches, [
+                    {key:"fecha", label:"Fecha"},
+                    {key:"partner", label:"Compañero"},
+                    {key:"rivals", label:"Rivales"},
+                    {key:"result", label:"Resultado"},
+                    {key:"vacas", label:"Vacas"},
+                    {key:"games", label:"Juegos"}
+                  ])}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
       const grid = document.getElementById("playersGrid");
       if (!grid) return;
 
       grid.innerHTML = state.players.map(p => {
+        const st = getDetailedPlayerStats(p.name);
         const img = p.avatar || "tournament-icon.png?v=082";
         const desc = p.description || "Jugador oficial del circuito Gents & Lords.";
         const flags = renderPlayerFlags(p);
         return `
-          <div class="bg-slate-950/95 border border-slate-800 rounded-2xl p-5 hover:border-amber-500/40 transition-all">
+          <div onclick="selectProfilePlayer('${escapeHtml(p.name)}')" class="cursor-pointer bg-slate-950/95 border border-slate-800 rounded-2xl p-5 hover:border-amber-500/40 transition-all">
             <div class="flex items-center gap-4">
               <img src="${escapeHtml(img)}"
                    onerror="this.src='tournament-icon.png?v=082'"
@@ -1162,9 +1319,12 @@
               <div>
                 <div class="text-xl font-black">${escapeHtml(p.name || "-")}</div>
                 <div class="text-xs uppercase tracking-wider text-slate-500 font-bold">${escapeHtml(p.role || "player")}</div>
+                <div class="text-xs text-slate-400 mt-1">${st.wins}-${st.losses} · ${st.winRate}% win</div>
               </div>
             </div>
-            <div class="mt-4 text-sm text-slate-300 min-h-[70px] leading-relaxed">${escapeHtml(desc)}</div>
+            <div class="mt-4 text-sm text-slate-300 min-h-[60px] leading-relaxed">
+              ${escapeHtml(desc)}
+            </div>
             <div class="mt-4 flex flex-wrap gap-2">${flags || '<span class="text-xs text-slate-600">Sin insignias todavía</span>'}</div>
           </div>
         `;

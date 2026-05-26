@@ -1,7 +1,7 @@
 {
-  "name": "Torneo de Mus Gents & Lords v0.10.0",
+  "name": "Torneo de Mus Gents & Lords v0.13.0",
   "short_name": "Mus G&L",
-  "start_url": "./?v=0100",
+  "start_url": "./?v=0130",
   "scope": "./",
   "display": "standalone",
   "background_color": "#020617",
