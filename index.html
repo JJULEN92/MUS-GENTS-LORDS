@@ -631,10 +631,14 @@
     
     function playerPhoto(name) {
       const clean = String(name || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
-        .replace(/[^a-z0-9]/g, "");
+        .trim()
+        .replaceAll("á","a")
+        .replaceAll("é","e")
+        .replaceAll("í","i")
+        .replaceAll("ó","o")
+        .replaceAll("ú","u")
+        .replaceAll(" ","");
       return `players/${clean}.jpg`;
     }
 
