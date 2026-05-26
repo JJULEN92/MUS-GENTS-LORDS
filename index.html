@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords - MVP Vacas</title>
+  <title>Torneo de Mus Gents & Lords</title>
+  <meta name="theme-color" content="#020617" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
@@ -34,12 +37,15 @@
         <div class="flex flex-wrap gap-2 items-center">
           <button onclick="loadData()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg text-sm font-bold">🔄 Actualizar datos</button>
           <button id="autoRefreshBtn" onclick="toggleAutoRefresh()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⏱️ Auto 15s: ON</button>
+          <button id="installBtn" onclick="installApp()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-lg text-sm font-black">📲 Instalar</button>
+          <button onclick="exportBackupJson()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⬇️ Backup</button>
         </div>
       </div>
     </section>
 
     <nav class="flex flex-wrap gap-2">
       <button onclick="showTab(event,'standings')" class="tabBtn bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Clasificación calculada</button>
+      <button onclick="showTab(event,'rounds')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Jornadas</button>
       <button onclick="showTab(event,'matches')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Partidas</button>
       <button onclick="showTab(event,'players')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Jugadores</button>
       <button onclick="showTab(event,'logs')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Log</button>
@@ -73,6 +79,21 @@
           <tbody id="standingsBody"></tbody>
         </table>
       </div>
+    </section>
+
+
+    <section id="tab-rounds" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-black">📅 Jornadas</h2>
+          <p class="text-xs text-slate-400">Estado rápido de cada partida: confirmada, pendiente, incompleta o error.</p>
+        </div>
+        <select id="roundFilter" onchange="renderRoundDashboard()" class="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm">
+          <option value="all">Todas las jornadas</option>
+        </select>
+      </div>
+      <div id="roundSummaryCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+      <div id="roundDashboard" class="space-y-4"></div>
     </section>
 
     <section id="tab-matches" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-5">
@@ -204,6 +225,7 @@
 
     let autoRefreshEnabled = true;
     let autoRefreshTimer = null;
+    let deferredInstallPrompt = null;
 
     document.querySelectorAll(".field").forEach(el => {
       el.className = "bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm w-full";
@@ -254,6 +276,7 @@
       renderPlayerSelects();
       state.calculatedStandings = calculateStandings();
       renderStandings();
+      renderRoundDashboard();
       renderMatches();
       renderPlayers();
       renderLogs();
@@ -353,6 +376,84 @@
           <td class="p-2 text-center">${r.sinAvatar}</td>
         </tr>
       `).join("") || `<tr><td colspan="11" class="p-4 text-slate-400">No hay clasificación calculada.</td></tr>`;
+    }
+
+
+    function getMatchMeta(m) {
+      const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3);
+      const teamA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].filter(Boolean).map(normalizeName).join(" / ");
+      const teamB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].filter(Boolean).map(normalizeName).join(" / ");
+      const winner = calc.winnerSide === "A" ? teamA : calc.winnerSide === "B" ? teamB : "";
+      let stateLabel = "Pendiente";
+      let stateClass = "bg-amber-500/10 text-amber-300 border-amber-500/30";
+      if ((m.status || "confirmed") === "cancelled") {
+        stateLabel = "Cancelada"; stateClass = "bg-red-500/10 text-red-300 border-red-500/30";
+      } else if (!calc.valid) {
+        stateLabel = "Error"; stateClass = "bg-red-500/10 text-red-300 border-red-500/30";
+      } else if (calc.complete && (m.status || "confirmed") === "confirmed") {
+        stateLabel = "Confirmada"; stateClass = "bg-emerald-500/10 text-emerald-300 border-emerald-500/30";
+      } else if (calc.complete && (m.status || "") === "pending") {
+        stateLabel = "Pendiente confirmación"; stateClass = "bg-cyan-500/10 text-cyan-300 border-cyan-500/30";
+      } else if (!calc.complete && [m.vaca1,m.vaca2,m.vaca3].some(Boolean)) {
+        stateLabel = "Incompleta"; stateClass = "bg-orange-500/10 text-orange-300 border-orange-500/30";
+      }
+      return { calc, teamA, teamB, winner, stateLabel, stateClass };
+    }
+
+    function renderRoundDashboard() {
+      const filterEl = document.getElementById("roundFilter");
+      if (!filterEl) return;
+
+      const rounds = [...new Set(state.matches.filter(m => m.round).map(m => String(m.round)))].sort((a,b) => Number(a)-Number(b));
+      const current = filterEl.value || "all";
+      filterEl.innerHTML = '<option value="all">Todas las jornadas</option>' + rounds.map(r => `<option value="${escapeHtml(r)}">Jornada ${escapeHtml(r)}</option>`).join("");
+      filterEl.value = rounds.includes(current) ? current : "all";
+
+      const matches = state.matches.filter(m => m.id && (filterEl.value === "all" || String(m.round) === String(filterEl.value)));
+      const summary = { total: matches.length, confirmed: 0, pending: 0, errors: 0 };
+      matches.forEach(m => {
+        const meta = getMatchMeta(m);
+        if (meta.stateLabel === "Confirmada") summary.confirmed++;
+        else if (meta.stateLabel === "Error" || meta.stateLabel === "Cancelada") summary.errors++;
+        else summary.pending++;
+      });
+
+      const card = (label, value, cls) => `<div class="bg-slate-950 border border-slate-800 rounded-xl p-4"><div class="text-xs uppercase tracking-wider text-slate-500 font-bold">${label}</div><div class="text-2xl font-black ${cls}">${value}</div></div>`;
+      document.getElementById("roundSummaryCards").innerHTML =
+        card("Partidas", summary.total, "text-white") +
+        card("Confirmadas", summary.confirmed, "text-emerald-400") +
+        card("Pendientes", summary.pending, "text-amber-400") +
+        card("Errores / canceladas", summary.errors, "text-red-400");
+
+      const grouped = {};
+      matches.forEach(m => {
+        const r = String(m.round || "Sin jornada");
+        grouped[r] = grouped[r] || [];
+        grouped[r].push(m);
+      });
+
+      document.getElementById("roundDashboard").innerHTML = Object.keys(grouped).sort((a,b) => Number(a)-Number(b)).map(round => `
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h3 class="font-black text-lg mb-3">Jornada ${escapeHtml(round)}</h3>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            ${grouped[round].map(m => {
+              const meta = getMatchMeta(m);
+              const vacas = meta.calc.valid ? `${meta.calc.vacasA}-${meta.calc.vacasB}` : "Error";
+              const juegos = meta.calc.valid ? `${meta.calc.gamesA}-${meta.calc.gamesB}` : "-";
+              return `<div onclick='editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})' class="cursor-pointer bg-slate-900 border border-slate-800 rounded-xl p-4 hover:border-amber-500/50 transition-all">
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <div class="font-black">${escapeHtml(m.id)} · ${escapeHtml(m.fecha || "")}</div>
+                  <span class="text-[10px] px-2 py-1 border rounded-full font-bold ${meta.stateClass}">${meta.stateLabel}</span>
+                </div>
+                <div class="text-sm text-slate-300"><b class="text-emerald-400">A</b> ${escapeHtml(meta.teamA || "-")}</div>
+                <div class="text-sm text-slate-300"><b class="text-cyan-400">B</b> ${escapeHtml(meta.teamB || "-")}</div>
+                <div class="text-xs text-slate-400 mt-2">Vacas: <b>${vacas}</b> · Juegos: <b>${juegos}</b> · ${[m.vaca1,m.vaca2,m.vaca3].filter(Boolean).join("/")}</div>
+                <div class="text-xs text-emerald-300 mt-1">Ganador: ${escapeHtml(meta.winner || "-")}</div>
+              </div>`;
+            }).join("")}
+          </div>
+        </div>
+      `).join("") || `<div class="text-slate-400 bg-slate-950 rounded-xl p-4">No hay partidas para mostrar.</div>`;
     }
 
     function renderMatches() {
@@ -701,6 +802,50 @@
         .replaceAll("'", "&#039;");
     }
 
+
+
+    function exportBackupJson() {
+      const backup = {
+        exportedAt: new Date().toISOString(),
+        players: state.players,
+        matches: state.matches,
+        calculatedStandings: state.calculatedStandings,
+        logs: state.logs
+      };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "backup_torneo_mus_gents_lords_" + new Date().toISOString().slice(0,10) + ".json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      const btn = document.getElementById("installBtn");
+      if (btn) btn.classList.remove("hidden");
+    });
+
+    async function installApp() {
+      if (!deferredInstallPrompt) {
+        alert("Si no aparece instalación automática, usa el menú del navegador: Añadir a pantalla de inicio.");
+        return;
+      }
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      document.getElementById("installBtn").classList.add("hidden");
+    }
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(console.error);
+      });
+    }
 
     function toggleAutoRefresh() {
       autoRefreshEnabled = !autoRefreshEnabled;

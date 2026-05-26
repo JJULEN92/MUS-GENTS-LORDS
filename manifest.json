@@ -1,0 +1,17 @@
+{
+  "name": "Torneo de Mus Gents & Lords",
+  "short_name": "Mus G&L",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "description": "App del torneo de mus Gents & Lords",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
