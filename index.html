@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Torneo de Mus Gents & Lords · v0.18.0</title>
   <meta name="theme-color" content="#020617" />
-  <link rel="manifest" href="manifest.json?v=0180" />
-  <link rel="apple-touch-icon" href="assets/logo.png?v=0180" />
+  <link rel="manifest" href="manifest.json?v=0181" />
+  <link rel="apple-touch-icon" href="assets/logo.png?v=0181" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
@@ -14,7 +14,7 @@
     body {
       background:
         linear-gradient(180deg, rgba(2,6,23,.78), rgba(2,6,23,.95)),
-        url('assets/background.jpg?v=0180') center center / cover fixed no-repeat;
+        url('assets/background.jpg?v=0181') center center / cover fixed no-repeat;
     }
     main, header, section, nav {
       position: relative;
@@ -54,10 +54,10 @@
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
     VERSION 0.18.0 · MODAL RESULTADOS</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
-    <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0180') center center / cover no-repeat;"></div>
+    <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0181') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
       <div class="text-center">
-        <img src="assets/logo.png?v=0180" onerror="this.src='assets/logo.png'" class="w-28 h-28 rounded-3xl bg-white p-2 object-contain mx-auto border border-amber-400/70" />
+        <img src="assets/logo.png?v=0181" onerror="this.src='assets/logo.png'" class="w-28 h-28 rounded-3xl bg-white p-2 object-contain mx-auto border border-amber-400/70" />
         <h1 class="text-3xl font-black mt-4">Torneo de Mus</h1>
         <p class="text-amber-300 font-black text-sm">Gents & Lords</p>
       </div>
@@ -71,7 +71,7 @@
       </div>
 
       <div class="text-center text-[11px] text-slate-500 mt-5">
-        v0.18.0 · La sesión se recordará en este dispositivo
+        v0.18.1 · La sesión se recordará en este dispositivo
       </div>
     </div>
   </section>
@@ -80,10 +80,10 @@
     <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
       <div>
         <div class="flex items-center gap-3">
-          <img src="assets/logo.png?v=0180" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
+          <img src="assets/logo.png?v=0181" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
           <div>
             <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-xs text-amber-300 font-black">v0.18.0 · Al mejor de 3 vacas · Vaca al mejor de 5 juegos al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-xs text-amber-300 font-black">v0.18.1 · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -363,8 +363,13 @@
         </div>
 
         <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
-          <h4 class="font-bold text-white mb-2">Resultado por vacas</h4>
-          <p class="text-xs text-slate-400 mb-3">Introduce solo las vacas jugadas. Ejemplo: 30 / 13 / 31.</p>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+            <div>
+              <h4 class="font-bold text-white">Resultado por vacas</h4>
+              <p class="text-xs text-slate-400 mt-1">Introduce solo las vacas jugadas. Ejemplo: 30 / 13 / 31.</p>
+            </div>
+            <span class="inline-flex w-fit items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-emerald-300">Modo resultado</span>
+          </div>
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
             <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
               <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 1</label>
@@ -382,12 +387,12 @@
               <div class="grid grid-cols-3 gap-1 resultButtons" data-target="vaca3"></div>
             </div>
           </div>
-          <div class="mt-3 bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm">
-            <label class="block text-xs uppercase font-bold text-slate-400 mb-2">Avatar usado</label>
+          <div class="mt-3 bg-slate-950 border border-slate-800 rounded-xl p-3">
+            <label class="block text-xs font-black text-amber-300 mb-2">🧞 Avatar usado</label>
             <select id="avatarPlayer" class="field" onchange="previewMatchResult()">
               <option value="">Ningún jugador usó avatar</option>
             </select>
-            <p class="text-xs text-slate-500 mt-2">Marca aquí al jugador sustituido si jugó un avatar en su lugar.</p>
+            <p class="text-[11px] text-slate-500 mt-2">Selecciona el jugador sustituido si alguno jugó con avatar.</p>
           </div>
 
           <div class="mt-3 bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm">
@@ -503,7 +508,7 @@
           <div class="flex items-center justify-between gap-3 p-4 border-b border-slate-800">
             <div>
               <h3 class="text-lg font-black">🎴 Meter / editar resultado</h3>
-              <p class="text-xs text-slate-400">Solo se modifican resultado y avatar. Las partidas se crean desde Google Sheets.</p>
+              <p class="text-xs text-slate-400">Solo se modifican resultados. Las partidas se crean desde Google Sheets.</p>
             </div>
             <button onclick="closeMatchForm()" class="bg-slate-800 hover:bg-slate-700 text-white font-black px-3 py-2 rounded-xl">✕</button>
           </div>
@@ -676,7 +681,6 @@
 
         const aPlayers = [normalizeName(m.teamA_player1 || m.teamA1), normalizeName(m.teamA_player2 || m.teamA2)].filter(Boolean);
         const bPlayers = [normalizeName(m.teamB_player1 || m.teamB1), normalizeName(m.teamB_player2 || m.teamB2)].filter(Boolean);
-        const avatarPlayer = normalizeName(m.avatarPlayer || m.avatarUsedBy || "");
 
         [...aPlayers, ...bPlayers].forEach(name => {
           if (!table.has(name)) {
@@ -703,10 +707,6 @@
           r.jp += calc.gamesA;
           if (calc.winnerSide === "B") r.points += 3;
         });
-
-        if (avatarPlayer && table.has(avatarPlayer)) {
-          table.get(avatarPlayer).avatar += 1;
-        }
       });
 
       return [...table.values()].map(r => ({
@@ -917,7 +917,7 @@
           <div class="text-sm text-slate-300"><b class="text-emerald-400">A</b> ${escapeHtml(meta.teamA || "-")}</div>
           <div class="text-sm text-slate-300"><b class="text-cyan-400">B</b> ${escapeHtml(meta.teamB || "-")}</div>
           <div class="text-xs text-slate-400 mt-2">Resultado: <b>${escapeHtml(results)}</b> · Vacas: <b>${vacas}</b> · Juegos: <b>${juegos}</b></div>
-          ${(m.avatarPlayer || m.avatarUsedBy) ? `<div class="text-xs text-amber-300 mt-1">Avatar: ${escapeHtml(normalizeName(m.avatarPlayer || m.avatarUsedBy))}</div>` : ""}
+          ${getMatchAvatarText(m) ? `<div class="text-xs text-amber-300 mt-1">🧞 Avatar: ${escapeHtml(getMatchAvatarText(m))}</div>` : ""}
           <div class="text-xs text-emerald-300 mt-1">Ganador: ${escapeHtml(meta.winner || "-")}</div>
           <div class="mt-3 flex flex-wrap gap-2 text-xs">${renderMatchActionButtons(m)}</div>
         </div>
@@ -1233,7 +1233,7 @@
 
       if (featured && selected) {
         const st = getDetailedPlayerStats(selected.name);
-        const img = selected.avatar || "assets/logo.png?v=0180";
+        const img = selected.avatar || "assets/logo.png?v=0181";
         const flags = renderPlayerFlags(selected);
         const recentMatches = st.matches.slice(-5).reverse();
 
@@ -1242,7 +1242,7 @@
             <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
               <div class="xl:col-span-4">
                 <div class="flex flex-col items-center text-center">
-                  <img src="${escapeHtml(img)}" onerror="this.src='assets/logo.png?v=0180'"
+                  <img src="${escapeHtml(img)}" onerror="this.src='assets/logo.png?v=0181'"
                        class="w-44 h-44 rounded-3xl object-contain bg-white p-2 border-2 border-amber-400/60 shadow-xl" />
                   <h3 class="text-3xl font-black mt-4">${escapeHtml(selected.name)}</h3>
                   <div class="text-xs uppercase tracking-wider text-slate-500 font-bold">${escapeHtml(selected.role || "player")}</div>
@@ -1305,14 +1305,14 @@
 
       grid.innerHTML = state.players.map(p => {
         const st = getDetailedPlayerStats(p.name);
-        const img = p.avatar || "assets/logo.png?v=0180";
+        const img = p.avatar || "assets/logo.png?v=0181";
         const desc = p.description || "Jugador oficial del circuito Gents & Lords.";
         const flags = renderPlayerFlags(p);
         return `
           <div onclick="selectProfilePlayer('${escapeHtml(p.name)}')" class="cursor-pointer bg-slate-950/95 border border-slate-800 rounded-2xl p-5 hover:border-amber-500/40 transition-all">
             <div class="flex items-center gap-4">
               <img src="${escapeHtml(img)}"
-                   onerror="this.src='assets/logo.png?v=0180'"
+                   onerror="this.src='assets/logo.png?v=0181'"
                    class="w-20 h-20 rounded-2xl object-contain border border-slate-700 bg-white p-1" />
               <div>
                 <div class="text-xl font-black">${escapeHtml(p.name || "-")}</div>
@@ -1550,7 +1550,6 @@
       const validation = document.getElementById("matchValidation");
       const teamA = [document.getElementById("teamA1").value, document.getElementById("teamA2").value].filter(Boolean).join(" / ") || "Pareja A";
       const teamB = [document.getElementById("teamB1").value, document.getElementById("teamB2").value].filter(Boolean).join(" / ") || "Pareja B";
-      const avatarPlayer = normalizeName(document.getElementById("avatarPlayer")?.value || "");
 
       if (validation) {
         const playerValidation = validateSelectedPlayers(false);
@@ -1569,8 +1568,9 @@
         ? '<span class="text-emerald-400 font-bold">Partida completa</span>'
         : '<span class="text-amber-400 font-bold">Partida incompleta: debe acabar 2-0 o 2-1 en vacas</span>';
 
-      const avatarText = avatarPlayer ? `<br>Avatar usado por: <span class="text-amber-300 font-bold">${escapeHtml(avatarPlayer)}</span>` : "";
-      preview.innerHTML = `Vacas: <b>${calc.vacasA}-${calc.vacasB}</b> · Juegos: <b>${calc.gamesA}-${calc.gamesB}</b> · Ganador: <span class="text-emerald-400 font-bold">${escapeHtml(winner)}</span>${avatarText}<br>${completion}`;
+      const avatar = document.getElementById("avatarPlayer")?.value || "";
+      const avatarLine = avatar ? `<br><span class="text-amber-300 font-bold">🧞 Avatar usado por: ${escapeHtml(avatar)}</span>` : "";
+      preview.innerHTML = `Vacas: <b>${calc.vacasA}-${calc.vacasB}</b> · Juegos: <b>${calc.gamesA}-${calc.gamesB}</b> · Ganador: <span class="text-emerald-400 font-bold">${escapeHtml(winner)}</span><br>${completion}${avatarLine}`;
     }
 
     function renderResultButtons() {
@@ -1708,7 +1708,18 @@
       document.body.classList.add("overflow-hidden");
     }
 
-    function getMatchFormPlayerNames() {
+    function setMatchFormAccessMode() {
+      // Sprint 18.1: Jornadas es un flujo de resultado.
+      // La partida se crea en Google Sheets; en la app solo se informa resultado + avatar.
+      ["matchId", "matchFecha", "matchRound", "teamA1", "teamA2", "teamB1", "teamB2", "matchStatus"].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.disabled = true;
+        el.classList.add("opacity-70", "cursor-not-allowed", "bg-slate-950");
+      });
+    }
+
+    function getMatchPlayerNamesFromForm() {
       return ["teamA1", "teamA2", "teamB1", "teamB2"]
         .map(id => normalizeName(document.getElementById(id)?.value || ""))
         .filter(Boolean);
@@ -1717,29 +1728,15 @@
     function renderAvatarPlayerOptions(selectedValue = "") {
       const select = document.getElementById("avatarPlayer");
       if (!select) return;
-      const players = getMatchFormPlayerNames();
+      const players = getMatchPlayerNamesFromForm();
       select.innerHTML = '<option value="">Ningún jugador usó avatar</option>' + players.map(name =>
         `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`
       ).join("");
       select.value = players.includes(normalizeName(selectedValue)) ? normalizeName(selectedValue) : "";
     }
 
-    function setMatchFormAccessMode() {
-      // En Jornadas la partida es de consulta: solo se edita resultado y avatar.
-      ["matchId", "matchFecha", "matchRound", "teamA1", "teamA2", "teamB1", "teamB2", "matchStatus"].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.disabled = true;
-          el.classList.add("opacity-70", "cursor-not-allowed");
-        }
-      });
-      ["vaca1", "vaca2", "vaca3", "avatarPlayer"].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.disabled = false;
-          el.classList.remove("opacity-70", "cursor-not-allowed");
-        }
-      });
+    function getMatchAvatarText(m) {
+      return normalizeName(m.avatarPlayer || m.avatarUsedBy || m.avatar || "");
     }
 
     function openMatchForm() {
@@ -1765,7 +1762,9 @@
     }
 
     function clearMatchForm() {
-      ["matchId","matchFecha","matchRound","vaca1","vaca2","vaca3","avatarPlayer"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+      ["matchId","matchFecha","matchRound","vaca1","vaca2","vaca3"].forEach(id => document.getElementById(id).value = "");
+      const avatarSelect = document.getElementById("avatarPlayer");
+      if (avatarSelect) avatarSelect.innerHTML = '<option value="">Ningún jugador usó avatar</option>';
       ["teamA1","teamA2","teamB1","teamB2"].forEach(id => document.getElementById(id).value = "");
       document.getElementById("matchStatus").value = "confirmed";
       previewMatchResult();
@@ -1785,7 +1784,7 @@
       document.getElementById("teamA2").value = normalizeName(m.teamA_player2 || m.teamA2 || "");
       document.getElementById("teamB1").value = normalizeName(m.teamB_player1 || m.teamB1 || "");
       document.getElementById("teamB2").value = normalizeName(m.teamB_player2 || m.teamB2 || "");
-      renderAvatarPlayerOptions(m.avatarPlayer || m.avatarUsedBy || "");
+      renderAvatarPlayerOptions(getMatchAvatarText(m));
       document.getElementById("vaca1").value = m.vaca1 || "";
       document.getElementById("vaca2").value = m.vaca2 || "";
       document.getElementById("vaca3").value = m.vaca3 || "";
@@ -1827,20 +1826,20 @@
         vaca1: document.getElementById("vaca1").value.trim(),
         vaca2: document.getElementById("vaca2").value.trim(),
         vaca3: document.getElementById("vaca3").value.trim(),
+        avatarPlayer: document.getElementById("avatarPlayer")?.value || "",
+        avatarUsedBy: document.getElementById("avatarPlayer")?.value || "",
         vacasA: calc.vacasA,
         vacasB: calc.vacasB,
         gamesA: calc.gamesA,
         gamesB: calc.gamesB,
         winner: calc.winnerSide === "A" ? teamA : teamB,
-        avatarPlayer: normalizeName(document.getElementById("avatarPlayer")?.value || ""),
-        avatarUsedBy: normalizeName(document.getElementById("avatarPlayer")?.value || ""),
         status: "pending",
         createdBy: state.currentUser.name,
         createdAt: new Date().toISOString(),
         updatedBy: state.currentUser.name,
         updatedAt: new Date().toISOString(),
-        confirmedBy: isAdmin() && document.getElementById("matchStatus").value === "confirmed" ? state.currentUser.name : "",
-        confirmedAt: isAdmin() && document.getElementById("matchStatus").value === "confirmed" ? new Date().toISOString() : "",
+        confirmedBy: "",
+        confirmedAt: "",
         rejectedBy: "",
         rejectedAt: "",
         rejectionReason: ""

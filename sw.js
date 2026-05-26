@@ -1,10 +1,10 @@
-const CACHE_NAME = "mus-gents-lords-v0180";
+const CACHE_NAME = "mus-gents-lords-v0181";
 const ASSETS = [
-  "./?v=0180",
-  "./index.html?v=0180",
-  "./manifest.json?v=0180",
-  "./assets/logo.png?v=0180",
-  "./assets/background.jpg?v=0180"
+  "./?v=0181",
+  "./index.html?v=0181",
+  "./manifest.json?v=0181",
+  "./assets/logo.png?v=0181",
+  "./assets/background.jpg?v=0181"
 ];
 
 self.addEventListener("install", (event) => {
@@ -25,7 +25,7 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   event.respondWith(
     fetch(event.request).catch(() =>
-      caches.match(event.request).then(res => res || caches.match("./index.html?v=0180"))
+      caches.match(event.request).then(res => res || caches.match("./index.html?v=0181"))
     )
   );
 });
