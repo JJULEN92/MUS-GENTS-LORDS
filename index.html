@@ -44,13 +44,13 @@
     </section>
 
     <nav class="flex flex-wrap gap-2">
-      <button onclick="showTab(event,'standings')" class="tabBtn bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Clasificación calculada</button>
+      <button onclick="showTab(event,'standings')" class="tabBtn bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Clasificación</button>
       <button onclick="showTab(event,'rounds')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Jornadas</button>
       <button onclick="showTab(event,'stats')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Estadísticas</button>
-      <button onclick="showTab(event,'rules')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Reglas</button>
+      <button onclick="showTab(event,'matches')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Partidas</button>
       <button onclick="showTab(event,'venues')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Sedes</button>
       <button onclick="showTab(event,'history')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Histórico</button>
-      <button onclick="showTab(event,'matches')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Partidas</button>
+      <button onclick="showTab(event,'rules')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Reglas</button>
       <button onclick="showTab(event,'players')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Jugadores</button>
       <button onclick="showTab(event,'logs')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Log</button>
     </nav>
@@ -221,33 +221,23 @@
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         <div class="venueCard border-emerald-800/40">
           <div class="text-4xl">🍽️</div>
-          <h3>Restaurante Urumea</h3>
-          <p>La sede de mesa seria: comida, tensión y partida con galones.</p>
-          <span>Clásico competitivo</span>
+          <h3>Restaurante Urumea</h3><p>La sede de mesa seria: comida, tensión y partida con galones.</p><a href="https://share.google/LciTNQjVFdbsnIvA6" target="_blank" class="text-cyan-400 text-sm font-bold">📍 Abrir en Google Maps</a><br><span>Clásico competitivo</span>
         </div>
         <div class="venueCard border-lime-800/40">
           <div class="text-4xl">🌳</div>
-          <h3>El Jardín del Abuelo</h3>
-          <p>Ambiente de torneo largo, conversación amplia y cierre con honra.</p>
-          <span>Sede de sobremesa</span>
+          <h3>El Jardín del Abuelo</h3><p>Ambiente de torneo largo, conversación amplia y cierre con honra.</p><a href="https://share.google/tH5Hc353iFy9dpS2C" target="_blank" class="text-cyan-400 text-sm font-bold">📍 Abrir en Google Maps</a><br><span>Sede de sobremesa</span>
         </div>
         <div class="venueCard border-cyan-800/40">
           <div class="text-4xl">❄️</div>
-          <h3>Taberna La Escarcha</h3>
-          <p>Territorio de mus directo: cerveza fría, señas discretas y cuchillo entre dientes.</p>
-          <span>Taberna de batalla</span>
+          <h3>Taberna La Escarcha</h3><p>Territorio de mus directo: cerveza fría, señas discretas y cuchillo entre dientes.</p><a href="https://share.google/xyw5hfASSQ9S8rWAo" target="_blank" class="text-cyan-400 text-sm font-bold">📍 Abrir en Google Maps</a><br><span>Taberna de batalla</span>
         </div>
         <div class="venueCard border-amber-800/40">
           <div class="text-4xl">🏡</div>
-          <h3>Ca Javi</h3>
-          <p>Formato casa: confianza, presión psicológica y posibilidad alta de discusión reglamentaria.</p>
-          <span>Territorio local</span>
+          <h3>Ca Javi</h3><p>Formato casa: confianza, presión psicológica y posibilidad alta de discusión reglamentaria.</p><div class="text-sm text-slate-400 mt-2">📍 C/José de Fentanes 21, sótano · Madrid</div><span>Territorio local</span>
         </div>
         <div class="venueCard border-fuchsia-800/40">
           <div class="text-4xl">🏡</div>
-          <h3>Ca Álvaro</h3>
-          <p>Sede con historial ganador: no se entra sin respeto ni se sale sin revisar la clasificación.</p>
-          <span>Casa de campeón</span>
+          <h3>Ca Álvaro</h3><p>Sede con historial ganador: no se entra sin respeto ni se sale sin revisar la clasificación.</p><div class="text-sm text-slate-400 mt-2">📍 Calle del Miño 4 · Terraza planta 3</div><span>Casa de campeón</span>
         </div>
       </div>
 
@@ -904,6 +894,26 @@
             <td class="p-2 text-center">${escapeHtml(m.status || "confirmed")}</td>
           </tr>`;
       }).join("") || `<tr><td colspan="9" class="p-4 text-slate-400">No hay partidas cargadas todavía.</td></tr>`;
+    }
+
+
+    async function saveMyProfile() {
+      if (!state.currentUser) return alert("Debes iniciar sesión.");
+
+      const player = state.players.find(p => normalizeName(p.name) === normalizeName(state.currentUser.name));
+      if (!player) return alert("Jugador no encontrado.");
+
+      player.avatar = document.getElementById("profileAvatar").value.trim();
+      player.description = document.getElementById("profileDescription").value.trim();
+
+      const res = await api("savePlayer", player);
+
+      if (res.ok) {
+        await loadData();
+        alert("Perfil actualizado.");
+      } else {
+        alert("Error guardando perfil.");
+      }
     }
 
     function renderPlayers() {
