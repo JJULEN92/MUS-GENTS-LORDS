@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v0.8.2</title>
+  <title>Torneo de Mus Gents & Lords · v0.10.0</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json?v=082" />
   <link rel="apple-touch-icon" href="tournament-icon.png?v=082" />
@@ -24,8 +24,7 @@
     }
   </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    VERSION 0.8.2 · SPRINT 8.2 · SI VES ESTO, LA ACTUALIZACIÓN HA ENTRADO
-  </div>
+    VERSION 0.10.0 · SPRINT 9-10 · PERMISOS + CONFIRMACIÓN</div>
   <header class="hero-bg border-b border-emerald-800 p-4 sticky top-0 z-10 shadow-2xl">
     <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
       <div>
@@ -33,7 +32,7 @@
           <img src="tournament-icon.png?v=082" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
           <div>
             <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-xs text-amber-300 font-black">v0.8.2 · Partidas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-xs text-amber-300 font-black">v0.10.0 · Partidas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -64,7 +63,18 @@
       </div>
     </section>
 
-    <nav class="flex flex-wrap gap-2">
+    
+    <section id="pendingPanel" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <div class="font-black text-amber-300">🔔 Resultados pendientes de confirmación</div>
+          <div id="pendingPanelText" class="text-sm text-slate-300">Hay partidas pendientes.</div>
+        </div>
+        <button onclick="showPendingMatches()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl">Ver pendientes</button>
+      </div>
+    </section>
+
+<nav class="flex flex-wrap gap-2">
       <button onclick="showTab(event,'standings')" class="tabBtn bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Clasificación</button>
       <button onclick="showTab(event,'rounds')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Jornadas</button>
       <button onclick="showTab(event,'stats')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Estadísticas</button>
@@ -349,6 +359,7 @@
           <select id="matchStatus" class="field">
             <option value="confirmed">Confirmada</option>
             <option value="pending">Pendiente</option>
+            <option value="rejected">Rechazada</option>
             <option value="cancelled">Cancelada</option>
           </select>
         </div>
@@ -567,6 +578,7 @@
       renderStandings();
       renderRoundDashboard();
       renderStats();
+      renderPendingPanel();
       renderMatches();
       renderPlayers();
       renderLogs();
@@ -601,7 +613,7 @@
         });
       });
 
-      state.matches.filter(m => (m.status || "confirmed") === "confirmed").forEach(m => {
+      state.matches.filter(m => effectiveStatus(m) === "confirmed").forEach(m => {
         const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3);
         if (!calc.valid || !calc.complete) return;
 
@@ -669,25 +681,134 @@
     }
 
 
+
+    function isAdmin() {
+      return state.currentUser && (state.currentUser.role || "").toLowerCase() === "admin";
+    }
+
+    function matchPlayers(m) {
+      return [
+        normalizeName(m.teamA_player1 || m.teamA1 || ""),
+        normalizeName(m.teamA_player2 || m.teamA2 || ""),
+        normalizeName(m.teamB_player1 || m.teamB1 || ""),
+        normalizeName(m.teamB_player2 || m.teamB2 || "")
+      ].filter(Boolean);
+    }
+
+    function userIsInMatch(m) {
+      if (!state.currentUser) return false;
+      return matchPlayers(m).includes(normalizeName(state.currentUser.name));
+    }
+
+    function canEditMatch(m) {
+      if (!state.currentUser) return false;
+      if (isAdmin()) return true;
+      if (!m || !m.id) return true;
+      return userIsInMatch(m);
+    }
+
+    function canConfirmMatch(m) {
+      if (!state.currentUser) return false;
+      if (isAdmin()) return true;
+      if (!userIsInMatch(m)) return false;
+      if (normalizeName(m.createdBy || m.updatedBy || "") === normalizeName(state.currentUser.name)) return false;
+      return true;
+    }
+
+    function hoursSince(dateValue) {
+      if (!dateValue) return 999999;
+      const d = new Date(dateValue);
+      if (isNaN(d.getTime())) return 999999;
+      return (Date.now() - d.getTime()) / 36e5;
+    }
+
+    function isAutoConfirmed(m) {
+      return (m.status || "") === "pending" && hoursSince(m.createdAt || m.updatedAt) >= 24;
+    }
+
+    function effectiveStatus(m) {
+      if (isAutoConfirmed(m)) return "confirmed";
+      return m.status || "confirmed";
+    }
+
+    function statusLabel(m) {
+      const status = effectiveStatus(m);
+      if (status === "confirmed" && (m.status || "") === "pending") return "Confirmada auto 24h";
+      if (status === "confirmed") return "Confirmada";
+      if (status === "pending") return "Pendiente";
+      if (status === "rejected") return "Rechazada";
+      if (status === "cancelled") return "Cancelada";
+      return status;
+    }
+
+    function renderPendingPanel() {
+      const panel = document.getElementById("pendingPanel");
+      const txt = document.getElementById("pendingPanelText");
+      if (!panel || !txt) return;
+
+      const pending = state.matches.filter(m => m.id && (m.status || "") === "pending" && !isAutoConfirmed(m));
+      if (!pending.length) {
+        panel.classList.add("hidden");
+        return;
+      }
+
+      panel.classList.remove("hidden");
+      txt.textContent = `${pending.length} partida(s) pendiente(s). Si no se rechazan o confirman, se aceptan automáticamente a las 24 horas.`;
+    }
+
+    function showPendingMatches() {
+      const btn = Array.from(document.querySelectorAll(".tabBtn")).find(b => b.textContent.includes("Jornadas"));
+      if (btn) showTab({ target: btn }, "rounds");
+      setTimeout(() => {
+        const filter = document.getElementById("roundFilter");
+        if (filter) filter.value = "all";
+        renderRoundDashboard(true);
+      }, 50);
+    }
+
     function getMatchMeta(m) {
       const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3);
       const teamA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].filter(Boolean).map(normalizeName).join(" / ");
       const teamB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].filter(Boolean).map(normalizeName).join(" / ");
       const winner = calc.winnerSide === "A" ? teamA : calc.winnerSide === "B" ? teamB : "";
-      let stateLabel = "Pendiente";
+      let stateLabel = statusLabel(m);
       let stateClass = "bg-amber-500/10 text-amber-300 border-amber-500/30";
-      if ((m.status || "confirmed") === "cancelled") {
-        stateLabel = "Cancelada"; stateClass = "bg-red-500/10 text-red-300 border-red-500/30";
+
+      if (effectiveStatus(m) === "cancelled" || effectiveStatus(m) === "rejected") {
+        stateClass = "bg-red-500/10 text-red-300 border-red-500/30";
       } else if (!calc.valid) {
-        stateLabel = "Error"; stateClass = "bg-red-500/10 text-red-300 border-red-500/30";
-      } else if (calc.complete && (m.status || "confirmed") === "confirmed") {
-        stateLabel = "Confirmada"; stateClass = "bg-emerald-500/10 text-emerald-300 border-emerald-500/30";
-      } else if (calc.complete && (m.status || "") === "pending") {
-        stateLabel = "Pendiente confirmación"; stateClass = "bg-cyan-500/10 text-cyan-300 border-cyan-500/30";
+        stateLabel = "Error";
+        stateClass = "bg-red-500/10 text-red-300 border-red-500/30";
+      } else if (effectiveStatus(m) === "confirmed") {
+        stateClass = "bg-emerald-500/10 text-emerald-300 border-emerald-500/30";
+      } else if (effectiveStatus(m) === "pending") {
+        stateClass = "bg-cyan-500/10 text-cyan-300 border-cyan-500/30";
       } else if (!calc.complete && [m.vaca1,m.vaca2,m.vaca3].some(Boolean)) {
-        stateLabel = "Incompleta"; stateClass = "bg-orange-500/10 text-orange-300 border-orange-500/30";
+        stateLabel = "Incompleta";
+        stateClass = "bg-orange-500/10 text-orange-300 border-orange-500/30";
       }
       return { calc, teamA, teamB, winner, stateLabel, stateClass };
+    }
+
+
+    function renderMatchActionButtons(m) {
+      const status = effectiveStatus(m);
+      const buttons = [];
+
+      if (canEditMatch(m) && status !== "cancelled") {
+        buttons.push(`<button onclick='event.stopPropagation(); editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})' class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg font-bold">✏️ Editar</button>`);
+      }
+
+      if ((m.status || "") === "pending" && canConfirmMatch(m)) {
+        buttons.push(`<button onclick='event.stopPropagation(); confirmMatch("${escapeHtml(m.id)}")' class="bg-emerald-700 hover:bg-emerald-600 px-3 py-1.5 rounded-lg font-bold">✅ Confirmar</button>`);
+        buttons.push(`<button onclick='event.stopPropagation(); rejectMatch("${escapeHtml(m.id)}")' class="bg-red-800 hover:bg-red-700 px-3 py-1.5 rounded-lg font-bold">❌ Rechazar</button>`);
+      }
+
+      if (!buttons.length) {
+        return `<span class="text-slate-500">Sin acciones disponibles</span>`;
+      }
+
+      return buttons.join("");
     }
 
     function renderRoundDashboard() {
@@ -703,8 +824,8 @@
       const summary = { total: matches.length, confirmed: 0, pending: 0, errors: 0 };
       matches.forEach(m => {
         const meta = getMatchMeta(m);
-        if (meta.stateLabel === "Confirmada") summary.confirmed++;
-        else if (meta.stateLabel === "Error" || meta.stateLabel === "Cancelada") summary.errors++;
+        if (effectiveStatus(m) === "confirmed") summary.confirmed++;
+        else if (["Error","Cancelada","Rechazada"].includes(meta.stateLabel)) summary.errors++;
         else summary.pending++;
       });
 
@@ -739,6 +860,9 @@
                 <div class="text-sm text-slate-300"><b class="text-cyan-400">B</b> ${escapeHtml(meta.teamB || "-")}</div>
                 <div class="text-xs text-slate-400 mt-2">Vacas: <b>${vacas}</b> · Juegos: <b>${juegos}</b> · ${[m.vaca1,m.vaca2,m.vaca3].filter(Boolean).join("/")}</div>
                 <div class="text-xs text-emerald-300 mt-1">Ganador: ${escapeHtml(meta.winner || "-")}</div>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  ${renderMatchActionButtons(m)}
+                </div>
               </div>`;
             }).join("")}
           </div>
@@ -967,7 +1091,7 @@
             <td class="p-2 text-center font-mono">${escapeHtml(vacasText)}</td>
             <td class="p-2 text-center font-mono">${escapeHtml(gamesText)}</td>
             <td class="p-2 text-center text-emerald-400">${escapeHtml(winner)}</td>
-            <td class="p-2 text-center">${escapeHtml(m.status || "confirmed")}</td>
+            <td class="p-2 text-center">${escapeHtml(statusLabel(m))}</td>
           </tr>`;
       }).join("") || `<tr><td colspan="9" class="p-4 text-slate-400">No hay partidas cargadas todavía.</td></tr>`;
     }
@@ -1214,6 +1338,7 @@
       state.isEditing = true;
       document.getElementById("matchForm").classList.remove("hidden");
       renderResultButtons();
+      document.getElementById("matchStatus").disabled = !isAdmin();
       previewMatchResult();
     }
 
@@ -1232,9 +1357,11 @@
 
     function editMatch(m) {
       if (!requireLogin()) return;
+      if (!canEditMatch(m)) return alert("Solo puedes editar partidas en las que participas.");
       state.isEditing = true;
       document.getElementById("matchForm").classList.remove("hidden");
       renderResultButtons();
+      document.getElementById("matchStatus").disabled = !isAdmin();
       document.getElementById("matchId").value = m.id || "";
       document.getElementById("matchFecha").value = m.fecha || "";
       document.getElementById("matchRound").value = m.round || "";
@@ -1287,9 +1414,16 @@
         gamesA: calc.gamesA,
         gamesB: calc.gamesB,
         winner: calc.winnerSide === "A" ? teamA : teamB,
-        status: document.getElementById("matchStatus").value,
+        status: isAdmin() ? document.getElementById("matchStatus").value : "pending",
+        createdBy: state.currentUser.name,
+        createdAt: new Date().toISOString(),
         updatedBy: state.currentUser.name,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        confirmedBy: isAdmin() && document.getElementById("matchStatus").value === "confirmed" ? state.currentUser.name : "",
+        confirmedAt: isAdmin() && document.getElementById("matchStatus").value === "confirmed" ? new Date().toISOString() : "",
+        rejectedBy: "",
+        rejectedAt: "",
+        rejectionReason: ""
       };
 
       if (!payload.id || !payload.fecha || !payload.round) return alert("Faltan ID, fecha o jornada.");
@@ -1306,6 +1440,50 @@
         alert("Error guardando partida: " + err.message);
         setStatus("Error guardando partida");
       }
+    }
+
+
+    async function updateMatchStatus(matchId, newStatus, extra = {}) {
+      if (!requireLogin()) return;
+      const match = state.matches.find(m => String(m.id) === String(matchId));
+      if (!match) return alert("Partida no encontrada.");
+
+      const updated = {
+        ...match,
+        status: newStatus,
+        updatedBy: state.currentUser.name,
+        updatedAt: new Date().toISOString(),
+        ...extra
+      };
+
+      const res = await api("saveMatch", updated);
+      if (!res.ok) return alert("Error actualizando partida.");
+      await loadData();
+    }
+
+    async function confirmMatch(matchId) {
+      const match = state.matches.find(m => String(m.id) === String(matchId));
+      if (!match) return alert("Partida no encontrada.");
+      if (!canConfirmMatch(match)) return alert("No puedes confirmar esta partida.");
+      await updateMatchStatus(matchId, "confirmed", {
+        confirmedBy: state.currentUser.name,
+        confirmedAt: new Date().toISOString()
+      });
+      alert("Resultado confirmado.");
+    }
+
+    async function rejectMatch(matchId) {
+      const match = state.matches.find(m => String(m.id) === String(matchId));
+      if (!match) return alert("Partida no encontrada.");
+      if (!canConfirmMatch(match)) return alert("No puedes rechazar esta partida.");
+      const reason = prompt("Motivo del rechazo:", "Resultado incorrecto");
+      if (reason === null) return;
+      await updateMatchStatus(matchId, "rejected", {
+        rejectedBy: state.currentUser.name,
+        rejectedAt: new Date().toISOString(),
+        rejectionReason: reason
+      });
+      alert("Resultado rechazado.");
     }
 
     async function saveCalculatedStandings() {
@@ -1426,4 +1604,3 @@
   </script>
 </body>
 </html>
-<!-- force deploy -->
