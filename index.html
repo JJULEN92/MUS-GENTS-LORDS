@@ -383,6 +383,14 @@
             </div>
           </div>
           <div class="mt-3 bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm">
+            <label class="block text-xs uppercase font-bold text-slate-400 mb-2">Avatar usado</label>
+            <select id="avatarPlayer" class="field" onchange="previewMatchResult()">
+              <option value="">Ningún jugador usó avatar</option>
+            </select>
+            <p class="text-xs text-slate-500 mt-2">Marca aquí al jugador sustituido si jugó un avatar en su lugar.</p>
+          </div>
+
+          <div class="mt-3 bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm">
             <div id="matchPreview" class="text-slate-300">Resultado pendiente de calcular.</div>
             <div id="matchValidation" class="text-xs mt-2 text-slate-400"></div>
           </div>
@@ -495,7 +503,7 @@
           <div class="flex items-center justify-between gap-3 p-4 border-b border-slate-800">
             <div>
               <h3 class="text-lg font-black">🎴 Meter / editar resultado</h3>
-              <p class="text-xs text-slate-400">Solo se modifican resultados. Las partidas se crean desde Google Sheets.</p>
+              <p class="text-xs text-slate-400">Solo se modifican resultado y avatar. Las partidas se crean desde Google Sheets.</p>
             </div>
             <button onclick="closeMatchForm()" class="bg-slate-800 hover:bg-slate-700 text-white font-black px-3 py-2 rounded-xl">✕</button>
           </div>
@@ -668,6 +676,7 @@
 
         const aPlayers = [normalizeName(m.teamA_player1 || m.teamA1), normalizeName(m.teamA_player2 || m.teamA2)].filter(Boolean);
         const bPlayers = [normalizeName(m.teamB_player1 || m.teamB1), normalizeName(m.teamB_player2 || m.teamB2)].filter(Boolean);
+        const avatarPlayer = normalizeName(m.avatarPlayer || m.avatarUsedBy || "");
 
         [...aPlayers, ...bPlayers].forEach(name => {
           if (!table.has(name)) {
@@ -694,6 +703,10 @@
           r.jp += calc.gamesA;
           if (calc.winnerSide === "B") r.points += 3;
         });
+
+        if (avatarPlayer && table.has(avatarPlayer)) {
+          table.get(avatarPlayer).avatar += 1;
+        }
       });
 
       return [...table.values()].map(r => ({
@@ -904,6 +917,7 @@
           <div class="text-sm text-slate-300"><b class="text-emerald-400">A</b> ${escapeHtml(meta.teamA || "-")}</div>
           <div class="text-sm text-slate-300"><b class="text-cyan-400">B</b> ${escapeHtml(meta.teamB || "-")}</div>
           <div class="text-xs text-slate-400 mt-2">Resultado: <b>${escapeHtml(results)}</b> · Vacas: <b>${vacas}</b> · Juegos: <b>${juegos}</b></div>
+          ${(m.avatarPlayer || m.avatarUsedBy) ? `<div class="text-xs text-amber-300 mt-1">Avatar: ${escapeHtml(normalizeName(m.avatarPlayer || m.avatarUsedBy))}</div>` : ""}
           <div class="text-xs text-emerald-300 mt-1">Ganador: ${escapeHtml(meta.winner || "-")}</div>
           <div class="mt-3 flex flex-wrap gap-2 text-xs">${renderMatchActionButtons(m)}</div>
         </div>
@@ -1536,6 +1550,7 @@
       const validation = document.getElementById("matchValidation");
       const teamA = [document.getElementById("teamA1").value, document.getElementById("teamA2").value].filter(Boolean).join(" / ") || "Pareja A";
       const teamB = [document.getElementById("teamB1").value, document.getElementById("teamB2").value].filter(Boolean).join(" / ") || "Pareja B";
+      const avatarPlayer = normalizeName(document.getElementById("avatarPlayer")?.value || "");
 
       if (validation) {
         const playerValidation = validateSelectedPlayers(false);
@@ -1554,7 +1569,8 @@
         ? '<span class="text-emerald-400 font-bold">Partida completa</span>'
         : '<span class="text-amber-400 font-bold">Partida incompleta: debe acabar 2-0 o 2-1 en vacas</span>';
 
-      preview.innerHTML = `Vacas: <b>${calc.vacasA}-${calc.vacasB}</b> · Juegos: <b>${calc.gamesA}-${calc.gamesB}</b> · Ganador: <span class="text-emerald-400 font-bold">${escapeHtml(winner)}</span><br>${completion}`;
+      const avatarText = avatarPlayer ? `<br>Avatar usado por: <span class="text-amber-300 font-bold">${escapeHtml(avatarPlayer)}</span>` : "";
+      preview.innerHTML = `Vacas: <b>${calc.vacasA}-${calc.vacasB}</b> · Juegos: <b>${calc.gamesA}-${calc.gamesB}</b> · Ganador: <span class="text-emerald-400 font-bold">${escapeHtml(winner)}</span>${avatarText}<br>${completion}`;
     }
 
     function renderResultButtons() {
@@ -1692,11 +1708,37 @@
       document.body.classList.add("overflow-hidden");
     }
 
+    function getMatchFormPlayerNames() {
+      return ["teamA1", "teamA2", "teamB1", "teamB2"]
+        .map(id => normalizeName(document.getElementById(id)?.value || ""))
+        .filter(Boolean);
+    }
+
+    function renderAvatarPlayerOptions(selectedValue = "") {
+      const select = document.getElementById("avatarPlayer");
+      if (!select) return;
+      const players = getMatchFormPlayerNames();
+      select.innerHTML = '<option value="">Ningún jugador usó avatar</option>' + players.map(name =>
+        `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`
+      ).join("");
+      select.value = players.includes(normalizeName(selectedValue)) ? normalizeName(selectedValue) : "";
+    }
+
     function setMatchFormAccessMode() {
-      const resultOnly = !isAdmin();
+      // En Jornadas la partida es de consulta: solo se edita resultado y avatar.
       ["matchId", "matchFecha", "matchRound", "teamA1", "teamA2", "teamB1", "teamB2", "matchStatus"].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.disabled = resultOnly || (id === "matchStatus" && !isAdmin());
+        if (el) {
+          el.disabled = true;
+          el.classList.add("opacity-70", "cursor-not-allowed");
+        }
+      });
+      ["vaca1", "vaca2", "vaca3", "avatarPlayer"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.disabled = false;
+          el.classList.remove("opacity-70", "cursor-not-allowed");
+        }
       });
     }
 
@@ -1707,6 +1749,7 @@
       state.isEditing = true;
       openMatchModal();
       renderResultButtons();
+      renderAvatarPlayerOptions();
       setMatchFormAccessMode();
       previewMatchResult();
     }
@@ -1722,7 +1765,7 @@
     }
 
     function clearMatchForm() {
-      ["matchId","matchFecha","matchRound","vaca1","vaca2","vaca3"].forEach(id => document.getElementById(id).value = "");
+      ["matchId","matchFecha","matchRound","vaca1","vaca2","vaca3","avatarPlayer"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
       ["teamA1","teamA2","teamB1","teamB2"].forEach(id => document.getElementById(id).value = "");
       document.getElementById("matchStatus").value = "confirmed";
       previewMatchResult();
@@ -1742,6 +1785,7 @@
       document.getElementById("teamA2").value = normalizeName(m.teamA_player2 || m.teamA2 || "");
       document.getElementById("teamB1").value = normalizeName(m.teamB_player1 || m.teamB1 || "");
       document.getElementById("teamB2").value = normalizeName(m.teamB_player2 || m.teamB2 || "");
+      renderAvatarPlayerOptions(m.avatarPlayer || m.avatarUsedBy || "");
       document.getElementById("vaca1").value = m.vaca1 || "";
       document.getElementById("vaca2").value = m.vaca2 || "";
       document.getElementById("vaca3").value = m.vaca3 || "";
@@ -1788,7 +1832,9 @@
         gamesA: calc.gamesA,
         gamesB: calc.gamesB,
         winner: calc.winnerSide === "A" ? teamA : teamB,
-        status: isAdmin() ? document.getElementById("matchStatus").value : "pending",
+        avatarPlayer: normalizeName(document.getElementById("avatarPlayer")?.value || ""),
+        avatarUsedBy: normalizeName(document.getElementById("avatarPlayer")?.value || ""),
+        status: "pending",
         createdBy: state.currentUser.name,
         createdAt: new Date().toISOString(),
         updatedBy: state.currentUser.name,
