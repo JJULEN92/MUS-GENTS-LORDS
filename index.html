@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v0.18.2</title>
+  <title>Torneo de Mus Gents & Lords · v0.17.0</title>
   <meta name="theme-color" content="#020617" />
-  <link rel="manifest" href="manifest.json?v=0182" />
-  <link rel="apple-touch-icon" href="assets/logo.png?v=0182" />
+  <link rel="manifest" href="manifest.json?v=0132" />
+  <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
@@ -14,7 +14,7 @@
     body {
       background:
         linear-gradient(180deg, rgba(2,6,23,.78), rgba(2,6,23,.95)),
-        url('assets/background.jpg?v=0182') center center / cover fixed no-repeat;
+        url('assets/background.jpg?v=0132') center center / cover fixed no-repeat;
     }
     main, header, section, nav {
       position: relative;
@@ -52,12 +52,12 @@
     }
   </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    VERSION 0.18.2 · RECOVERY JORNADAS</div>
+    VERSION 0.17.0 · JORNADAS OPERATIVAS</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
-    <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0182') center center / cover no-repeat;"></div>
+    <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0153') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
       <div class="text-center">
-        <img src="assets/logo.png?v=0182" onerror="this.src='assets/logo.png'" class="w-28 h-28 rounded-3xl bg-white p-2 object-contain mx-auto border border-amber-400/70" />
+        <img src="assets/logo.png?v=0153" onerror="this.src='assets/logo.png'" class="w-28 h-28 rounded-3xl bg-white p-2 object-contain mx-auto border border-amber-400/70" />
         <h1 class="text-3xl font-black mt-4">Torneo de Mus</h1>
         <p class="text-amber-300 font-black text-sm">Gents & Lords</p>
       </div>
@@ -71,7 +71,7 @@
       </div>
 
       <div class="text-center text-[11px] text-slate-500 mt-5">
-        v0.18.2 · La sesión se recordará en este dispositivo
+        v0.17.0 · La sesión se recordará en este dispositivo
       </div>
     </div>
   </section>
@@ -80,10 +80,10 @@
     <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
       <div>
         <div class="flex items-center gap-3">
-          <img src="assets/logo.png?v=0182" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
+          <img src="assets/logo.png?v=0132" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
           <div>
             <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-xs text-amber-300 font-black">v0.18.2 · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-xs text-amber-300 font-black">v0.17.0 · Jornadas operativas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -488,92 +488,6 @@
         </table>
       </div>
     </section>
-
-    <div id="resultModal" class="hidden fixed inset-0 z-[998] bg-slate-950/80 backdrop-blur-sm p-3 sm:p-6 overflow-y-auto">
-      <div class="max-w-3xl mx-auto my-4 sm:my-8">
-        <div class="bg-slate-900 border border-amber-500/40 rounded-3xl shadow-2xl overflow-hidden">
-          <div class="flex items-center justify-between gap-3 p-4 border-b border-slate-800">
-            <div>
-              <div class="inline-flex px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[10px] font-black uppercase tracking-wider">Modo resultado</div>
-              <h3 class="text-lg font-black mt-2">🎴 Meter / editar resultado</h3>
-              <p class="text-xs text-slate-400">Jugadores, jornada y estado son solo consulta. Solo se guarda el resultado y avatar usado.</p>
-            </div>
-            <button onclick="closeResultModal()" class="bg-slate-800 hover:bg-slate-700 text-white font-black px-3 py-2 rounded-xl">✕</button>
-          </div>
-
-          <div class="p-4 space-y-4">
-            <input id="resultMatchId" type="hidden" />
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
-                <div class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Partida</div>
-                <div id="resultMetaId" class="font-black text-white mt-1">-</div>
-              </div>
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
-                <div class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Fecha / Jornada</div>
-                <div id="resultMetaDate" class="font-black text-white mt-1">-</div>
-              </div>
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
-                <div class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Estado actual</div>
-                <div id="resultMetaStatus" class="font-black text-amber-300 mt-1">-</div>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
-                <h4 class="font-black text-emerald-400 mb-2">Pareja A</h4>
-                <div id="resultTeamA" class="text-sm text-slate-200">-</div>
-              </div>
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
-                <h4 class="font-black text-cyan-400 mb-2">Pareja B</h4>
-                <div id="resultTeamB" class="text-sm text-slate-200">-</div>
-              </div>
-            </div>
-
-            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-              <h4 class="font-black text-white mb-2">Resultado por vacas</h4>
-              <p class="text-xs text-slate-400 mb-3">Formato válido: 30, 31, 32, 03, 13, 23.</p>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div>
-                  <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 1</label>
-                  <input id="resultVaca1" class="field" placeholder="30 / 31 / 32 / 03 / 13 / 23" oninput="previewResultModal()" />
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 2</label>
-                  <input id="resultVaca2" class="field" placeholder="30 / 31 / 32 / 03 / 13 / 23" oninput="previewResultModal()" />
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 3</label>
-                  <input id="resultVaca3" class="field" placeholder="Solo si hace falta desempate" oninput="previewResultModal()" />
-                </div>
-              </div>
-              <div class="grid grid-cols-3 md:grid-cols-6 gap-2 mt-3">
-                ${["30","31","32","03","13","23"].map(v => `<button type="button" onclick="fillNextResultVaca('${v}')" class="bg-slate-800 hover:bg-slate-700 rounded-lg py-2 text-sm font-black">${v}</button>`).join("")}
-              </div>
-            </div>
-
-            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-              <label class="block text-xs uppercase font-bold text-slate-400 mb-2">Avatar usado</label>
-              <select id="resultAvatarPlayer" class="field">
-                <option value="">Ningún jugador usó avatar</option>
-              </select>
-              <p class="text-xs text-slate-500 mt-2">Selecciona el jugador sustituido si en esta partida jugó un avatar por él.</p>
-            </div>
-
-            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm">
-              <div id="resultPreview" class="text-slate-300">Resultado pendiente de calcular.</div>
-              <div id="resultValidation" class="text-xs mt-2 text-slate-400"></div>
-            </div>
-
-            <div class="flex flex-wrap justify-end gap-2">
-              <button onclick="closeResultModal()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl font-bold text-sm">Cancelar</button>
-              <button onclick="saveResultFromModal()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-xl font-black text-sm">💾 Guardar resultado</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </main>
 
   <script>
@@ -941,7 +855,7 @@
 
       // Editar resultado: admin o jugador participante, solo si no está confirmada.
       if (canEditMatch(m) && status !== "confirmed" && status !== "cancelled") {
-        buttons.push(`<button onclick='event.stopPropagation(); openResultModal(${JSON.stringify(m).replaceAll("'", "&apos;")})' class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-lg font-black">✏️ Meter / editar resultado</button>`);
+        buttons.push(`<button onclick='event.stopPropagation(); editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})' class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-lg font-black">✏️ Meter / editar resultado</button>`);
       }
 
       // Confirmar/rechazar: solo cuando ya hay resultado pendiente de confirmación.
@@ -966,7 +880,7 @@
       const results = [m.vaca1, m.vaca2, m.vaca3].filter(Boolean).join(" / ") || "Sin resultado";
 
       return `
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-amber-500/50 transition-all">
+        <div onclick='editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})' class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-amber-500/50 transition-all">
           <div class="flex items-center justify-between gap-2 mb-2">
             <div class="font-black">${escapeHtml(m.id)} · ${escapeHtml(m.fecha || "")}</div>
             <span class="text-[10px] px-2 py-1 border rounded-full font-bold ${meta.stateClass}">${meta.stateLabel}</span>
@@ -1241,29 +1155,6 @@
       </table></div>`;
     }
 
-
-    function openCurrentUserPlayerCard() {
-      if (!state.currentUser) return;
-
-      setTimeout(() => {
-        const cards = [...document.querySelectorAll("[data-player-name]")];
-        const current = normalizeName(state.currentUser.name);
-
-        const ownCard = cards.find(c =>
-          normalizeName(c.dataset.playerName || "") === current
-        );
-
-        if (ownCard) {
-          ownCard.scrollIntoView({ behavior: "smooth", block: "center" });
-          ownCard.classList.add("ring-4", "ring-amber-400");
-
-          setTimeout(() => {
-            ownCard.classList.remove("ring-4", "ring-amber-400");
-          }, 2500);
-        }
-      }, 150);
-    }
-
     function renderPlayers() {
       const avatarInput = document.getElementById("profileAvatar");
       const descInput = document.getElementById("profileDescription");
@@ -1289,7 +1180,7 @@
 
       if (featured && selected) {
         const st = getDetailedPlayerStats(selected.name);
-        const img = selected.avatar || "assets/logo.png?v=0182";
+        const img = selected.avatar || "assets/logo.png?v=0132";
         const flags = renderPlayerFlags(selected);
         const recentMatches = st.matches.slice(-5).reverse();
 
@@ -1298,7 +1189,7 @@
             <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
               <div class="xl:col-span-4">
                 <div class="flex flex-col items-center text-center">
-                  <img src="${escapeHtml(img)}" onerror="this.src='assets/logo.png?v=0182'"
+                  <img src="${escapeHtml(img)}" onerror="this.src='assets/logo.png?v=0132'"
                        class="w-44 h-44 rounded-3xl object-contain bg-white p-2 border-2 border-amber-400/60 shadow-xl" />
                   <h3 class="text-3xl font-black mt-4">${escapeHtml(selected.name)}</h3>
                   <div class="text-xs uppercase tracking-wider text-slate-500 font-bold">${escapeHtml(selected.role || "player")}</div>
@@ -1361,14 +1252,14 @@
 
       grid.innerHTML = state.players.map(p => {
         const st = getDetailedPlayerStats(p.name);
-        const img = p.avatar || "assets/logo.png?v=0182";
+        const img = p.avatar || "assets/logo.png?v=0132";
         const desc = p.description || "Jugador oficial del circuito Gents & Lords.";
         const flags = renderPlayerFlags(p);
         return `
           <div onclick="selectProfilePlayer('${escapeHtml(p.name)}')" class="cursor-pointer bg-slate-950/95 border border-slate-800 rounded-2xl p-5 hover:border-amber-500/40 transition-all">
             <div class="flex items-center gap-4">
               <img src="${escapeHtml(img)}"
-                   onerror="this.src='assets/logo.png?v=0182'"
+                   onerror="this.src='assets/logo.png?v=0132'"
                    class="w-20 h-20 rounded-2xl object-contain border border-slate-700 bg-white p-1" />
               <div>
                 <div class="text-xl font-black">${escapeHtml(p.name || "-")}</div>
