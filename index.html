@@ -401,10 +401,37 @@
       </div>
     </section>
 
-    <section id="tab-players" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4">
-      <h2 class="text-xl font-black mb-4">👤 Jugadores</h2>
-      <div id="playersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3"></div>
+    
+    <section id="tab-players" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6">
+      <div>
+        <h2 class="text-2xl font-black">👥 Jugadores y perfiles</h2>
+        <p class="text-sm text-slate-400 mt-1">Cada jugador puede personalizar su ficha con foto y descripción.</p>
+      </div>
+
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+        <h3 class="font-black text-lg mb-3">🪪 Mi perfil</h3>
+        <p class="text-xs text-slate-400 mb-4">Inicia sesión con tu jugador para modificar tu foto y descripción.</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs uppercase font-bold text-slate-400 mb-2">Foto / avatar URL</label>
+            <input id="profileAvatar" class="field" placeholder="https://..." />
+            <p class="text-xs text-slate-500 mt-2">Debe ser una URL pública de imagen.</p>
+          </div>
+          <div class="lg:col-span-2">
+            <label class="block text-xs uppercase font-bold text-slate-400 mb-2">Descripción del jugador</label>
+            <textarea id="profileDescription" class="field min-h-[100px]" placeholder="Especialista en órdagos imposibles, presión psicológica y cierre de vacas..."></textarea>
+          </div>
+        </div>
+
+        <div class="flex justify-end mt-4">
+          <button onclick="saveMyProfile()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl">💾 Guardar perfil</button>
+        </div>
+      </div>
+
+      <div id="playersGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
     </section>
+
 
     <section id="tab-logs" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4">
       <h2 class="text-xl font-black mb-4">🧾 Log de cambios</h2>
@@ -474,14 +501,21 @@
     }
 
     function normalizePlayers(players) {
-      return players.filter(p => p.id !== "" && p.name).map(p => ({
-        ...p,
-        id: String(p.id),
-        name: normalizeName(p.name),
-        role: p.role || "player",
-        penal: Number(p.penal || 0),
-        avatar: Number(p.avatar || 0)
-      }));
+      return players.filter(p => p.id !== "" && p.name).map(p => {
+        const rawAvatar = p.avatar || "";
+        const rawPhoto = p.photoUrl || p.photo || p.image || "";
+        const avatarLooksNumeric = rawAvatar !== "" && !isNaN(Number(rawAvatar));
+        return {
+          ...p,
+          id: String(p.id),
+          name: normalizeName(p.name),
+          role: p.role || "player",
+          penal: Number(p.penal || 0),
+          avatarCount: avatarLooksNumeric ? Number(rawAvatar || 0) : Number(p.avatarCount || p.avatar_used || 0),
+          avatar: avatarLooksNumeric ? rawPhoto : rawAvatar,
+          description: p.description || p.descripcion || p.bio || ""
+        };
+      });
     }
 
     function renderAll() {
@@ -521,7 +555,7 @@
       state.players.forEach(p => {
         table.set(p.name, {
           player: p.name, pj: 0, points: 0, vacasWon: 0, vacasLost: 0,
-          jg: 0, jp: 0, penal: Number(p.penal || 0), avatar: Number(p.avatar || 0), sinAvatar: 0
+          jg: 0, jp: 0, penal: Number(p.penal || 0), avatar: Number(p.avatarCount || 0), sinAvatar: 0
         });
       });
 
@@ -917,13 +951,44 @@
     }
 
     function renderPlayers() {
-      document.getElementById("playersGrid").innerHTML = state.players.map(p => `
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
-          <div class="text-lg font-black">${escapeHtml(p.name)}</div>
-          <div class="text-xs text-slate-400">Rol: ${escapeHtml(p.role || "player")}</div>
-          <div class="text-xs text-slate-400 mt-2">Penal: ${p.penal || 0} · Avatar: ${p.avatar || 0}</div>
-        </div>
-      `).join("") || `<p class="text-slate-400">No hay jugadores cargados.</p>`;
+      const avatarInput = document.getElementById("profileAvatar");
+      const descInput = document.getElementById("profileDescription");
+
+      if (state.currentUser && avatarInput && descInput) {
+        const me = state.players.find(p => normalizeName(p.name) === normalizeName(state.currentUser.name));
+        if (me) {
+          avatarInput.value = me.avatar || "";
+          descInput.value = me.description || "";
+        }
+      }
+
+      const grid = document.getElementById("playersGrid");
+      if (!grid) return;
+
+      grid.innerHTML = state.players.map(p => {
+        const img = p.avatar || "https://placehold.co/160x160/020617/facc15?text=MUS";
+        const desc = p.description || "Jugador oficial del circuito Gents & Lords.";
+        return `
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 hover:border-amber-500/40 transition-all">
+            <div class="flex items-center gap-4">
+              <img src="${escapeHtml(img)}"
+                   onerror="this.src='https://placehold.co/160x160/020617/facc15?text=MUS'"
+                   class="w-20 h-20 rounded-2xl object-cover border border-slate-700 bg-slate-900" />
+              <div>
+                <div class="text-xl font-black">${escapeHtml(p.name || "-")}</div>
+                <div class="text-xs uppercase tracking-wider text-slate-500 font-bold">${escapeHtml(p.role || "player")}</div>
+              </div>
+            </div>
+            <div class="mt-4 text-sm text-slate-300 min-h-[70px] leading-relaxed">
+              ${escapeHtml(desc)}
+            </div>
+            <div class="mt-4 flex gap-2 text-xs">
+              <span class="px-2 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-400">Penal: ${p.penal || 0}</span>
+              <span class="px-2 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-400">Avatar: ${p.avatarCount || p.avatar_used || 0}</span>
+            </div>
+          </div>
+        `;
+      }).join("") || `<p class="text-slate-400">No hay jugadores cargados.</p>`;
     }
 
     function renderLogs() {
