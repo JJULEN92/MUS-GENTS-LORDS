@@ -46,6 +46,10 @@
     <nav class="flex flex-wrap gap-2">
       <button onclick="showTab(event,'standings')" class="tabBtn bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Clasificación calculada</button>
       <button onclick="showTab(event,'rounds')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Jornadas</button>
+      <button onclick="showTab(event,'stats')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Estadísticas</button>
+      <button onclick="showTab(event,'rules')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Reglas</button>
+      <button onclick="showTab(event,'venues')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Sedes</button>
+      <button onclick="showTab(event,'history')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Histórico</button>
       <button onclick="showTab(event,'matches')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Partidas</button>
       <button onclick="showTab(event,'players')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Jugadores</button>
       <button onclick="showTab(event,'logs')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Log</button>
@@ -95,6 +99,225 @@
       <div id="roundSummaryCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
       <div id="roundDashboard" class="space-y-4"></div>
     </section>
+
+
+    <section id="tab-stats" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-5">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-black">📊 Estadísticas avanzadas</h2>
+          <p class="text-xs text-slate-400">Rankings automáticos del torneo.</p>
+        </div>
+      </div>
+
+      <div id="topCards" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3"></div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h3 class="font-black mb-3">🏆 Mejor ratio de victorias</h3>
+          <div id="winRatioTable"></div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h3 class="font-black mb-3">🔥 Racha actual</h3>
+          <div id="streakTable"></div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h3 class="font-black mb-3">🤝 Mejores parejas</h3>
+          <div id="pairsTable"></div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h3 class="font-black mb-3">🎯 Juegos ganados</h3>
+          <div id="gamesWonTable"></div>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="tab-rules" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6">
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3">
+        <div>
+          <div class="inline-flex px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-black uppercase tracking-wider">Reglamento oficial 2025-2026</div>
+          <h2 class="text-2xl font-black mt-3">📜 Código Gents & Lords</h2>
+          <p class="text-sm text-slate-400 max-w-3xl">Resumen operativo del reglamento: lo importante para jugar, resolver dudas y evitar discusiones de mesa.</p>
+        </div>
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-sm">
+          <div class="text-slate-400 text-xs uppercase font-bold">Formato oficial</div>
+          <div class="text-white font-black">Partida: mejor de 3 vacas · Vaca: mejor de 5 juegos · Juego: 40 tantos</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="bg-slate-950 border border-emerald-800/40 rounded-2xl p-5">
+          <div class="text-3xl mb-2">🎴</div>
+          <h3 class="font-black text-lg text-emerald-300">Formato y puntuación</h3>
+          <ul class="text-sm text-slate-300 mt-3 space-y-2">
+            <li><b>Victoria:</b> 3 puntos para cada jugador de la pareja ganadora.</li>
+            <li><b>Derrota:</b> 0 puntos.</li>
+            <li><b>Desempates:</b> puntos → juegos ganados → menos juegos perdidos → menos penalizaciones → más partidas sin avatar.</li>
+            <li><b>Empate absoluto:</b> se resuelve con quijotes de Brugal cola hasta rendición honorable.</li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-950 border border-cyan-800/40 rounded-2xl p-5">
+          <div class="text-3xl mb-2">👥</div>
+          <h3 class="font-black text-lg text-cyan-300">Fase liguilla</h3>
+          <ul class="text-sm text-slate-300 mt-3 space-y-2">
+            <li>8 jugadores en formato rotativo.</li>
+            <li>7 partidas: una vez con cada compañero y al menos una vez contra cada rival.</li>
+            <li>Las partidas se programan mensualmente, normalmente el último viernes.</li>
+            <li>Los 4 primeros pasan a la Gran Final.</li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-950 border border-amber-800/40 rounded-2xl p-5">
+          <div class="text-3xl mb-2">🧙‍♂️</div>
+          <h3 class="font-black text-lg text-amber-300">Avatar y ausencias</h3>
+          <ul class="text-sm text-slate-300 mt-3 space-y-2">
+            <li>Si un jugador no puede asistir, puede intentar cambiar fecha con una semana de antelación.</li>
+            <li>Si no se puede cuadrar, puede buscar un avatar válido.</li>
+            <li>Si no encuentra avatar: -1 punto para él y +1 punto para el resto de la mesa.</li>
+            <li>El avatar debe ser varón, conocido, mayor de 30 y no jugador activo, salvo eliminados habilitados.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5">
+          <h3 class="font-black text-lg mb-4">🤫 Señas y cartas</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-amber-300">Ocho reyes y ocho ases</b><br><span class="text-slate-400">Formato oficial de baraja.</span></div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-amber-300">Señas tradicionales</b><br><span class="text-slate-400">Las falsas o no tradicionales quedan prohibidas.</span></div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-amber-300">No se pregunta seña</b><br><span class="text-slate-400">Toda seña implica jugada real.</span></div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-amber-300">Sin deje</b><br><span class="text-slate-400">En pares, juego o punto se juega sin deje.</span></div>
+          </div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5">
+          <h3 class="font-black text-lg mb-4">⚖️ Incidencias de mesa</h3>
+          <div class="space-y-3 text-sm text-slate-300">
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-cyan-300">Mus visto:</b> admitido si se descubre involuntariamente una carta; en caso de duda decide el Mano.</div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-cyan-300">CANTA:</b> si alguien niega pares o juego teniendo, los contrarios pueden exigir que declare la verdad.</div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-cyan-300">Perete:</b> no existe. 4,5,6,7 no da derecho a cartas nuevas ni tanto. Sí autoriza burla general.</div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-cyan-300">Discrepancias:</b> deciden los Comisarios de Juego; resolución inapelable.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-r from-amber-500/10 to-emerald-500/10 border border-amber-500/30 rounded-2xl p-5">
+        <h3 class="font-black text-lg">👑 Gran Final y trofeos</h3>
+        <p class="text-sm text-slate-300 mt-2">Los cuatro mejores juegan la gran final: 1º + 4º contra 2º + 3º. El ganador de liguilla recibe el reconocimiento de <b>EL PUTO AMO</b>. Los ganadores finales son <b>THE CHAMPIONS</b> y obtienen trofeo, certificado de expertos y privilegio de propuesta de nuevos jugadores. El último clasificado con participación suficiente recibe la honorable <b>Cuchara de Madera</b>.</p>
+      </div>
+    </section>
+
+    <section id="tab-venues" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6">
+      <div>
+        <div class="inline-flex px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-black uppercase tracking-wider">Mapa social del torneo</div>
+        <h2 class="text-2xl font-black mt-3">🏨 Sedes oficiales</h2>
+        <p class="text-sm text-slate-400 max-w-3xl">Los templos reconocidos del campeonato: lugares donde se mezclan cartas, comida, presión competitiva y sobremesa.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div class="venueCard border-emerald-800/40">
+          <div class="text-4xl">🍽️</div>
+          <h3>Restaurante Urumea</h3>
+          <p>La sede de mesa seria: comida, tensión y partida con galones.</p>
+          <span>Clásico competitivo</span>
+        </div>
+        <div class="venueCard border-lime-800/40">
+          <div class="text-4xl">🌳</div>
+          <h3>El Jardín del Abuelo</h3>
+          <p>Ambiente de torneo largo, conversación amplia y cierre con honra.</p>
+          <span>Sede de sobremesa</span>
+        </div>
+        <div class="venueCard border-cyan-800/40">
+          <div class="text-4xl">❄️</div>
+          <h3>Taberna La Escarcha</h3>
+          <p>Territorio de mus directo: cerveza fría, señas discretas y cuchillo entre dientes.</p>
+          <span>Taberna de batalla</span>
+        </div>
+        <div class="venueCard border-amber-800/40">
+          <div class="text-4xl">🏡</div>
+          <h3>Ca Javi</h3>
+          <p>Formato casa: confianza, presión psicológica y posibilidad alta de discusión reglamentaria.</p>
+          <span>Territorio local</span>
+        </div>
+        <div class="venueCard border-fuchsia-800/40">
+          <div class="text-4xl">🏡</div>
+          <h3>Ca Álvaro</h3>
+          <p>Sede con historial ganador: no se entra sin respeto ni se sale sin revisar la clasificación.</p>
+          <span>Casa de campeón</span>
+        </div>
+      </div>
+
+      <style>
+        .venueCard { background:#020617; border-width:1px; border-radius:1rem; padding:1.25rem; transition:all .2s; }
+        .venueCard:hover { transform:translateY(-2px); border-color:#f59e0b; }
+        .venueCard h3 { font-weight:900; font-size:1.05rem; margin-top:.6rem; color:white; }
+        .venueCard p { color:#94a3b8; font-size:.875rem; margin-top:.4rem; min-height:3.5rem; }
+        .venueCard span { display:inline-block; margin-top:.7rem; font-size:.7rem; font-weight:900; text-transform:uppercase; letter-spacing:.06em; color:#facc15; background:rgba(250,204,21,.08); border:1px solid rgba(250,204,21,.2); border-radius:999px; padding:.25rem .55rem; }
+      </style>
+    </section>
+
+    <section id="tab-history" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6">
+      <div>
+        <div class="inline-flex px-3 py-1 rounded-full bg-fuchsia-500/10 border border-fuchsia-500/30 text-fuchsia-300 text-xs font-black uppercase tracking-wider">Memoria noble del torneo</div>
+        <h2 class="text-2xl font-black mt-3">🏛️ Ranking histórico & Hall of Fame</h2>
+        <p class="text-sm text-slate-400 max-w-3xl">Los nombres que ya forman parte de la aristocracia musística de Gents & Lords.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="bg-slate-950 border border-amber-500/40 rounded-2xl p-5 relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-amber-500 text-slate-950 text-[10px] font-black px-3 py-1 rounded-bl-xl">LIGUILLA</div>
+          <div class="text-5xl mb-3">📍</div>
+          <h3 class="font-black text-amber-300">EL PUTO AMO</h3>
+          <p class="text-2xl font-black mt-3">Álvaro Millán</p>
+          <p class="text-sm text-slate-400">Temporada 2024-2025</p>
+          <p class="text-xs text-slate-500 mt-3">Ganador de la fase regular y portador legítimo del PIN de gala.</p>
+        </div>
+
+        <div class="bg-gradient-to-b from-amber-500/20 to-slate-950 border-2 border-amber-400 rounded-2xl p-5 relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-amber-400 text-slate-950 text-[10px] font-black px-3 py-1 rounded-bl-xl">CAMPEONES</div>
+          <div class="text-5xl mb-3">👑</div>
+          <h3 class="font-black text-amber-200">THE CHAMPIONS</h3>
+          <p class="text-2xl font-black mt-3">Álvaro Millán<br><span class="text-slate-300">&</span> Jorge Royo</p>
+          <p class="text-sm text-slate-400">Temporada 2024-2025</p>
+          <p class="text-xs text-slate-500 mt-3">Campeones certificados y habilitados para impartir doctrina musística.</p>
+        </div>
+
+        <div class="bg-slate-950 border border-orange-500/40 rounded-2xl p-5 relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-orange-500 text-slate-950 text-[10px] font-black px-3 py-1 rounded-bl-xl">HONOR</div>
+          <div class="text-5xl mb-3">🥄</div>
+          <h3 class="font-black text-orange-300">CUCHARA DE MADERA</h3>
+          <p class="text-2xl font-black mt-3">Paco Ruíz</p>
+          <p class="text-sm text-slate-400">Temporada 2024-2025</p>
+          <p class="text-xs text-slate-500 mt-3">Reconocimiento al compromiso competitivo pese al resultado adverso.</p>
+        </div>
+      </div>
+
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5">
+        <h3 class="font-black text-lg mb-3">📚 Línea histórica</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="text-left py-2">Temporada</th>
+                <th class="text-left py-2">Categoría</th>
+                <th class="text-left py-2">Ganador/es</th>
+                <th class="text-left py-2">Notas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-slate-900"><td class="py-2">2024-2025</td><td>El Puto Amo</td><td>Álvaro Millán</td><td>Ganador fase liguilla</td></tr>
+              <tr class="border-b border-slate-900"><td class="py-2">2024-2025</td><td>The Champions</td><td>Álvaro Millán / Jorge Royo</td><td>Campeones de la gran final</td></tr>
+              <tr class="border-b border-slate-900"><td class="py-2">2024-2025</td><td>Cuchara de Madera</td><td>Paco Ruíz</td><td>Premio de honor al último clasificado elegible</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
 
     <section id="tab-matches" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-5">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -277,6 +500,7 @@
       state.calculatedStandings = calculateStandings();
       renderStandings();
       renderRoundDashboard();
+      renderStats();
       renderMatches();
       renderPlayers();
       renderLogs();
@@ -454,6 +678,208 @@
           </div>
         </div>
       `).join("") || `<div class="text-slate-400 bg-slate-950 rounded-xl p-4">No hay partidas para mostrar.</div>`;
+    }
+
+
+    function getPlayerStats() {
+      const stats = {};
+
+      state.players.forEach(p => {
+        stats[p.name] = {
+          name: p.name,
+          played: 0,
+          wins: 0,
+          losses: 0,
+          gamesWon: 0,
+          gamesLost: 0,
+          vacasWon: 0,
+          vacasLost: 0,
+          streak: 0,
+          lastResults: []
+        };
+      });
+
+      state.matches.forEach(m => {
+        const meta = getMatchMeta(m);
+        if (!meta.calc.valid || !meta.calc.complete) return;
+
+        const teamA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].filter(Boolean);
+        const teamB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].filter(Boolean);
+
+        const winners = meta.calc.winnerSide === "A" ? teamA : teamB;
+        const losers = meta.calc.winnerSide === "A" ? teamB : teamA;
+
+        [...teamA, ...teamB].forEach(player => {
+          if (!stats[player]) return;
+          stats[player].played++;
+        });
+
+        winners.forEach(player => {
+          if (!stats[player]) return;
+          stats[player].wins++;
+          stats[player].lastResults.push("W");
+        });
+
+        losers.forEach(player => {
+          if (!stats[player]) return;
+          stats[player].losses++;
+          stats[player].lastResults.push("L");
+        });
+
+        teamA.forEach(player => {
+          if (!stats[player]) return;
+          stats[player].gamesWon += meta.calc.gamesA;
+          stats[player].gamesLost += meta.calc.gamesB;
+          stats[player].vacasWon += meta.calc.vacasA;
+          stats[player].vacasLost += meta.calc.vacasB;
+        });
+
+        teamB.forEach(player => {
+          if (!stats[player]) return;
+          stats[player].gamesWon += meta.calc.gamesB;
+          stats[player].gamesLost += meta.calc.gamesA;
+          stats[player].vacasWon += meta.calc.vacasB;
+          stats[player].vacasLost += meta.calc.vacasA;
+        });
+      });
+
+      Object.values(stats).forEach(s => {
+        let streak = 0;
+        for (let i = s.lastResults.length - 1; i >= 0; i--) {
+          const r = s.lastResults[i];
+          if (i === s.lastResults.length - 1) {
+            streak = 1;
+          } else if (r === s.lastResults[s.lastResults.length - 1]) {
+            streak++;
+          } else {
+            break;
+          }
+        }
+        s.streak = (s.lastResults[s.lastResults.length - 1] || "") + streak;
+        s.winRate = s.played ? Math.round((s.wins / s.played) * 100) : 0;
+      });
+
+      return stats;
+    }
+
+    function renderSimpleTable(containerId, rows, columns) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      container.innerHTML = `
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-slate-400 border-b border-slate-800">
+                ${columns.map(c => `<th class="text-left py-2">${c.label}</th>`).join("")}
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(r => `
+                <tr class="border-b border-slate-900 hover:bg-slate-900/50">
+                  ${columns.map(c => `<td class="py-2">${r[c.key] ?? ""}</td>`).join("")}
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderStats() {
+      const stats = Object.values(getPlayerStats());
+
+      const bestWin = [...stats].sort((a,b) => b.winRate - a.winRate)[0];
+      const bestGames = [...stats].sort((a,b) => b.gamesWon - a.gamesWon)[0];
+      const bestVacas = [...stats].sort((a,b) => b.vacasWon - a.vacasWon)[0];
+      const mostWins = [...stats].sort((a,b) => b.wins - a.wins)[0];
+
+      const card = (title, value, subtitle, color) => `
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <div class="text-xs uppercase tracking-wider text-slate-500 font-bold">${title}</div>
+          <div class="text-2xl font-black ${color} mt-1">${value || "-"}</div>
+          <div class="text-xs text-slate-400 mt-1">${subtitle || ""}</div>
+        </div>
+      `;
+
+      document.getElementById("topCards").innerHTML =
+        card("Más victorias", mostWins?.name, `${mostWins?.wins || 0} victorias`, "text-emerald-400") +
+        card("Mejor win ratio", bestWin?.name, `${bestWin?.winRate || 0}%`, "text-cyan-400") +
+        card("Más juegos", bestGames?.name, `${bestGames?.gamesWon || 0} juegos`, "text-amber-400") +
+        card("Más vacas", bestVacas?.name, `${bestVacas?.vacasWon || 0} vacas`, "text-fuchsia-400");
+
+      renderSimpleTable(
+        "winRatioTable",
+        [...stats].sort((a,b) => b.winRate - a.winRate).map(s => ({
+          jugador: s.name,
+          ratio: s.winRate + "%",
+          balance: `${s.wins}-${s.losses}`
+        })),
+        [
+          { key: "jugador", label: "Jugador" },
+          { key: "ratio", label: "Win %" },
+          { key: "balance", label: "Balance" }
+        ]
+      );
+
+      renderSimpleTable(
+        "streakTable",
+        [...stats].sort((a,b) => parseInt((b.streak||"").slice(1)||0) - parseInt((a.streak||"").slice(1)||0)).map(s => ({
+          jugador: s.name,
+          racha: s.streak || "-"
+        })),
+        [
+          { key: "jugador", label: "Jugador" },
+          { key: "racha", label: "Racha" }
+        ]
+      );
+
+      const pairs = {};
+      state.matches.forEach(m => {
+        const meta = getMatchMeta(m);
+        if (!meta.calc.valid || !meta.calc.complete) return;
+
+        const pairA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].sort().join(" + ");
+        const pairB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].sort().join(" + ");
+
+        [pairA, pairB].forEach(p => {
+          pairs[p] = pairs[p] || { pair: p, played: 0, wins: 0 };
+          pairs[p].played++;
+        });
+
+        const winnerPair = meta.calc.winnerSide === "A" ? pairA : pairB;
+        pairs[winnerPair].wins++;
+      });
+
+      renderSimpleTable(
+        "pairsTable",
+        Object.values(pairs)
+          .map(p => ({
+            pareja: p.pair,
+            victorias: p.wins,
+            ratio: p.played ? Math.round((p.wins/p.played)*100) + "%" : "0%"
+          }))
+          .sort((a,b) => b.victorias - a.victorias),
+        [
+          { key: "pareja", label: "Pareja" },
+          { key: "victorias", label: "Victorias" },
+          { key: "ratio", label: "Ratio" }
+        ]
+      );
+
+      renderSimpleTable(
+        "gamesWonTable",
+        [...stats].sort((a,b) => b.gamesWon - a.gamesWon).map(s => ({
+          jugador: s.name,
+          juegos: s.gamesWon,
+          balance: s.gamesWon - s.gamesLost
+        })),
+        [
+          { key: "jugador", label: "Jugador" },
+          { key: "juegos", label: "JG" },
+          { key: "balance", label: "Balance" }
+        ]
+      );
     }
 
     function renderMatches() {
