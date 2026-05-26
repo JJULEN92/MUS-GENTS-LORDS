@@ -3,18 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords</title>
+  <title>Torneo de Mus Gents & Lords · v0.8.1</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icon.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen bg-fixed bg-cover bg-center" style="background-image:linear-gradient(rgba(2,6,23,.82),rgba(2,6,23,.94)),url('home-bg.png');">
-  <header class="bg-slate-900 border-b border-emerald-800 p-4 sticky top-0 z-10">
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <div class="fixed top-2 right-3 z-50 text-[10px] font-black tracking-wider bg-slate-950/80 border border-amber-500/30 text-amber-300 px-2 py-1 rounded-full">v0.8.1 · Sprint 8.1</div>
+  <style>
+    .hero-bg {
+      background-image:
+        linear-gradient(180deg, rgba(2,6,23,.72), rgba(2,6,23,.96)),
+        url('hero-bg.png?v=081');
+      background-size: cover;
+      background-position: center;
+    }
+    .player-badge {
+      display:inline-flex; align-items:center; gap:.25rem;
+      padding:.25rem .5rem; border-radius:999px;
+      background:rgba(15,23,42,.85); border:1px solid rgba(51,65,85,.9);
+      font-size:.8rem; line-height:1.1;
+    }
+  </style>
+  <header class="hero-bg border-b border-emerald-800 p-4 sticky top-0 z-10 shadow-2xl">
     <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
       <div>
-        <div class="text-[10px] uppercase tracking-widest text-amber-300 font-black mb-1">Versión 0.6 · Sprint 6</div>
-        <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
+        <div class="flex items-center gap-3">
+          <img src="tournament-icon.png?v=081" class="w-12 h-12 rounded-xl bg-white/90 object-contain p-1 border border-amber-400/50" />
+          <div>
+            <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
+            <p class="text-xs text-amber-300 font-bold">v0.8.1 · Sprint 8.1</p>
+          </div>
+        </div>
         <p class="text-xs text-slate-400">MVP · Partidas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
       </div>
       <div class="flex flex-wrap gap-2 items-center">
@@ -406,7 +427,21 @@
     <section id="tab-players" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6">
       <div>
         <h2 class="text-2xl font-black">👥 Jugadores y perfiles</h2>
-        <p class="text-sm text-slate-400 mt-1">Cada jugador puede personalizar su ficha con foto y descripción. Las insignias se leen desde las columnas flagav, flagpen, flagpa, flagwin, flagfinal, flagcm y flagsf.</p>
+        <p class="text-sm text-slate-400 mt-1">Cada jugador puede personalizar su ficha con foto y descripción.</p>
+
+      <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-4">
+        <h3 class="font-black text-lg mb-3">🏷️ Leyenda de símbolos</h3>
+        <div class="flex flex-wrap gap-3 text-sm">
+          <div class="player-badge"><span>🧞</span><span>Avatar</span></div>
+          <div class="player-badge"><span>⚠️</span><span>Penalización</span></div>
+          <div class="player-badge"><span>🥇</span><span>Puto Amo</span></div>
+          <div class="player-badge"><span>🏆</span><span>Winner</span></div>
+          <div class="player-badge"><span>👏</span><span>Finalista</span></div>
+          <div class="player-badge"><span>🥄</span><span>Cuchara de madera</span></div>
+          <div class="player-badge"><span>🏛️</span><span>Fundador</span></div>
+        </div>
+      </div>
+
       </div>
 
       <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
@@ -417,7 +452,7 @@
           <div>
             <label class="block text-xs uppercase font-bold text-slate-400 mb-2">Foto / avatar URL</label>
             <input id="profileAvatar" class="field" placeholder="https://..." />
-            <p class="text-xs text-slate-500 mt-2">Debe ser una URL pública de imagen. Si se deja vacío, se usa el icono oficial del torneo.</p>
+            <p class="text-xs text-slate-500 mt-2">Debe ser una URL pública de imagen.</p>
           </div>
           <div class="lg:col-span-2">
             <label class="block text-xs uppercase font-bold text-slate-400 mb-2">Descripción del jugador</label>
@@ -512,7 +547,7 @@
           name: normalizeName(p.name),
           role: p.role || "player",
           penal: Number(p.penal || 0),
-          avatarCount: avatarLooksNumeric ? Number(rawAvatar || 0) : Number(p.avatarCount || p.avatar_used || 0),
+          avatarCount: avatarLooksNumeric ? Number(rawAvatar || 0) : Number(p.avatarCount || p.avatar_used || p.flagav || 0),
           avatar: avatarLooksNumeric ? rawPhoto : rawAvatar,
           description: p.description || p.descripcion || p.bio || "",
           flagav: Number(p.flagav || 0),
@@ -958,30 +993,26 @@
       }
     }
 
-    
-function renderPlayerFlags(player) {
-  const defs = [
-    { key: "flagav", icon: "🧞", title: "Avatar" },
-    { key: "flagpen", icon: "⚠️", title: "Penalización" },
-    { key: "flagpa", icon: "🥇", title: "Puto Amo" },
-    { key: "flagwin", icon: "🏆", title: "Winner" },
-    { key: "flagfinal", icon: "👏", title: "Finalista" },
-    { key: "flagcm", icon: "🥄", title: "Cuchara de madera" },
-    { key: "flagsf", icon: "🏛️", title: "Fundador" }
-  ];
 
-  return defs.map(d => {
-    const count = Number(player[d.key] || 0);
-    if (!count || count < 1) return "";
-    return `
-      <div class="flex items-center gap-1 px-2 py-1 rounded-full bg-slate-900 border border-slate-800" title="${d.title}">
-        <span class="text-sm">${d.icon.repeat(Math.min(count, 10))}</span>
-      </div>
-    `;
-  }).join("");
-}
+    function renderPlayerFlags(player) {
+      const defs = [
+        { key: "flagav", icon: "🧞", title: "Avatar" },
+        { key: "flagpen", icon: "⚠️", title: "Penalización" },
+        { key: "flagpa", icon: "🥇", title: "Puto Amo" },
+        { key: "flagwin", icon: "🏆", title: "Winner" },
+        { key: "flagfinal", icon: "👏", title: "Finalista" },
+        { key: "flagcm", icon: "🥄", title: "Cuchara de madera" },
+        { key: "flagsf", icon: "🏛️", title: "Fundador" }
+      ];
 
-function renderPlayers() {
+      return defs.map(d => {
+        const count = Number(player[d.key] || 0);
+        if (!count || count < 1) return "";
+        return `<span class="player-badge" title="${d.title}">${d.icon.repeat(Math.min(count, 12))}</span>`;
+      }).join("");
+    }
+
+    function renderPlayers() {
       const avatarInput = document.getElementById("profileAvatar");
       const descInput = document.getElementById("profileDescription");
 
@@ -996,30 +1027,16 @@ function renderPlayers() {
       const grid = document.getElementById("playersGrid");
       if (!grid) return;
 
-      const flagDefs = [
-        { key: "flagav", icon: "🧞", label: "Avatar" },
-        { key: "flagpen", icon: "⚠️", label: "Penalización" },
-        { key: "flagpa", icon: "🃏", label: "Rey de bastos" },
-        { key: "flagwin", icon: "🏆", label: "Winner" },
-        { key: "flagfinal", icon: "👏", label: "Finalista / podio" },
-        { key: "flagcm", icon: "🥄", label: "Cuchara de madera" },
-        { key: "flagsf", icon: "🏛️", label: "Socio fundador" }
-      ];
-
       grid.innerHTML = state.players.map(p => {
-        const img = p.avatar || "icon.svg";
+        const img = p.avatar || "tournament-icon.png?v=081";
         const desc = p.description || "Jugador oficial del circuito Gents & Lords.";
-        const flags = flagDefs
-          .filter(f => Number(p[f.key] || 0) > 0)
-          .map(f => `<span title="${f.label}" class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-900 border border-amber-500/25 text-amber-200 text-xs font-black"><span>${f.icon}</span><span>x${Number(p[f.key] || 0)}</span></span>`)
-          .join("") || `<span class="text-xs text-slate-500 italic">Sin insignias todavía</span>`;
-
+        const flags = renderPlayerFlags(p);
         return `
-          <div class="bg-slate-950/95 border border-slate-800 rounded-2xl p-5 hover:border-amber-500/40 transition-all shadow-xl">
+          <div class="bg-slate-950/95 border border-slate-800 rounded-2xl p-5 hover:border-amber-500/40 transition-all">
             <div class="flex items-center gap-4">
               <img src="${escapeHtml(img)}"
-                   onerror="this.src='icon.svg'"
-                   class="w-20 h-20 rounded-2xl object-cover border border-amber-500/30 bg-slate-900 p-1" />
+                   onerror="this.src='tournament-icon.png?v=081'"
+                   class="w-20 h-20 rounded-2xl object-contain border border-slate-700 bg-white p-1" />
               <div>
                 <div class="text-xl font-black">${escapeHtml(p.name || "-")}</div>
                 <div class="text-xs uppercase tracking-wider text-slate-500 font-bold">${escapeHtml(p.role || "player")}</div>
@@ -1028,9 +1045,7 @@ function renderPlayers() {
             <div class="mt-4 text-sm text-slate-300 min-h-[70px] leading-relaxed">
               ${escapeHtml(desc)}
             </div>
-            <div class="mt-4 flex flex-wrap gap-2">
-              ${flags}
-            </div>
+            <div class="mt-4 flex flex-wrap gap-2">${flags || '<span class="text-xs text-slate-600">Sin insignias todavía</span>'}</div>
           </div>
         `;
       }).join("") || `<p class="text-slate-400">No hay jugadores cargados.</p>`;
