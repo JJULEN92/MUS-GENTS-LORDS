@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v0.15.2</title>
+  <title>Torneo de Mus Gents & Lords · v0.15.3</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json?v=0132" />
   <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
@@ -52,15 +52,14 @@
     }
   </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    VERSION 0.15.2 · API FIX HOF/SEDES</div>
+    VERSION 0.15.3 · LOGIN REBUILD</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
-    <div class="absolute inset-0 opacity-40" style="background: url('assets/background.jpg?v=0150') center center / cover no-repeat;"></div>
+    <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0153') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
       <div class="text-center">
-        <img src="assets/logo.png?v=0150" onerror="this.src='assets/logo.png'" class="w-28 h-28 rounded-3xl bg-white p-2 object-contain mx-auto border border-amber-400/70" />
+        <img src="assets/logo.png?v=0153" onerror="this.src='assets/logo.png'" class="w-28 h-28 rounded-3xl bg-white p-2 object-contain mx-auto border border-amber-400/70" />
         <h1 class="text-3xl font-black mt-4">Torneo de Mus</h1>
         <p class="text-amber-300 font-black text-sm">Gents & Lords</p>
-        <p class="text-xs text-slate-400 mt-2">Acceso privado del circuito</p>
       </div>
 
       <div class="mt-6 space-y-3">
@@ -72,7 +71,7 @@
       </div>
 
       <div class="text-center text-[11px] text-slate-500 mt-5">
-        v0.15.2 · La sesión se recordará en este dispositivo
+        v0.15.3 · La sesión se recordará en este dispositivo
       </div>
     </div>
   </section>
@@ -84,7 +83,7 @@
           <img src="assets/logo.png?v=0132" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
           <div>
             <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-xs text-amber-300 font-black">v0.15.2 · Partidas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-xs text-amber-300 font-black">v0.15.3 · Partidas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -296,29 +295,29 @@
     </section>
 
     
-    
-    <section id="tab-venues" class="tabContent hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-6">
-      <div class="mb-6">
-        <h2 class="text-3xl font-black">📍 Sedes</h2>
+    <section id="tab-venues" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6">
+      <div class="flex items-end justify-between gap-4 mb-5">
+        <div>
+          <h2 class="text-2xl font-black">📍 Sedes del circuito</h2>
+          <p class="text-sm text-slate-400">Gestionadas dinámicamente desde Google Sheets.</p>
+        </div>
       </div>
 
       <div id="venuesGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
     </section>
 
 
-
     
-    
-    
-    <section id="tab-history" class="tabContent hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-6">
-      <div class="mb-6">
-        <h2 class="text-3xl font-black">🏛️ Hall of Fame</h2>
+    <section id="tab-history" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6">
+      <div class="flex items-end justify-between gap-4 mb-5">
+        <div>
+          <h2 class="text-2xl font-black">🏛️ Histórico del torneo</h2>
+          <p class="text-sm text-slate-400">Hall of Fame y temporadas históricas gestionadas desde Google Sheets.</p>
+        </div>
       </div>
 
       <div id="historyGrid" class="space-y-4"></div>
     </section>
-
-
 
 
 
@@ -531,7 +530,6 @@
       setStatus("Cargando datos...");
       try {
         const data = await api("getData");
-        console.log("getData keys", Object.keys(data));
         if (!data.ok) throw new Error(data.error || "Error desconocido");
         state.players = normalizePlayers(data.players || []);
         restoreLogin();
@@ -758,20 +756,7 @@
     }
 
     function isAutoConfirmed(m) {
-      if ((m.status || "") !== "pending") return false;
-
-      const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3);
-
-      // Solo se autoconfirma si existe un resultado completo introducido por un jugador.
-      // No deben autoconfirmarse partidas pendientes sin resultado.
-      const hasCompleteResult = calc.valid && calc.complete;
-      const hasResultAuthor = !!(m.createdBy || m.updatedBy);
-      const hasConfirmation = !!(m.confirmedBy || m.confirmedAt);
-      const hasRejection = !!(m.rejectedBy || m.rejectedAt || m.rejectionReason);
-
-      if (!hasCompleteResult || !hasResultAuthor || hasConfirmation || hasRejection) return false;
-
-      return hoursSince(m.createdAt || m.updatedAt) >= 24;
+      return (m.status || "") === "pending" && hoursSince(m.createdAt || m.updatedAt) >= 24;
     }
 
     function effectiveStatus(m) {
@@ -801,7 +786,7 @@
       }
 
       panel.classList.remove("hidden");
-      txt.textContent = `${pending.length} partida(s) pendiente(s). Los resultados pendientes se aceptan automáticamente 24h después de ser introducidos si nadie de la otra pareja los rechaza o confirma.`;
+      txt.textContent = `${pending.length} partida(s) pendiente(s). Si no se rechazan o confirman, se aceptan automáticamente a las 24 horas.`;
     }
 
     function showPendingMatches() {
@@ -1415,8 +1400,6 @@
     }
 
 
-
-
     function renderVenues() {
       const grid = document.getElementById("venuesGrid");
       if (!grid) return;
@@ -1424,13 +1407,13 @@
       const venues = state.venues || [];
 
       if (!venues.length) {
-        grid.innerHTML = `<div class="text-slate-500 bg-slate-950 border border-slate-800 rounded-2xl p-5">No hay sedes configuradas.</div>`;
+        grid.innerHTML = `<div class="text-slate-500 bg-slate-950 border border-slate-800 rounded-2xl p-5">No hay sedes configuradas o no se han recibido desde Google Sheets.</div>`;
         return;
       }
 
       grid.innerHTML = venues.map(v => `
-        <div class="bg-slate-950/90 border border-slate-800 rounded-3xl overflow-hidden hover:border-amber-500/40 transition-all shadow-xl">
-          <div class="h-48 bg-gradient-to-br from-slate-800 to-slate-950 flex items-center justify-center overflow-hidden">
+        <div class="bg-slate-950 border border-slate-800 rounded-3xl overflow-hidden hover:border-amber-500/40 transition-all shadow-xl">
+          <div class="h-44 bg-gradient-to-br from-slate-800 to-slate-950 flex items-center justify-center overflow-hidden">
             ${v.image ? `<img src="${escapeHtml(v.image)}" class="w-full h-full object-cover" onerror="this.style.display='none'" />`
             : `<div class="text-6xl">♠️</div>`}
           </div>
@@ -1455,40 +1438,6 @@
       `).join("");
     }
 
-    function historyKey(category) {
-      const c = String(category || "").toLowerCase();
-      if (c.includes("puto")) return "puto";
-      if (c.includes("ganador") || c.includes("champion") || c.includes("winner")) return "ganadores";
-      if (c.includes("final")) return "finalistas";
-      if (c.includes("cuchara")) return "cuchara";
-      return "otros";
-    }
-
-    function renderTrophyCell(item, fallbackTitle, icon) {
-      if (!item) {
-        return `
-          <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 min-h-[150px] flex flex-col items-center justify-center text-center opacity-50">
-            <div class="text-4xl mb-2">${icon}</div>
-            <div class="text-xs uppercase tracking-wider text-slate-500 font-black">${fallbackTitle}</div>
-            <div class="text-sm text-slate-500 mt-2">Sin dato</div>
-          </div>
-        `;
-      }
-
-      return `
-        <div class="bg-slate-950/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl p-4 min-h-[150px] transition-all">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="text-4xl">${icon}</div>
-            <div>
-              <div class="text-xs uppercase tracking-wider text-amber-400 font-black">${escapeHtml(item.category)}</div>
-              <div class="text-xl font-black text-white leading-tight">${escapeHtml(item.winners || "-")}</div>
-            </div>
-          </div>
-          ${item.notes ? `<div class="text-xs text-slate-400 leading-relaxed bg-slate-900/70 border border-slate-800 rounded-xl p-3">${escapeHtml(item.notes)}</div>` : ""}
-        </div>
-      `;
-    }
-
     function renderHistory() {
       const grid = document.getElementById("historyGrid");
       if (!grid) return;
@@ -1496,63 +1445,31 @@
       const history = state.history || [];
 
       if (!history.length) {
-        grid.innerHTML = `<div class="text-slate-500 bg-slate-950 border border-slate-800 rounded-2xl p-5">No hay histórico configurado.</div>`;
+        grid.innerHTML = `<div class="text-slate-500 bg-slate-950 border border-slate-800 rounded-2xl p-5">No hay histórico configurado o no se ha recibido desde Google Sheets.</div>`;
         return;
       }
 
-      const grouped = {};
-      history.forEach(h => {
-        const season = h.season || "Sin temporada";
-        grouped[season] = grouped[season] || {};
-        grouped[season][historyKey(h.category)] = h;
-      });
-
-      const seasons = Object.keys(grouped).sort((a, b) => String(b).localeCompare(String(a)));
-
-      grid.innerHTML = `
-        <div class="bg-slate-950/70 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl overflow-x-auto">
-          <div class="min-w-[900px]">
-            <div class="grid grid-cols-[170px_repeat(4,1fr)] gap-4 items-center pb-4 border-b border-slate-800">
-              <div class="text-amber-400 font-black text-lg">Temporada</div>
-              <div class="text-center">
-                <div class="text-5xl">🥇</div>
-                <div class="text-amber-400 font-black mt-1">Puto Amo</div>
-              </div>
-              <div class="text-center">
-                <div class="text-5xl">🏆</div>
-                <div class="text-amber-400 font-black mt-1">Ganadores</div>
-              </div>
-              <div class="text-center">
-                <div class="text-5xl">👏</div>
-                <div class="text-amber-400 font-black mt-1">Finalistas</div>
-              </div>
-              <div class="text-center">
-                <div class="text-5xl">🥄</div>
-                <div class="text-amber-400 font-black mt-1">Cuchara de madera</div>
-              </div>
+      grid.innerHTML = history.map(h => `
+        <div class="bg-gradient-to-r from-slate-950 to-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <div class="text-xs uppercase tracking-wider text-amber-400 font-black">${escapeHtml(h.season)}</div>
+              <h3 class="text-2xl font-black mt-1">${escapeHtml(h.category || "Temporada")}</h3>
             </div>
 
-            ${seasons.map(season => {
-              const row = grouped[season];
-              return `
-                <div class="grid grid-cols-[170px_repeat(4,1fr)] gap-4 items-stretch py-4 border-b border-slate-900 last:border-b-0">
-                  <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex flex-col justify-center">
-                    <div class="text-2xl font-black text-amber-300">${escapeHtml(season)}</div>
-                    <div class="text-xs text-slate-500 mt-1">Temporada</div>
-                  </div>
-
-                  ${renderTrophyCell(row.puto, "Puto Amo", "🥇")}
-                  ${renderTrophyCell(row.ganadores, "Ganadores", "🏆")}
-                  ${renderTrophyCell(row.finalistas, "Finalistas", "👏")}
-                  ${renderTrophyCell(row.cuchara, "Cuchara de madera", "🥄")}
-                </div>
-              `;
-            }).join("")}
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl px-5 py-3">
+              <div class="text-xs uppercase tracking-wider text-amber-300 font-bold">Ganadores</div>
+              <div class="text-lg font-black text-white">${escapeHtml(h.winners || "-")}</div>
+            </div>
           </div>
-        </div>
-      `;
-    }
 
+          ${h.notes ? `
+            <div class="mt-5 text-sm text-slate-300 leading-relaxed bg-slate-950/70 border border-slate-800 rounded-2xl p-4">
+              ${escapeHtml(h.notes)}
+            </div>` : ""}
+        </div>
+      `).join("");
+    }
 
     function renderLogs() {
       const rows = [...state.logs].reverse().slice(0, 50);
@@ -1592,7 +1509,7 @@
     function parseVaca(value) {
       let s = String(value ?? "").trim().replace("-", "").replace(" ", "");
 
-      //  puede convertir 03 en número 3.
+      // Google Sheets puede convertir 03 en número 3.
       // En ese caso recuperamos el formato correcto como 03.
       if (/^\d$/.test(s)) s = "0" + s;
 
@@ -1678,9 +1595,7 @@
     function showLoginScreen(force = false) {
       const screen = document.getElementById("loginScreen");
       if (!screen) return;
-      if (force || !state.currentUser) {
-        screen.classList.remove("hidden");
-      }
+      if (force || !state.currentUser) screen.classList.remove("hidden");
     }
 
     function hideLoginScreen() {
@@ -1689,7 +1604,6 @@
     }
 
     function login() {
-      // Compatibilidad con versiones anteriores si existiera el login antiguo.
       const id = document.getElementById("loginPlayer")?.value || document.getElementById("loginScreenPlayer")?.value;
       const pass = document.getElementById("loginPassword")?.value || document.getElementById("loginScreenPassword")?.value;
       return performLogin(id, pass);
@@ -1709,9 +1623,10 @@
       state.currentUser = player;
       localStorage.setItem("mus_current_user_id", player.id);
       localStorage.setItem("mus_current_user_name", player.name);
+
       hideLoginScreen();
       renderActiveUser();
-      renderAll();
+      renderPlayers();
     }
 
     function logout() {
@@ -1739,8 +1654,6 @@
     }
 
     function renderActiveUser() {
-      restoreLogin();
-
       const label = state.currentUser
         ? `${state.currentUser.name} (${state.currentUser.role || "player"})`
         : "No identificado";
@@ -1843,8 +1756,8 @@
         gamesB: calc.gamesB,
         winner: calc.winnerSide === "A" ? teamA : teamB,
         status: isAdmin() ? document.getElementById("matchStatus").value : "pending",
-        createdBy: (state.matches.find(m => String(m.id) === String(document.getElementById("matchId").value.trim()))?.createdBy) || state.currentUser.name,
-        createdAt: (state.matches.find(m => String(m.id) === String(document.getElementById("matchId").value.trim()))?.createdAt) || new Date().toISOString(),
+        createdBy: state.currentUser.name,
+        createdAt: new Date().toISOString(),
         updatedBy: state.currentUser.name,
         updatedAt: new Date().toISOString(),
         confirmedBy: isAdmin() && document.getElementById("matchStatus").value === "confirmed" ? state.currentUser.name : "",
