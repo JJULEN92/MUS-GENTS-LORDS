@@ -1,5 +1,5 @@
-const CACHE_NAME = "mus-gents-lords-v081";
-const ASSETS = ["./", "./index.html", "./manifest.json", "./tournament-icon.png", "./hero-bg.png" ];
+const CACHE_NAME = "mus-gents-lords-v082";
+const ASSETS = ["./?v=082", "./index.html?v=082", "./manifest.json?v=082", "./tournament-icon.png?v=082", "./hero-bg.png?v=082"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
@@ -13,5 +13,5 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
-  event.respondWith(fetch(event.request).catch(() => caches.match(event.request).then(res => res || caches.match("./index.html"))));
+  event.respondWith(fetch(event.request).catch(() => caches.match(event.request).then(res => res || caches.match("./index.html?v=082"))));
 });
