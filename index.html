@@ -1,21 +1,48 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v0.13.0</title>
+  <title>Torneo de Mus Gents & Lords · v0.13.2</title>
   <meta name="theme-color" content="#020617" />
-  <link rel="manifest" href="manifest.json?v=082" />
-  <link rel="apple-touch-icon" href="tournament-icon.png?v=082" />
+  <link rel="manifest" href="manifest.json?v=0132" />
+  <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
   <style>
+    body {
+      background:
+        linear-gradient(180deg, rgba(2,6,23,.78), rgba(2,6,23,.95)),
+        url('assets/background.jpg?v=0132') center center / cover fixed no-repeat;
+    }
+    main, header, section, nav {
+      position: relative;
+      z-index: 1;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(2,6,23,.35);
+      pointer-events: none;
+      z-index: 0;
+    }
     .hero-bg {
-      background-image: linear-gradient(180deg, rgba(2,6,23,.62), rgba(2,6,23,.90)), url('hero-bg.png?v=082');
-      background-size: cover;
-      background-position: center;
+      background: rgba(15,23,42,.86);
+      backdrop-filter: blur(8px);
+    }
+    .player-badge {
+      display:inline-flex; align-items:center; gap:.25rem;
+      padding:.25rem .5rem; border-radius:999px;
+      background:rgba(15,23,42,.85); border:1px solid rgba(51,65,85,.9);
+      font-size:.8rem; line-height:1.1;
+    }
+  </style>
+  <style>
+    .hero-bg {
+      background: rgba(15,23,42,.88);
+      backdrop-filter: blur(6px);
     }
     .player-badge {
       display:inline-flex; align-items:center; gap:.25rem;
@@ -25,15 +52,15 @@
     }
   </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    VERSION 0.13.0 · SPRINT 12-13 · HISTÓRICO + SEDES DINÁMICAS</div>
+    VERSION 0.13.2 · ASSETS FIJOS</div>
   <header class="hero-bg border-b border-emerald-800 p-4 sticky top-0 z-10 shadow-2xl">
     <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
       <div>
         <div class="flex items-center gap-3">
-          <img src="tournament-icon.png?v=082" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
+          <img src="assets/logo.png?v=0132" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
           <div>
             <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-xs text-amber-300 font-black">v0.13.0 · Partidas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-xs text-amber-300 font-black">v0.13.2 · Partidas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -483,6 +510,8 @@
         state.players = normalizePlayers(data.players || []);
         state.matches = data.matches || [];
         state.logs = data.logs || [];
+        state.history = normalizeHistory(data.history || []);
+        state.venues = normalizeVenues(data.venues || []);
         renderAll();
         setStatus("Datos cargados correctamente");
       } catch (err) {
@@ -547,6 +576,8 @@
       renderPendingPanel();
       renderMatches();
       renderPlayers();
+      renderVenues();
+      renderHistory();
       renderLogs();
       renderActiveUser();
     }
@@ -1236,7 +1267,7 @@
 
       if (featured && selected) {
         const st = getDetailedPlayerStats(selected.name);
-        const img = selected.avatar || "tournament-icon.png?v=082";
+        const img = selected.avatar || "assets/logo.png?v=0132";
         const flags = renderPlayerFlags(selected);
         const recentMatches = st.matches.slice(-5).reverse();
 
@@ -1245,7 +1276,7 @@
             <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
               <div class="xl:col-span-4">
                 <div class="flex flex-col items-center text-center">
-                  <img src="${escapeHtml(img)}" onerror="this.src='tournament-icon.png?v=082'"
+                  <img src="${escapeHtml(img)}" onerror="this.src='assets/logo.png?v=0132'"
                        class="w-44 h-44 rounded-3xl object-contain bg-white p-2 border-2 border-amber-400/60 shadow-xl" />
                   <h3 class="text-3xl font-black mt-4">${escapeHtml(selected.name)}</h3>
                   <div class="text-xs uppercase tracking-wider text-slate-500 font-bold">${escapeHtml(selected.role || "player")}</div>
@@ -1308,14 +1339,14 @@
 
       grid.innerHTML = state.players.map(p => {
         const st = getDetailedPlayerStats(p.name);
-        const img = p.avatar || "tournament-icon.png?v=082";
+        const img = p.avatar || "assets/logo.png?v=0132";
         const desc = p.description || "Jugador oficial del circuito Gents & Lords.";
         const flags = renderPlayerFlags(p);
         return `
           <div onclick="selectProfilePlayer('${escapeHtml(p.name)}')" class="cursor-pointer bg-slate-950/95 border border-slate-800 rounded-2xl p-5 hover:border-amber-500/40 transition-all">
             <div class="flex items-center gap-4">
               <img src="${escapeHtml(img)}"
-                   onerror="this.src='tournament-icon.png?v=082'"
+                   onerror="this.src='assets/logo.png?v=0132'"
                    class="w-20 h-20 rounded-2xl object-contain border border-slate-700 bg-white p-1" />
               <div>
                 <div class="text-xl font-black">${escapeHtml(p.name || "-")}</div>
@@ -1330,6 +1361,78 @@
           </div>
         `;
       }).join("") || `<p class="text-slate-400">No hay jugadores cargados.</p>`;
+    }
+
+
+    function renderVenues() {
+      const grid = document.getElementById("venuesGrid");
+      if (!grid) return;
+
+      const venues = state.venues || [];
+
+      if (!venues.length) {
+        grid.innerHTML = `<div class="text-slate-500 bg-slate-950 border border-slate-800 rounded-2xl p-5">No hay sedes configuradas o no se han recibido desde Google Sheets.</div>`;
+        return;
+      }
+
+      grid.innerHTML = venues.map(v => `
+        <div class="bg-slate-950 border border-slate-800 rounded-3xl overflow-hidden hover:border-amber-500/40 transition-all shadow-xl">
+          <div class="h-44 bg-gradient-to-br from-slate-800 to-slate-950 flex items-center justify-center overflow-hidden">
+            ${v.image ? `<img src="${escapeHtml(v.image)}" class="w-full h-full object-cover" onerror="this.style.display='none'" />`
+            : `<div class="text-6xl">♠️</div>`}
+          </div>
+
+          <div class="p-5">
+            <h3 class="text-xl font-black">${escapeHtml(v.name)}</h3>
+            <div class="text-xs uppercase tracking-wider text-amber-400 font-bold mt-1">${escapeHtml(v.type || "Sede oficial")}</div>
+
+            <p class="text-sm text-slate-300 mt-4 leading-relaxed">
+              ${escapeHtml(v.description || "Sede oficial del circuito Gents & Lords.")}
+            </p>
+
+            ${v.address ? `<div class="mt-4 text-sm text-slate-400">📍 ${escapeHtml(v.address)}</div>` : ""}
+
+            ${v.mapsUrl ? `
+              <a href="${escapeHtml(v.mapsUrl)}" target="_blank"
+                 class="mt-4 inline-flex items-center gap-2 bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-xl font-black text-sm">
+                🗺️ Abrir en Google Maps
+              </a>` : ""}
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderHistory() {
+      const grid = document.getElementById("historyGrid");
+      if (!grid) return;
+
+      const history = state.history || [];
+
+      if (!history.length) {
+        grid.innerHTML = `<div class="text-slate-500 bg-slate-950 border border-slate-800 rounded-2xl p-5">No hay histórico configurado o no se ha recibido desde Google Sheets.</div>`;
+        return;
+      }
+
+      grid.innerHTML = history.map(h => `
+        <div class="bg-gradient-to-r from-slate-950 to-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <div class="text-xs uppercase tracking-wider text-amber-400 font-black">${escapeHtml(h.season)}</div>
+              <h3 class="text-2xl font-black mt-1">${escapeHtml(h.category || "Temporada")}</h3>
+            </div>
+
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl px-5 py-3">
+              <div class="text-xs uppercase tracking-wider text-amber-300 font-bold">Ganadores</div>
+              <div class="text-lg font-black text-white">${escapeHtml(h.winners || "-")}</div>
+            </div>
+          </div>
+
+          ${h.notes ? `
+            <div class="mt-5 text-sm text-slate-300 leading-relaxed bg-slate-950/70 border border-slate-800 rounded-2xl p-4">
+              ${escapeHtml(h.notes)}
+            </div>` : ""}
+        </div>
+      `).join("");
     }
 
     function renderLogs() {
