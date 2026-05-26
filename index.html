@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v0.15.3</title>
+  <title>Torneo de Mus Gents & Lords · v0.15.4</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json?v=0132" />
   <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
@@ -52,7 +52,7 @@
     }
   </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    VERSION 0.15.3 · LOGIN REBUILD</div>
+    VERSION 0.15.4 · HALL OF FAME LOOK</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
     <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0153') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
@@ -71,7 +71,7 @@
       </div>
 
       <div class="text-center text-[11px] text-slate-500 mt-5">
-        v0.15.3 · La sesión se recordará en este dispositivo
+        v0.15.4 · La sesión se recordará en este dispositivo
       </div>
     </div>
   </section>
@@ -83,7 +83,7 @@
           <img src="assets/logo.png?v=0132" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
           <div>
             <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-xs text-amber-300 font-black">v0.15.3 · Partidas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-xs text-amber-300 font-black">v0.15.4 · Partidas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -308,16 +308,15 @@
 
 
     
-    <section id="tab-history" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6">
-      <div class="flex items-end justify-between gap-4 mb-5">
-        <div>
-          <h2 class="text-2xl font-black">🏛️ Histórico del torneo</h2>
-          <p class="text-sm text-slate-400">Hall of Fame y temporadas históricas gestionadas desde Google Sheets.</p>
-        </div>
+
+    <section id="tab-history" class="tabContent hidden p-4 sm:p-6">
+      <div class="mb-7">
+        <h2 class="text-4xl sm:text-5xl font-black tracking-tight">🏛️ Hall of Fame</h2>
       </div>
 
       <div id="historyGrid" class="space-y-4"></div>
     </section>
+
 
 
 
@@ -1438,6 +1437,59 @@
       `).join("");
     }
 
+
+    function historyKey(category) {
+      const c = String(category || "").toLowerCase();
+      if (c.includes("puto")) return "puto";
+      if (c.includes("ganador") || c.includes("champion") || c.includes("winner")) return "ganadores";
+      if (c.includes("final")) return "finalistas";
+      if (c.includes("cuchara")) return "cuchara";
+      return "otros";
+    }
+
+    function playerAvatarByName(name) {
+      const clean = normalizeName(String(name || "").split("/")[0].trim());
+      const player = state.players.find(p => normalizeName(p.name) === clean);
+      return player?.avatar || "assets/logo.png?v=0154";
+    }
+
+    function renderWinnerAvatars(winners, colorClass = "border-amber-400") {
+      const names = String(winners || "")
+        .split("/")
+        .map(x => normalizeName(x.trim()))
+        .filter(Boolean);
+
+      if (!names.length) return "";
+
+      return `
+        <div class="flex justify-center ${names.length > 1 ? "-space-x-3" : ""} mb-2">
+          ${names.map((name, idx) => `
+            <img src="${escapeHtml(playerAvatarByName(name))}"
+                 onerror="this.src='assets/logo.png?v=0154'"
+                 class="w-16 h-16 rounded-full object-cover bg-white p-1 border-2 ${colorClass} shadow-xl" />
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderHofCell(item, icon, colorClass) {
+      if (!item) {
+        return `
+          <div class="flex flex-col items-center justify-center text-center min-h-[120px] opacity-35">
+            <div class="text-4xl mb-2">${icon}</div>
+            <div class="text-sm text-slate-500 font-bold">Sin dato</div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="flex flex-col items-center justify-center text-center min-h-[120px]">
+          ${renderWinnerAvatars(item.winners, colorClass)}
+          <div class="text-xl font-black text-white leading-tight">${escapeHtml(item.winners || "-")}</div>
+        </div>
+      `;
+    }
+
     function renderHistory() {
       const grid = document.getElementById("historyGrid");
       if (!grid) return;
@@ -1445,31 +1497,64 @@
       const history = state.history || [];
 
       if (!history.length) {
-        grid.innerHTML = `<div class="text-slate-500 bg-slate-950 border border-slate-800 rounded-2xl p-5">No hay histórico configurado o no se ha recibido desde Google Sheets.</div>`;
+        grid.innerHTML = `<div class="text-slate-500 bg-slate-950 border border-slate-800 rounded-2xl p-5">No hay histórico configurado.</div>`;
         return;
       }
 
-      grid.innerHTML = history.map(h => `
-        <div class="bg-gradient-to-r from-slate-950 to-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
-          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <div class="text-xs uppercase tracking-wider text-amber-400 font-black">${escapeHtml(h.season)}</div>
-              <h3 class="text-2xl font-black mt-1">${escapeHtml(h.category || "Temporada")}</h3>
+      const grouped = {};
+      history.forEach(h => {
+        const season = h.season || "Sin temporada";
+        grouped[season] = grouped[season] || {};
+        grouped[season][historyKey(h.category)] = h;
+      });
+
+      const seasons = Object.keys(grouped).sort((a, b) => String(b).localeCompare(String(a)));
+
+      grid.innerHTML = `
+        <div class="bg-slate-950/55 border border-slate-700/70 rounded-3xl p-4 sm:p-6 shadow-2xl overflow-x-auto backdrop-blur-sm">
+          <div class="min-w-[980px]">
+            <div class="grid grid-cols-[190px_repeat(4,1fr)] gap-4 items-end pb-5 border-b border-slate-700/70">
+              <div class="text-amber-400 font-black text-lg uppercase tracking-wide">Temporada</div>
+              <div class="text-center">
+                <div class="text-6xl drop-shadow-xl">🥇</div>
+                <div class="text-amber-400 font-black mt-2 text-lg">Puto Amo</div>
+              </div>
+              <div class="text-center">
+                <div class="text-6xl drop-shadow-xl">🏆</div>
+                <div class="text-amber-400 font-black mt-2 text-lg">Ganadores</div>
+              </div>
+              <div class="text-center">
+                <div class="text-6xl drop-shadow-xl">👏</div>
+                <div class="text-amber-400 font-black mt-2 text-lg">Finalistas</div>
+              </div>
+              <div class="text-center">
+                <div class="text-6xl drop-shadow-xl">🥄</div>
+                <div class="text-amber-400 font-black mt-2 text-lg">Cuchara de madera</div>
+              </div>
             </div>
 
-            <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl px-5 py-3">
-              <div class="text-xs uppercase tracking-wider text-amber-300 font-bold">Ganadores</div>
-              <div class="text-lg font-black text-white">${escapeHtml(h.winners || "-")}</div>
-            </div>
+            ${seasons.map((season, idx) => {
+              const row = grouped[season];
+              const isCurrent = idx === 0 ? "Temporada actual" : "Temporada histórica";
+              return `
+                <div class="grid grid-cols-[190px_repeat(4,1fr)] gap-4 items-center my-3 bg-slate-900/55 hover:bg-slate-900/75 border border-slate-700/50 rounded-2xl px-4 py-4 transition-all">
+                  <div class="flex flex-col justify-center">
+                    <div class="text-3xl font-black text-amber-300">${escapeHtml(season)}</div>
+                    <div class="text-sm text-slate-400 mt-2">${isCurrent}</div>
+                  </div>
+
+                  ${renderHofCell(row.puto, "🥇", "border-yellow-400")}
+                  ${renderHofCell(row.ganadores, "🏆", "border-emerald-400")}
+                  ${renderHofCell(row.finalistas, "👏", "border-cyan-400")}
+                  ${renderHofCell(row.cuchara, "🥄", "border-orange-400")}
+                </div>
+              `;
+            }).join("")}
           </div>
-
-          ${h.notes ? `
-            <div class="mt-5 text-sm text-slate-300 leading-relaxed bg-slate-950/70 border border-slate-800 rounded-2xl p-4">
-              ${escapeHtml(h.notes)}
-            </div>` : ""}
         </div>
-      `).join("");
+      `;
     }
+
 
     function renderLogs() {
       const rows = [...state.logs].reverse().slice(0, 50);
