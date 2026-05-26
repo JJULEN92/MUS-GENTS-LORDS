@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v0.15.0</title>
+  <title>Torneo de Mus Gents & Lords · v0.15.1</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json?v=0132" />
   <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
@@ -52,7 +52,7 @@
     }
   </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    VERSION 0.15.0 · LOGIN DEDICADO</div>
+    VERSION 0.15.1 · LOGIN + HOF/SEDES FIX</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
     <div class="absolute inset-0 opacity-40" style="background: url('assets/background.jpg?v=0150') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
@@ -84,7 +84,7 @@
           <img src="assets/logo.png?v=0132" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
           <div>
             <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-xs text-amber-300 font-black">v0.15.0 · Partidas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-xs text-amber-300 font-black">v0.15.1 · Partidas al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -296,18 +296,18 @@
     </section>
 
     
-    <section id="tab-venues" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6">
-      <div class="flex items-end justify-between gap-4 mb-5">
-        <div>
-          <h2 class="text-2xl font-black">📍 Sedes del circuito</h2>
-          
-        </div>
+    
+    <section id="tab-venues" class="tabContent hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-6">
+      <div class="mb-6">
+        <h2 class="text-3xl font-black">📍 Sedes</h2>
       </div>
 
       <div id="venuesGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
     </section>
 
 
+
+    
     
     
     <section id="tab-history" class="tabContent hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-6">
@@ -317,6 +317,7 @@
 
       <div id="historyGrid" class="space-y-4"></div>
     </section>
+
 
 
 
@@ -1413,6 +1414,8 @@
     }
 
 
+
+
     function renderVenues() {
       const grid = document.getElementById("venuesGrid");
       if (!grid) return;
@@ -1420,13 +1423,13 @@
       const venues = state.venues || [];
 
       if (!venues.length) {
-        grid.innerHTML = `<div class="text-slate-500 bg-slate-950 border border-slate-800 rounded-2xl p-5">No hay sedes configuradas o no se han recibido desde </div>`;
+        grid.innerHTML = `<div class="text-slate-500 bg-slate-950 border border-slate-800 rounded-2xl p-5">No hay sedes configuradas.</div>`;
         return;
       }
 
       grid.innerHTML = venues.map(v => `
-        <div class="bg-slate-950 border border-slate-800 rounded-3xl overflow-hidden hover:border-amber-500/40 transition-all shadow-xl">
-          <div class="h-44 bg-gradient-to-br from-slate-800 to-slate-950 flex items-center justify-center overflow-hidden">
+        <div class="bg-slate-950/90 border border-slate-800 rounded-3xl overflow-hidden hover:border-amber-500/40 transition-all shadow-xl">
+          <div class="h-48 bg-gradient-to-br from-slate-800 to-slate-950 flex items-center justify-center overflow-hidden">
             ${v.image ? `<img src="${escapeHtml(v.image)}" class="w-full h-full object-cover" onerror="this.style.display='none'" />`
             : `<div class="text-6xl">♠️</div>`}
           </div>
@@ -1449,15 +1452,6 @@
           </div>
         </div>
       `).join("");
-    }
-
-    function historyIcon(category) {
-      const c = String(category || "").toLowerCase();
-      if (c.includes("puto")) return "🥇";
-      if (c.includes("ganador") || c.includes("champion") || c.includes("winner")) return "🏆";
-      if (c.includes("final")) return "👏";
-      if (c.includes("cuchara")) return "🥄";
-      return "🏛️";
     }
 
     function historyKey(category) {
@@ -1557,6 +1551,7 @@
         </div>
       `;
     }
+
 
     function renderLogs() {
       const rows = [...state.logs].reverse().slice(0, 50);
