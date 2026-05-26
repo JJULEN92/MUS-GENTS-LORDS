@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Torneo de Mus Gents & Lords · v0.16.1</title>
   <meta name="theme-color" content="#020617" />
-  <link rel="manifest" href="manifest.json?v=0161" />
+  <link rel="manifest" href="manifest.json?v=0132" />
   <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -52,7 +52,7 @@
     }
   </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    VERSION 0.16.1 · JORNADAS ESTABLES</div>
+    VERSION 0.16.1 · JORNADAS RESULTADOS</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
     <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0153') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
@@ -366,13 +366,6 @@
         <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
           <h4 class="font-bold text-white mb-2">Resultado por vacas</h4>
           <p class="text-xs text-slate-400 mb-3">Introduce solo las vacas jugadas. Ejemplo: 30 / 13 / 31.</p>
-          <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 mb-3">
-            <label class="block text-xs font-bold text-slate-400 mb-2">Avatar usado</label>
-            <select id="matchAvatarUsed" class="field">
-              <option value="">Ningún jugador usó avatar</option>
-            </select>
-            <p class="text-xs text-slate-500 mt-2">Marca el jugador sustituido por avatar, si aplica.</p>
-          </div>
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
             <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
               <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 1</label>
@@ -394,6 +387,14 @@
             <div id="matchPreview" class="text-slate-300">Resultado pendiente de calcular.</div>
             <div id="matchValidation" class="text-xs mt-2 text-slate-400"></div>
           </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+          <h4 class="font-bold text-white mb-2">🧞 Avatar usado</h4>
+          <p class="text-xs text-slate-400 mb-3">Indica si alguno de los 4 jugadores jugó con avatar en esta partida.</p>
+          <select id="matchAvatarPlayer" class="field">
+            <option value="">Ningún jugador usó avatar</option>
+          </select>
         </div>
 
         <div class="flex flex-wrap gap-2">
@@ -667,8 +668,6 @@
           }
         });
 
-        const avatarUsed = normalizeName(m.avatarUsed || m.avatar_used || m.avatarPlayer || m.avatar_player || "");
-
         aPlayers.forEach(name => {
           const r = table.get(name);
           r.pj += 1;
@@ -676,7 +675,6 @@
           r.vacasLost += calc.vacasB;
           r.jg += calc.gamesA;
           r.jp += calc.gamesB;
-          if (avatarUsed && normalizeName(name) === avatarUsed) r.avatar += 1;
           if (calc.winnerSide === "A") r.points += 3;
         });
 
@@ -687,7 +685,6 @@
           r.vacasLost += calc.vacasA;
           r.jg += calc.gamesB;
           r.jp += calc.gamesA;
-          if (avatarUsed && normalizeName(name) === avatarUsed) r.avatar += 1;
           if (calc.winnerSide === "B") r.points += 3;
         });
       });
@@ -841,7 +838,7 @@
       const buttons = [];
 
       if (canEditMatch(m) && status !== "cancelled") {
-        buttons.push(`<button onclick='event.stopPropagation(); editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})' class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg font-bold">✏️ Editar</button>`);
+        buttons.push(`<button onclick='event.stopPropagation(); editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})' class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg font-bold">✏️ Meter resultado</button>`);
       }
 
       if ((m.status || "") === "pending" && canConfirmMatch(m)) {
@@ -904,7 +901,6 @@
                 <div class="text-sm text-slate-300"><b class="text-emerald-400">A</b> ${escapeHtml(meta.teamA || "-")}</div>
                 <div class="text-sm text-slate-300"><b class="text-cyan-400">B</b> ${escapeHtml(meta.teamB || "-")}</div>
                 <div class="text-xs text-slate-400 mt-2">Vacas: <b>${vacas}</b> · Juegos: <b>${juegos}</b> · ${[m.vaca1,m.vaca2,m.vaca3].filter(Boolean).join("/")}</div>
-                ${(m.avatarUsed || m.avatar_used || m.avatarPlayer || m.avatar_player) ? `<div class="text-xs text-amber-300 mt-1">🧞 Avatar: ${escapeHtml(m.avatarUsed || m.avatar_used || m.avatarPlayer || m.avatar_player)}</div>` : ""}
                 <div class="text-xs text-emerald-300 mt-1">Ganador: ${escapeHtml(meta.winner || "-")}</div>
                 <div class="mt-3 flex flex-wrap gap-2">
                   ${renderMatchActionButtons(m)}
@@ -1772,63 +1768,72 @@
       return true;
     }
 
-    function setMatchFormLocked(isLocked) {
-      ["matchId", "matchFecha", "matchRound", "teamA1", "teamA2", "teamB1", "teamB2", "matchStatus"].forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.disabled = !!isLocked;
-        el.classList.toggle("opacity-60", !!isLocked);
-        el.classList.toggle("cursor-not-allowed", !!isLocked);
-      });
+    function ensureMatchFormInRounds() {
+      const form = document.getElementById("matchForm");
+      const roundsTab = document.getElementById("tab-rounds");
+      const dashboard = document.getElementById("roundDashboard");
+      if (!form || !roundsTab || !dashboard) return;
+      if (!roundsTab.contains(form)) {
+        roundsTab.insertBefore(form, dashboard);
+      }
     }
 
-    function renderAvatarUsedOptions(m = {}) {
-      const select = document.getElementById("matchAvatarUsed");
-      if (!select) return;
-      const players = matchPlayers(m).length ? matchPlayers(m) : [
-        document.getElementById("teamA1")?.value,
-        document.getElementById("teamA2")?.value,
-        document.getElementById("teamB1")?.value,
-        document.getElementById("teamB2")?.value
-      ].filter(Boolean).map(normalizeName);
-      const current = m.avatarUsed || m.avatar_used || m.avatarPlayer || m.avatar_player || "";
-      select.innerHTML = '<option value="">Ningún jugador usó avatar</option>' + players.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("");
-      select.value = current;
+    function setMatchFormResultMode() {
+      ["matchId", "matchFecha", "matchRound"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.readOnly = true;
+      });
+      ["teamA1", "teamA2", "teamB1", "teamB2", "matchStatus"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+      const title = document.querySelector("#matchForm h3");
+      if (title) title.textContent = "Meter / editar resultado";
+    }
+
+    function populateAvatarSelectorFromMatch(m = {}) {
+      const sel = document.getElementById("matchAvatarPlayer");
+      if (!sel) return;
+      const players = [
+        m.teamA_player1 || m.teamA1 || document.getElementById("teamA1")?.value || "",
+        m.teamA_player2 || m.teamA2 || document.getElementById("teamA2")?.value || "",
+        m.teamB_player1 || m.teamB1 || document.getElementById("teamB1")?.value || "",
+        m.teamB_player2 || m.teamB2 || document.getElementById("teamB2")?.value || ""
+      ].map(normalizeName).filter(Boolean);
+      const current = m.avatarPlayer || m.avatarUsedBy || m.avatar || "";
+      sel.innerHTML = '<option value="">Ningún jugador usó avatar</option>' + players.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
+      sel.value = players.includes(normalizeName(current)) ? normalizeName(current) : "";
     }
 
     function openMatchForm() {
-      if (!requireLogin()) return;
-      clearMatchForm();
-      state.isEditing = true;
-      document.getElementById("matchForm").classList.remove("hidden");
-      renderResultButtons();
-      setMatchFormLocked(false);
-      renderAvatarUsedOptions();
-      previewMatchResult();
+      alert("Las partidas se crean manualmente en Google Sheets. Desde la app solo se introducen resultados.");
     }
 
     function closeMatchForm() {
-      document.getElementById("matchForm").classList.add("hidden");
+      const form = document.getElementById("matchForm");
+      if (form) form.classList.add("hidden");
       state.isEditing = false;
       clearMatchForm();
     }
 
     function clearMatchForm() {
-      ["matchId","matchFecha","matchRound","vaca1","vaca2","vaca3"].forEach(id => document.getElementById(id).value = "");
-      ["teamA1","teamA2","teamB1","teamB2"].forEach(id => document.getElementById(id).value = "");
-      document.getElementById("matchStatus").value = "pending";
-      const avatarSelect = document.getElementById("matchAvatarUsed");
-      if (avatarSelect) avatarSelect.innerHTML = '<option value="">Ningún jugador usó avatar</option>';
-      setMatchFormLocked(false);
+      ["matchId","matchFecha","matchRound","vaca1","vaca2","vaca3"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+      ["teamA1","teamA2","teamB1","teamB2"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+      const status = document.getElementById("matchStatus");
+      if (status) status.value = "confirmed";
+      const avatar = document.getElementById("matchAvatarPlayer");
+      if (avatar) avatar.innerHTML = '<option value="">Ningún jugador usó avatar</option>';
       previewMatchResult();
     }
 
     function editMatch(m) {
       if (!requireLogin()) return;
       if (!canEditMatch(m)) return alert("Solo puedes editar partidas en las que participas.");
+      ensureMatchFormInRounds();
       state.isEditing = true;
       document.getElementById("matchForm").classList.remove("hidden");
       renderResultButtons();
+      setMatchFormResultMode();
       document.getElementById("matchId").value = m.id || "";
       document.getElementById("matchFecha").value = m.fecha || "";
       document.getElementById("matchRound").value = m.round || "";
@@ -1839,10 +1844,10 @@
       document.getElementById("vaca1").value = m.vaca1 || "";
       document.getElementById("vaca2").value = m.vaca2 || "";
       document.getElementById("vaca3").value = m.vaca3 || "";
-      document.getElementById("matchStatus").value = m.status || "pending";
-      renderAvatarUsedOptions(m);
-      setMatchFormLocked(true);
+      document.getElementById("matchStatus").value = m.status || "confirmed";
+      populateAvatarSelectorFromMatch(m);
       previewMatchResult();
+      document.getElementById("matchForm").scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     async function saveMatch() {
@@ -1884,14 +1889,14 @@
         gamesB: calc.gamesB,
         winner: calc.winnerSide === "A" ? teamA : teamB,
         status: "pending",
-        avatarUsed: document.getElementById("matchAvatarUsed")?.value || "",
-        avatar_used: document.getElementById("matchAvatarUsed")?.value || "",
+        avatarPlayer: document.getElementById("matchAvatarPlayer") ? document.getElementById("matchAvatarPlayer").value : "",
+        avatarUsedBy: document.getElementById("matchAvatarPlayer") ? document.getElementById("matchAvatarPlayer").value : "",
         createdBy: state.currentUser.name,
         createdAt: new Date().toISOString(),
         updatedBy: state.currentUser.name,
         updatedAt: new Date().toISOString(),
-        confirmedBy: isAdmin() && document.getElementById("matchStatus").value === "confirmed" ? state.currentUser.name : "",
-        confirmedAt: isAdmin() && document.getElementById("matchStatus").value === "confirmed" ? new Date().toISOString() : "",
+        confirmedBy: "",
+        confirmedAt: "",
         rejectedBy: "",
         rejectedAt: "",
         rejectionReason: ""
@@ -2055,7 +2060,7 @@
 
     function toggleAutoRefresh() {
       autoRefreshEnabled = !autoRefreshEnabled;
-      document.getElementById("autoRefreshBtn").textContent = autoRefreshEnabled ? "⏱️ Auto: OFF" : "⏱️ Auto 15s: OFF";
+      document.getElementById("autoRefreshBtn").textContent = autoRefreshEnabled ? "⏱️ Auto 5m: ON" : "⏱️ Auto: OFF";
       document.getElementById("autoRefreshBtn").className = autoRefreshEnabled
         ? "bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold"
         : "bg-red-900 hover:bg-red-800 px-4 py-2 rounded-lg text-sm font-bold";
@@ -2064,7 +2069,7 @@
     function startAutoRefresh() {
       if (autoRefreshTimer) clearInterval(autoRefreshTimer);
       autoRefreshTimer = setInterval(() => {
-        if (autoRefreshEnabled && !state.isEditing && !document.hidden) {
+        if (autoRefreshEnabled && !state.isEditing) {
           loadData();
         }
       }, 300000);
