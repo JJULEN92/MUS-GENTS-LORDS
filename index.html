@@ -175,7 +175,6 @@
           <p class="text-xs text-slate-400">Vista principal para consultar, editar, confirmar o rechazar resultados.</p>
         </div>
         <div class="flex flex-wrap gap-2 items-center">
-          <button onclick="openMatchForm()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl text-sm">➕ Nueva partida</button>
           <select id="roundFilter" onchange="renderRoundDashboard()" class="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm">
             <option value="all">Todas las jornadas</option>
           </select>
@@ -855,12 +854,13 @@
       const filterEl = document.getElementById("roundFilter");
       if (!filterEl) return;
 
-      const rounds = [...new Set(state.matches.filter(m => m.round).map(m => String(m.round)))].sort((a,b) => Number(a)-Number(b));
+      const allMatches = state.matches.filter(m => m.id);
+      const rounds = [...new Set(allMatches.filter(m => m.round).map(m => String(m.round)))].sort((a,b) => Number(a)-Number(b));
       const current = filterEl.value || "all";
       filterEl.innerHTML = '<option value="all">Todas las jornadas</option>' + rounds.map(r => `<option value="${escapeHtml(r)}">Jornada ${escapeHtml(r)}</option>`).join("");
       filterEl.value = rounds.includes(current) ? current : "all";
 
-      const matches = state.matches.filter(m => m.id && (filterEl.value === "all" || String(m.round) === String(filterEl.value)));
+      const matches = allMatches.filter(m => filterEl.value === "all" || String(m.round) === String(filterEl.value));
       const summary = { total: matches.length, confirmed: 0, pending: 0, errors: 0 };
       matches.forEach(m => {
         const meta = getMatchMeta(m);
@@ -876,39 +876,73 @@
         card("Pendientes", summary.pending, "text-amber-400") +
         card("Errores / canceladas", summary.errors, "text-red-400");
 
-      const grouped = {};
-      matches.forEach(m => {
-        const r = String(m.round || "Sin jornada");
-        grouped[r] = grouped[r] || [];
-        grouped[r].push(m);
-      });
+      const isFinished = (m) => effectiveStatus(m) === "confirmed";
+      const isOpen = (m) => !isFinished(m);
+      const hasAnyResult = (m) => [m.vaca1, m.vaca2, m.vaca3].some(Boolean);
+      const roundNumber = (m) => Number(m.round || 999999);
 
-      document.getElementById("roundDashboard").innerHTML = Object.keys(grouped).sort((a,b) => Number(a)-Number(b)).map(round => `
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-          <h3 class="font-black text-lg mb-3">Jornada ${escapeHtml(round)}</h3>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            ${grouped[round].map(m => {
-              const meta = getMatchMeta(m);
-              const vacas = meta.calc.valid ? `${meta.calc.vacasA}-${meta.calc.vacasB}` : "Error";
-              const juegos = meta.calc.valid ? `${meta.calc.gamesA}-${meta.calc.gamesB}` : "-";
-              return `<div onclick='editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})' class="cursor-pointer bg-slate-900 border border-slate-800 rounded-xl p-4 hover:border-amber-500/50 transition-all">
-                <div class="flex items-center justify-between gap-2 mb-2">
-                  <div class="font-black">${escapeHtml(m.id)} · ${escapeHtml(m.fecha || "")}</div>
-                  <span class="text-[10px] px-2 py-1 border rounded-full font-bold ${meta.stateClass}">${meta.stateLabel}</span>
-                </div>
-                <div class="text-sm text-slate-300"><b class="text-emerald-400">A</b> ${escapeHtml(meta.teamA || "-")}</div>
-                <div class="text-sm text-slate-300"><b class="text-cyan-400">B</b> ${escapeHtml(meta.teamB || "-")}</div>
-                <div class="text-xs text-slate-400 mt-2">Vacas: <b>${vacas}</b> · Juegos: <b>${juegos}</b> · ${[m.vaca1,m.vaca2,m.vaca3].filter(Boolean).join("/")}</div>
-                <div class="text-xs text-emerald-300 mt-1">Ganador: ${escapeHtml(meta.winner || "-")}</div>
-                ${getAvatarPlayersFromMatch(m).length ? `<div class="text-xs text-amber-300 mt-1">🧞 Avatar: ${escapeHtml(getAvatarPlayersFromMatch(m).join(" / "))}</div>` : ""}
-                <div class="mt-3 flex flex-wrap gap-2">
-                  ${renderMatchActionButtons(m)}
-                </div>
-              </div>`;
-            }).join("")}
+      const openMatches = matches.filter(isOpen).sort((a,b) => roundNumber(a) - roundNumber(b) || String(a.id).localeCompare(String(b.id), undefined, { numeric: true }));
+      const confirmedMatches = matches.filter(isFinished).sort((a,b) => roundNumber(b) - roundNumber(a) || String(a.id).localeCompare(String(b.id), undefined, { numeric: true }));
+
+      const nextRoundNumber = openMatches.length ? roundNumber(openMatches[0]) : null;
+      const nextMatches = nextRoundNumber === null ? [] : openMatches.filter(m => roundNumber(m) === nextRoundNumber);
+      const followingMatches = nextRoundNumber === null ? [] : openMatches.filter(m => roundNumber(m) !== nextRoundNumber);
+
+      function renderMatchCard(m) {
+        const meta = getMatchMeta(m);
+        const vacas = meta.calc.valid ? `${meta.calc.vacasA}-${meta.calc.vacasB}` : "Error";
+        const juegos = meta.calc.valid ? `${meta.calc.gamesA}-${meta.calc.gamesB}` : "-";
+        const results = [m.vaca1,m.vaca2,m.vaca3].filter(Boolean).join("/") || "Sin resultado";
+        return `<div onclick='editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})' class="cursor-pointer bg-slate-900 border border-slate-800 rounded-xl p-4 hover:border-amber-500/50 transition-all">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="font-black">${escapeHtml(m.id)} · ${escapeHtml(m.fecha || "")}</div>
+            <span class="text-[10px] px-2 py-1 border rounded-full font-bold ${meta.stateClass}">${meta.stateLabel}</span>
           </div>
-        </div>
-      `).join("") || `<div class="text-slate-400 bg-slate-950 rounded-xl p-4">No hay partidas para mostrar.</div>`;
+          <div class="text-sm text-slate-300"><b class="text-emerald-400">A</b> ${escapeHtml(meta.teamA || "-")}</div>
+          <div class="text-sm text-slate-300"><b class="text-cyan-400">B</b> ${escapeHtml(meta.teamB || "-")}</div>
+          <div class="text-xs text-slate-400 mt-2">Resultado: <b>${escapeHtml(results)}</b> · Vacas: <b>${vacas}</b> · Juegos: <b>${juegos}</b></div>
+          <div class="text-xs text-emerald-300 mt-1">Ganador: ${escapeHtml(meta.winner || "-")}</div>
+          ${getAvatarPlayersFromMatch(m).length ? `<div class="text-xs text-amber-300 mt-1">🧞 Avatar: ${escapeHtml(getAvatarPlayersFromMatch(m).join(" / "))}</div>` : ""}
+          <div class="mt-3 flex flex-wrap gap-2">
+            ${renderMatchActionButtons(m)}
+          </div>
+        </div>`;
+      }
+
+      function groupByRound(list) {
+        const grouped = {};
+        list.forEach(m => {
+          const r = String(m.round || "Sin jornada");
+          grouped[r] = grouped[r] || [];
+          grouped[r].push(m);
+        });
+        return grouped;
+      }
+
+      function renderRoundGroup(title, list, subtitle = "", order = "asc") {
+        if (!list.length) return "";
+        const grouped = groupByRound(list);
+        const keys = Object.keys(grouped).sort((a,b) => order === "desc" ? Number(b)-Number(a) : Number(a)-Number(b));
+        return `<div class="space-y-4">
+          <div>
+            <h3 class="font-black text-xl">${title}</h3>
+            ${subtitle ? `<p class="text-xs text-slate-400 mt-1">${subtitle}</p>` : ""}
+          </div>
+          ${keys.map(round => `<div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+            <h4 class="font-black text-lg mb-3">Jornada ${escapeHtml(round)}</h4>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              ${grouped[round].map(renderMatchCard).join("")}
+            </div>
+          </div>`).join("")}
+        </div>`;
+      }
+
+      let html = "";
+      html += renderRoundGroup("🔥 Próxima jornada", nextMatches, "Primera jornada con partidas pendientes o sin resultado.");
+      html += renderRoundGroup("⏭️ Siguientes jornadas", followingMatches, "Partidas futuras pendientes cargadas desde Excel.");
+      html += renderRoundGroup("✅ Jornadas terminadas", confirmedMatches, "Partidas confirmadas, al final de la vista.", "desc");
+
+      document.getElementById("roundDashboard").innerHTML = html || `<div class="text-slate-400 bg-slate-950 rounded-xl p-4">No hay partidas para mostrar.</div>`;
     }
 
 
