@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v0.17.3</title>
+  <title>Torneo de Mus Gents & Lords · v0.17.4 RC</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json?v=0132" />
   <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
@@ -52,7 +52,7 @@
     }
   </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    VERSION 0.17.3 · AVATARES EN JUGADORES</div>
+    VERSION 0.17.4 RC · ADMIN BACKUP LOG</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
     <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0153') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
@@ -71,7 +71,7 @@
       </div>
 
       <div class="text-center text-[11px] text-slate-500 mt-5">
-        v0.17.3 · La sesión se recordará en este dispositivo
+        v0.17.4 RC · La sesión se recordará en este dispositivo
       </div>
     </div>
   </section>
@@ -83,7 +83,7 @@
           <img src="assets/logo.png?v=0132" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
           <div>
             <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-xs text-amber-300 font-black">v0.17.3 · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-xs text-amber-300 font-black">v0.17.4 RC · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -110,7 +110,7 @@
           <button onclick="loadData()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg text-sm font-bold">🔄 Actualizar datos</button>
           <button id="autoRefreshBtn" onclick="toggleAutoRefresh()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⏱️ Auto: OFF</button>
           <button id="installBtn" onclick="installApp()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-lg text-sm font-black">📲 Instalar</button>
-          <button onclick="exportBackupJson()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⬇️ Backup</button>
+          <button id="backupBtn" onclick="exportBackupJson()" class="hidden bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⬇️ Backup</button>
         </div>
       </div>
     </section>
@@ -134,7 +134,7 @@
       <button onclick="showTab(event,'history')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Hall of Fame</button>
       <button onclick="showTab(event,'rules')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Reglas</button>
       <button onclick="showTab(event,'players')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Jugadores</button>
-      <button onclick="showTab(event,'logs')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Log</button>
+      <button id="logsTabBtn" onclick="showTab(event,'logs')" class="tabBtn hidden bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Log</button>
     </nav>
 
     <section id="tab-standings" class="tabContent bg-slate-900 border border-slate-800 rounded-2xl p-4">
@@ -656,6 +656,7 @@
       renderHistory();
       renderLogs();
       renderActiveUser();
+      renderAdminControls();
     }
 
     function renderLoginPlayers() {
@@ -768,6 +769,25 @@
 
     function isAdmin() {
       return state.currentUser && (state.currentUser.role || "").toLowerCase() === "admin";
+    }
+
+
+    function renderAdminControls() {
+      const show = isAdmin();
+
+      const backupBtn = document.getElementById("backupBtn");
+      if (backupBtn) backupBtn.classList.toggle("hidden", !show);
+
+      const logsTabBtn = document.getElementById("logsTabBtn");
+      if (logsTabBtn) logsTabBtn.classList.toggle("hidden", !show);
+
+      if (!show) {
+        const logsPanel = document.getElementById("tab-logs");
+        if (logsPanel && !logsPanel.classList.contains("hidden")) {
+          const firstTab = document.querySelector(".tabBtn:not(.hidden)");
+          if (firstTab) showTab({ target: firstTab }, "standings");
+        }
+      }
     }
 
     function matchPlayers(m) {
@@ -1733,8 +1753,16 @@
 
 
     function renderLogs() {
+      const logsBody = document.getElementById("logsBody");
+      if (!logsBody) return;
+
+      if (!isAdmin()) {
+        logsBody.innerHTML = `<tr><td colspan="4" class="p-4 text-slate-400">Solo administrador.</td></tr>`;
+        return;
+      }
+
       const rows = [...state.logs].reverse().slice(0, 50);
-      document.getElementById("logsBody").innerHTML = rows.map(l => `
+      logsBody.innerHTML = rows.map(l => `
         <tr class="border-b border-slate-800">
           <td class="p-2 text-xs">${escapeHtml(l.timestamp)}</td>
           <td class="p-2">${escapeHtml(l.user)}</td>
@@ -1888,6 +1916,7 @@
       hideLoginScreen();
       renderActiveUser();
       renderPlayers();
+      renderAdminControls();
     }
 
     function logout() {
@@ -1895,6 +1924,7 @@
       localStorage.removeItem("mus_current_user_id");
       localStorage.removeItem("mus_current_user_name");
       renderActiveUser();
+      renderAdminControls();
       showLoginScreen(true);
     }
 
@@ -2203,6 +2233,10 @@
     }
 
     function showTab(event, tab) {
+      if (tab === "logs" && !isAdmin()) {
+        alert("Solo el administrador puede acceder al Log.");
+        return;
+      }
       document.querySelectorAll(".tabContent").forEach(el => el.classList.add("hidden"));
       document.getElementById("tab-" + tab).classList.remove("hidden");
       document.querySelectorAll(".tabBtn").forEach(el => {
@@ -2236,6 +2270,11 @@
 
 
     function exportBackupJson() {
+      if (!isAdmin()) {
+        alert("Solo el administrador puede descargar backups.");
+        return;
+      }
+
       const backup = {
         exportedAt: new Date().toISOString(),
         players: state.players,
