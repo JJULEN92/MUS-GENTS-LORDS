@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v0.17.1</title>
+  <title>Torneo de Mus Gents & Lords · v0.17.2</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json?v=0132" />
   <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
@@ -52,7 +52,7 @@
     }
   </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    VERSION 0.17.1 · CONFIRMACIÓN PAREJA RIVAL</div>
+    VERSION 0.17.2 · BLOQUEO DURANTE ACCIONES</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
     <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0153') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
@@ -71,7 +71,7 @@
       </div>
 
       <div class="text-center text-[11px] text-slate-500 mt-5">
-        v0.17.1 · La sesión se recordará en este dispositivo
+        v0.17.2 · La sesión se recordará en este dispositivo
       </div>
     </div>
   </section>
@@ -83,7 +83,7 @@
           <img src="assets/logo.png?v=0132" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
           <div>
             <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-xs text-amber-300 font-black">v0.17.1 · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-xs text-amber-300 font-black">v0.17.2 · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -496,6 +496,15 @@
     </section>
   </main>
 
+
+  <div id="busyOverlay" class="hidden fixed inset-0 z-[1000] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-950 border border-amber-500/40 rounded-3xl p-6 shadow-2xl text-center max-w-xs w-full">
+      <div class="mx-auto mb-4 w-12 h-12 rounded-full border-4 border-slate-700 border-t-amber-400 animate-spin"></div>
+      <div id="busyOverlayText" class="font-black text-amber-300">Procesando...</div>
+      <div class="text-xs text-slate-400 mt-2">No cierres ni pulses otros botones.</div>
+    </div>
+  </div>
+
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxLVAivtSJmnjluEyGOesCDuSUu7qiaV5kSn13cy1yQ2UXsvZs5hIF8-eDcoZOG_j8/exec";
 
@@ -514,10 +523,42 @@
     let autoRefreshEnabled = false;
     let autoRefreshTimer = null;
     let deferredInstallPrompt = null;
+    let appBusy = false;
 
     document.querySelectorAll(".field").forEach(el => {
       el.className = "bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm w-full";
     });
+
+
+    function setBusy(isBusy, message = "Procesando...") {
+      appBusy = isBusy;
+
+      const overlay = document.getElementById("busyOverlay");
+      const text = document.getElementById("busyOverlayText");
+
+      if (text) text.textContent = message;
+      if (overlay) overlay.classList.toggle("hidden", !isBusy);
+
+      document.querySelectorAll("button, select, input, textarea").forEach(el => {
+        if (el.id === "busyOverlayText") return;
+        if (isBusy) {
+          if (!el.dataset.prevDisabled) el.dataset.prevDisabled = el.disabled ? "1" : "0";
+          el.disabled = true;
+          el.classList.add("opacity-60", "pointer-events-none");
+        } else {
+          if (el.dataset.prevDisabled === "0") el.disabled = false;
+          if (el.dataset.prevDisabled === "1") el.disabled = true;
+          delete el.dataset.prevDisabled;
+          el.classList.remove("opacity-60", "pointer-events-none");
+        }
+      });
+    }
+
+    function isBusyGuard() {
+      if (appBusy) return true;
+      return false;
+    }
+
 
     async function api(action, payload = {}) {
       const res = await fetch(API_URL, {
@@ -532,7 +573,9 @@
       }
     }
 
-    async function loadData() {
+    async function loadData(skipBusyGuard = false) {
+      if (!skipBusyGuard && isBusyGuard()) return;
+      if (!skipBusyGuard) setBusy(true, "Actualizando datos...");
       setStatus("Cargando datos...");
       try {
         const data = await api("getData");
@@ -548,6 +591,8 @@
       } catch (err) {
         console.error(err);
         setStatus("Error cargando datos: " + err.message);
+      } finally {
+        if (!skipBusyGuard) setBusy(false);
       }
     }
 
@@ -1950,6 +1995,7 @@
     }
 
     function editMatch(m) {
+      if (isBusyGuard()) return;
       if (!requireLogin()) return;
       if (!canEditMatch(m)) return alert("Solo puedes editar partidas en las que participas.");
       ensureMatchFormInRounds();
@@ -1974,6 +2020,7 @@
     }
 
     async function saveMatch() {
+      if (isBusyGuard()) return;
       if (!requireLogin()) return;
 
       const calc = calculateMatch(
@@ -2029,21 +2076,25 @@
       if (!payload.id || !payload.fecha || !payload.round) return alert("Faltan ID, fecha o jornada.");
 
       setStatus("Guardando partida...");
+      setBusy(true, "Guardando resultado...");
       try {
         const res = await api("saveMatch", payload);
         if (!res.ok) throw new Error(res.error || "Error guardando");
         closeMatchForm();
-        await loadData();
+        await loadData(true);
         alert("Partida guardada.");
       } catch (err) {
         console.error(err);
         alert("Error guardando partida: " + err.message);
         setStatus("Error guardando partida");
+      } finally {
+        setBusy(false);
       }
     }
 
 
     async function updateMatchStatus(matchId, newStatus, extra = {}) {
+      if (isBusyGuard()) return;
       if (!requireLogin()) return;
       const match = state.matches.find(m => String(m.id) === String(matchId));
       if (!match) return alert("Partida no encontrada.");
@@ -2057,9 +2108,14 @@
         ...extra
       };
 
-      const res = await api("saveMatch", updated);
-      if (!res.ok) return alert("Error actualizando partida.");
-      await loadData();
+      setBusy(true, newStatus === "confirmed" ? "Confirmando resultado..." : newStatus === "rejected" ? "Rechazando resultado..." : "Actualizando partida...");
+      try {
+        const res = await api("saveMatch", updated);
+        if (!res.ok) return alert("Error actualizando partida.");
+        await loadData(true);
+      } finally {
+        setBusy(false);
+      }
     }
 
     async function confirmMatch(matchId) {
