@@ -1,0 +1,2549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Torneo de Mus Gents & Lords · v1.0.8</title>
+  <meta name="theme-color" content="#020617" />
+  <link rel="manifest" href="manifest.json?v=0132" />
+  <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Mus G&L" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <style>
+    body {
+      background:
+        linear-gradient(180deg, rgba(2,6,23,.78), rgba(2,6,23,.95)),
+        url('assets/background.jpg?v=0132') center center / cover fixed no-repeat;
+    }
+    main, header, section, nav {
+      position: relative;
+      z-index: 1;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(2,6,23,.35);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .hero-bg {
+      background: rgba(15,23,42,.86);
+      backdrop-filter: blur(8px);
+    }
+    .player-badge {
+      display:inline-flex; align-items:center; gap:.25rem;
+      padding:.25rem .5rem; border-radius:999px;
+      background:rgba(15,23,42,.85); border:1px solid rgba(51,65,85,.9);
+      font-size:.8rem; line-height:1.1;
+    }
+  
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+
+</style>
+  <style>
+    .hero-bg {
+      background: rgba(15,23,42,.88);
+      backdrop-filter: blur(6px);
+    }
+    .player-badge {
+      display:inline-flex; align-items:center; gap:.25rem;
+      padding:.25rem .5rem; border-radius:999px;
+      background:rgba(15,23,42,.85); border:1px solid rgba(51,65,85,.9);
+      font-size:.8rem; line-height:1.1;
+    }
+  
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+
+</style>
+  <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
+    VERSION 1.0.8 · UX TABS Y ADMIN</div>
+  <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
+    <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0153') center center / cover no-repeat;"></div>
+    <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
+      <div class="text-center">
+        <img src="assets/logo.png?v=0153" onerror="this.src='assets/logo.png'" class="w-28 h-28 rounded-3xl bg-white p-2 object-contain mx-auto border border-amber-400/70" />
+        <h1 class="text-3xl font-black mt-4">Torneo de Mus</h1>
+        <p class="text-amber-300 font-black text-sm">Gents & Lords</p>
+      </div>
+
+      <div class="mt-6 space-y-3">
+        <select id="loginScreenPlayer" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm">
+          <option value="">Selecciona jugador</option>
+        </select>
+        <input id="loginScreenPassword" type="password" placeholder="Clave" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm" />
+        <button onclick="loginFromScreen()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-3 rounded-xl">Entrar</button>
+      </div>
+
+      <div class="text-center text-[11px] text-slate-500 mt-5">
+        v1.0.8 · La sesión se recordará en este dispositivo
+      </div>
+    </div>
+  </section>
+
+  <header class="hero-bg border-b border-emerald-800 px-3 py-2 md:p-4 sticky top-0 z-10 shadow-2xl">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
+      <div>
+        <div class="flex items-center gap-2 md:gap-3 min-w-0">
+          <img src="assets/logo.png?v=0132" class="w-9 h-9 md:w-14 md:h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70 shrink-0" />
+          <div>
+            <h1 class="text-lg md:text-2xl font-black text-white leading-tight whitespace-nowrap truncate">🏆 Torneo de Mus Gents & Lords</h1>
+            <p class="text-[10px] md:text-xs text-amber-300 font-black leading-tight whitespace-nowrap truncate">v1.0.8 · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="hidden md:flex flex-wrap gap-2 items-center justify-end">
+        <div class="bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-2 text-sm">
+          <span class="text-slate-400">Usuario:</span>
+          <span id="headerUser" class="font-black text-amber-300">No identificado</span>
+        </div>
+        <button onclick="showLoginScreen(true)" class="hidden md:inline-flex bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-lg text-sm">Cambiar usuario</button>
+        <button onclick="logout()" class="hidden md:inline-flex bg-red-900 hover:bg-red-800 text-white font-bold px-3 py-2 rounded-lg text-sm">Salir</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-4 space-y-6">
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-3 md:p-4">
+      <button onclick="toggleTopPanel()" class="w-full flex items-center justify-between gap-3 text-left md:pointer-events-none">
+        <div class="min-w-0">
+          <p class="text-sm truncate">👤 <span id="activeUser" class="font-bold text-amber-400">No identificado</span></p>
+          <p class="text-xs text-slate-400 truncate">Estado: <span id="appStatus">Cargando datos...</span></p>
+        </div>
+        <div class="md:hidden bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm font-black">⚙️</div>
+      </button>
+
+      <div id="topPanelActions" class="hidden md:flex flex-wrap gap-2 items-center mt-3 md:mt-4">
+        <button onclick="loadData()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg text-sm font-bold">🔄 Actualizar datos</button>
+        <button id="autoRefreshBtn" onclick="toggleAutoRefresh()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⏱️ Auto: OFF</button>
+        <button id="installBtn" onclick="installApp()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-lg text-sm font-black">📲 Instalar</button>
+        <button id="backupBtn" onclick="exportBackupJson()" class="hidden bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⬇️ Backup</button>
+        <button onclick="showLoginScreen(true)" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-2 rounded-lg text-sm">Cambiar usuario</button>
+        <button onclick="logout()" class="bg-red-900 hover:bg-red-800 text-white font-bold px-4 py-2 rounded-lg text-sm">Salir</button>
+      </div>
+    </section>
+
+    
+    <section id="pendingPanel" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <div class="font-black text-amber-300">🔔 Resultados pendientes de confirmación</div>
+          <div id="pendingPanelText" class="text-sm text-slate-300">Hay partidas pendientes.</div>
+        </div>
+        <button onclick="showPendingMatches()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl">Ver pendientes</button>
+      </div>
+    </section>
+
+<nav class="flex gap-1 overflow-x-auto scrollbar-hide pb-1">
+      <button onclick="showTab(event,'standings')" class="tabBtn bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Rank</button>
+      <button onclick="showTab(event,'rounds')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Games</button>
+      <button onclick="showTab(event,'stats')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Stats</button>
+      <button onclick="showTab(event,'venues')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Sedes</button>
+      <button onclick="showTab(event,'history')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Hall</button>
+      <button onclick="showTab(event,'rules')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Rules</button>
+      <button onclick="showTab(event,'players')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Gents</button>
+      <button id="logsTabBtn" onclick="showTab(event,'logs')" class="tabBtn hidden bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Log</button>
+    </nav>
+
+    <section id="tab-standings" class="tabContent bg-slate-900 border border-slate-800 rounded-2xl p-4">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
+        <div>
+          <h2 class="text-xl font-black">📊 Clasificación automática</h2>
+          <p class="text-xs text-slate-400">Orden: Puntos → JG → menor JP → menor Penal → Sin Avatar</p>
+        </div>
+        <button id="saveStandingsBtn" onclick="saveCalculatedStandings()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-lg text-sm">💾 Volcar clasificación al Sheet</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="text-xs uppercase text-slate-400 border-b border-slate-700">
+            <tr>
+              <th class="text-left p-2">Pos</th>
+              <th class="text-left p-2">Jugador</th>
+              <th class="text-center p-2">PJ</th>
+              <th class="text-center p-2 text-amber-400">Puntos</th>
+              <th class="text-center p-2">V+</th>
+              <th class="text-center p-2">V-</th>
+              <th class="text-center p-2 text-emerald-400">JG</th>
+              <th class="text-center p-2 text-red-400">JP</th>
+              <th class="text-center p-2">Penal</th>
+              <th class="text-center p-2">Avatar</th>
+              <th class="text-center p-2">Sin Avatar</th>
+            </tr>
+          </thead>
+          <tbody id="standingsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+
+    <section id="tab-rounds" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-black">📅 Jornadas y resultados</h2>
+          <p class="text-xs text-slate-400">Vista principal para consultar, editar, confirmar o rechazar resultados.</p>
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <select id="roundFilter" onchange="renderRoundDashboard()" class="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm">
+            <option value="all">Todas las jornadas</option>
+          </select>
+        </div>
+      </div>
+      <div id="roundSummaryCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+      <div id="roundDashboard" class="space-y-4"></div>
+    </section>
+
+
+    <section id="tab-stats" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-5">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-black">📊 Estadísticas avanzadas</h2>
+          <p class="text-xs text-slate-400">Rankings automáticos del torneo.</p>
+        </div>
+      </div>
+
+      <div id="topCards" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3"></div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h3 class="font-black mb-3">🏆 Mejor ratio de victorias</h3>
+          <div id="winRatioTable"></div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h3 class="font-black mb-3">🔥 Racha actual</h3>
+          <div id="streakTable"></div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h3 class="font-black mb-3">🤝 Mejores parejas</h3>
+          <div id="pairsTable"></div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h3 class="font-black mb-3">🎯 Juegos ganados</h3>
+          <div id="gamesWonTable"></div>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="tab-rules" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6">
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3">
+        <div>
+          <div class="inline-flex px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-black uppercase tracking-wider">Reglamento oficial 2025-2026</div>
+          <h2 class="text-2xl font-black mt-3">📜 Código Gents & Lords</h2>
+          <p class="text-sm text-slate-400 max-w-3xl">Resumen operativo del reglamento: lo importante para jugar, resolver dudas y evitar discusiones de mesa.</p>
+        </div>
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-sm">
+          <div class="text-slate-400 text-xs uppercase font-bold">Formato oficial</div>
+          <div class="text-white font-black">Partida: mejor de 3 vacas · Vaca: mejor de 5 juegos · Juego: 40 tantos</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="bg-slate-950 border border-emerald-800/40 rounded-2xl p-5">
+          <div class="text-3xl mb-2">🎴</div>
+          <h3 class="font-black text-lg text-emerald-300">Formato y puntuación</h3>
+          <ul class="text-sm text-slate-300 mt-3 space-y-2">
+            <li><b>Victoria:</b> 3 puntos para cada jugador de la pareja ganadora.</li>
+            <li><b>Derrota:</b> 0 puntos.</li>
+            <li><b>Desempates:</b> puntos → juegos ganados → menos juegos perdidos → menos penalizaciones → más partidas sin avatar.</li>
+            <li><b>Empate absoluto:</b> se resuelve con quijotes de Brugal cola hasta rendición honorable.</li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-950 border border-cyan-800/40 rounded-2xl p-5">
+          <div class="text-3xl mb-2">👥</div>
+          <h3 class="font-black text-lg text-cyan-300">Fase liguilla</h3>
+          <ul class="text-sm text-slate-300 mt-3 space-y-2">
+            <li>8 jugadores en formato rotativo.</li>
+            <li>7 partidas: una vez con cada compañero y al menos una vez contra cada rival.</li>
+            <li>Las partidas se programan mensualmente, normalmente el último viernes.</li>
+            <li>Los 4 primeros pasan a la Gran Final.</li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-950 border border-amber-800/40 rounded-2xl p-5">
+          <div class="text-3xl mb-2">🧙‍♂️</div>
+          <h3 class="font-black text-lg text-amber-300">Avatar y ausencias</h3>
+          <ul class="text-sm text-slate-300 mt-3 space-y-2">
+            <li>Si un jugador no puede asistir, puede intentar cambiar fecha con una semana de antelación.</li>
+            <li>Si no se puede cuadrar, puede buscar un avatar válido.</li>
+            <li>Si no encuentra avatar: -1 punto para él y +1 punto para el resto de la mesa.</li>
+            <li>El avatar debe ser varón, conocido, mayor de 30 y no jugador activo, salvo eliminados habilitados.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5">
+          <h3 class="font-black text-lg mb-4">🤫 Señas y cartas</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-amber-300">Ocho reyes y ocho ases</b><br><span class="text-slate-400">Formato oficial de baraja.</span></div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-amber-300">Señas tradicionales</b><br><span class="text-slate-400">Las falsas o no tradicionales quedan prohibidas.</span></div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-amber-300">No se pregunta seña</b><br><span class="text-slate-400">Toda seña implica jugada real.</span></div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-amber-300">Sin deje</b><br><span class="text-slate-400">En pares, juego o punto se juega sin deje.</span></div>
+          </div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5">
+          <h3 class="font-black text-lg mb-4">⚖️ Incidencias de mesa</h3>
+          <div class="space-y-3 text-sm text-slate-300">
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-cyan-300">Mus visto:</b> admitido si se descubre involuntariamente una carta; en caso de duda decide el Mano.</div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-cyan-300">CANTA:</b> si alguien niega pares o juego teniendo, los contrarios pueden exigir que declare la verdad.</div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-cyan-300">Perete:</b> no existe. 4,5,6,7 no da derecho a cartas nuevas ni tanto. Sí autoriza burla general.</div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-cyan-300">Discrepancias:</b> deciden los Comisarios de Juego; resolución inapelable.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-r from-amber-500/10 to-emerald-500/10 border border-amber-500/30 rounded-2xl p-5">
+        <h3 class="font-black text-lg">👑 Gran Final y trofeos</h3>
+        <p class="text-sm text-slate-300 mt-2">Los cuatro mejores juegan la gran final: 1º + 4º contra 2º + 3º. El ganador de liguilla recibe el reconocimiento de <b>EL PUTO AMO</b>. Los ganadores finales son <b>THE CHAMPIONS</b> y obtienen trofeo, certificado de expertos y privilegio de propuesta de nuevos jugadores. El último clasificado con participación suficiente recibe la honorable <b>Cuchara de Madera</b>.</p>
+      </div>
+    </section>
+
+    
+    <section id="tab-venues" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6">
+      <div class="flex items-end justify-between gap-4 mb-5">
+        <div>
+          <h2 class="text-2xl font-black">📍 Sedes del circuito</h2>
+          <p class="text-sm text-slate-400">Gestionadas dinámicamente desde Google Sheets.</p>
+        </div>
+      </div>
+
+      <div id="venuesGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+    </section>
+
+
+    
+
+    <section id="tab-history" class="tabContent hidden p-4 sm:p-6">
+      <div class="mb-7">
+        <h2 class="text-4xl sm:text-5xl font-black tracking-tight">🏛️ Hall of Fame</h2>
+      </div>
+
+      <div id="historyGrid" class="space-y-4"></div>
+    </section>
+
+
+
+
+    <section id="tab-matches" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-5">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-black">🎴 Partidas</h2>
+          <p class="text-xs text-slate-400">Formato vaca: 30, 31, 32 si gana Pareja A; 03, 13, 23 si gana Pareja B.</p>
+        </div>
+        <button onclick="openMatchForm()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-lg text-sm">➕ Añadir/Editar partida</button>
+      </div>
+
+      <div id="matchForm" class="hidden bg-slate-950 border border-slate-700 rounded-2xl p-4 space-y-4">
+        <h3 class="font-bold text-amber-400">Registrar partida</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <input id="matchId" placeholder="ID, ej. J1-M1" class="field" />
+          <input id="matchFecha" placeholder="Fecha, ej. 26/12/2025" class="field" />
+          <input id="matchRound" placeholder="Jornada, ej. 1" class="field" />
+          <select id="matchStatus" class="field">
+            <option value="confirmed">Confirmada</option>
+            <option value="pending">Pendiente</option>
+            <option value="rejected">Rechazada</option>
+            <option value="cancelled">Cancelada</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+            <h4 class="font-bold text-emerald-400 mb-2">Pareja A</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <select id="teamA1" class="field playerSelect" onchange="previewMatchResult()"></select>
+              <select id="teamA2" class="field playerSelect" onchange="previewMatchResult()"></select>
+            </div>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+            <h4 class="font-bold text-cyan-400 mb-2">Pareja B</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <select id="teamB1" class="field playerSelect" onchange="previewMatchResult()"></select>
+              <select id="teamB2" class="field playerSelect" onchange="previewMatchResult()"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+          <h4 class="font-bold text-white mb-2">Resultado por vacas</h4>
+          <p class="text-xs text-slate-400 mb-3">Introduce solo las vacas jugadas. Ejemplo: 30 / 13 / 31.</p>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+              <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 1</label>
+              <input id="vaca1" placeholder="30 / 31 / 32 / 03 / 13 / 23" class="field mb-2" oninput="previewMatchResult()" />
+              <div class="grid grid-cols-3 gap-1 resultButtons" data-target="vaca1"></div>
+            </div>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+              <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 2</label>
+              <input id="vaca2" placeholder="30 / 31 / 32 / 03 / 13 / 23" class="field mb-2" oninput="previewMatchResult()" />
+              <div class="grid grid-cols-3 gap-1 resultButtons" data-target="vaca2"></div>
+            </div>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+              <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 3</label>
+              <input id="vaca3" placeholder="Solo si hace falta desempate" class="field mb-2" oninput="previewMatchResult()" />
+              <div class="grid grid-cols-3 gap-1 resultButtons" data-target="vaca3"></div>
+            </div>
+          </div>
+          <div class="mt-3 bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm">
+            <div id="matchPreview" class="text-slate-300">Resultado pendiente de calcular.</div>
+            <div id="matchValidation" class="text-xs mt-2 text-slate-400"></div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+          <h4 class="font-bold text-white mb-2">🧞 Avatar usado</h4>
+          <p class="text-xs text-slate-400 mb-3">Marca bajo cada jugador si esa plaza fue cubierta por avatar. Puede haber varios.</p>
+          <div id="matchAvatarFlags" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2"></div>
+        </div>
+
+        <div class="bg-red-950/40 border border-red-800/60 rounded-xl p-3">
+          <h4 class="font-bold text-red-300 mb-2">⚠️ Penalización por falta</h4>
+          <p class="text-xs text-slate-400 mb-3">Marca si un jugador no se presentó y la partida no pudo jugarse. Al jugador marcado se le resta 1 punto y al resto de jugadores de la partida se les suma 1.</p>
+          <div id="matchFaultFlags" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2"></div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button onclick="saveMatch()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg font-bold text-sm">💾 Guardar partida</button>
+          <button onclick="closeMatchForm()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold text-sm">Cancelar</button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="text-xs uppercase text-slate-400 border-b border-slate-700">
+            <tr>
+              <th class="text-left p-2">ID</th>
+              <th class="text-center p-2">Fecha</th>
+              <th class="text-center p-2">J</th>
+              <th class="text-left p-2">Pareja A</th>
+              <th class="text-left p-2">Pareja B</th>
+              <th class="text-center p-2">Vacas</th>
+              <th class="text-center p-2">Games</th>
+              <th class="text-center p-2">Ganador</th>
+              <th class="text-center p-2">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="matchesBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    
+
+    <section id="tab-players" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6">
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-black">👥 Jugadores y perfiles</h2>
+          <p class="text-sm text-slate-400 mt-1">Ficha de jugador con foto, descripción, insignias y estadísticas personales.</p>
+        </div>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+          <label class="block text-xs uppercase font-bold text-slate-400 mb-2">Ver ficha de</label>
+          <select id="profilePlayerSelect" onchange="selectProfilePlayer(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm min-w-[220px]"></select>
+        </div>
+      </div>
+
+      <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-4">
+        <h3 class="font-black text-lg mb-3">🏷️ Leyenda de símbolos</h3>
+        <div class="flex flex-wrap gap-3 text-sm">
+          <div class="player-badge"><span>🧞</span><span>Avatar</span></div>
+          <div class="player-badge"><span>⚠️</span><span>Penalización</span></div>
+          <div class="player-badge"><span>🥇</span><span>Puto Amo</span></div>
+          <div class="player-badge"><span>🏆</span><span>Winner</span></div>
+          <div class="player-badge"><span>👏</span><span>Finalista</span></div>
+          <div class="player-badge"><span>🥄</span><span>Cuchara de madera</span></div>
+          <div class="player-badge"><span>🏛️</span><span>Fundador</span></div>
+        </div>
+      </div>
+
+      <div id="playerFeaturedCard"></div>
+
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+        <h3 class="font-black text-lg mb-3">🪪 Mi perfil</h3>
+        <p class="text-xs text-slate-400 mb-4">Inicia sesión con tu jugador para modificar tu foto y descripción.</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs uppercase font-bold text-slate-400 mb-2">Foto / avatar URL</label>
+            <input id="profileAvatar" class="field" placeholder="https://..." />
+            <p class="text-xs text-slate-500 mt-2">Debe ser una URL pública de imagen.</p>
+          </div>
+          <div class="lg:col-span-2">
+            <label class="block text-xs uppercase font-bold text-slate-400 mb-2">Descripción del jugador</label>
+            <textarea id="profileDescription" class="field min-h-[100px]" placeholder="Especialista en órdagos imposibles, presión psicológica y cierre de vacas..."></textarea>
+          </div>
+        </div>
+
+        <div class="flex justify-end mt-4">
+          <button onclick="saveMyProfile()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl">💾 Guardar perfil</button>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="font-black text-lg mb-3">📇 Todos los jugadores</h3>
+        <div id="playersGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      </div>
+    </section>
+
+
+
+    <section id="tab-logs" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4">
+      <h2 class="text-xl font-black mb-4">🧾 Log de cambios</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="text-xs uppercase text-slate-400 border-b border-slate-700">
+            <tr>
+              <th class="text-left p-2">Fecha</th>
+              <th class="text-left p-2">Usuario</th>
+              <th class="text-left p-2">Acción</th>
+              <th class="text-left p-2">Detalle</th>
+            </tr>
+          </thead>
+          <tbody id="logsBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+
+
+  <div id="iosInstallModal" class="hidden fixed inset-0 z-[1001] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-950 border border-amber-500/40 rounded-3xl p-6 shadow-2xl max-w-sm w-full">
+      <div class="text-3xl mb-2">📲</div>
+      <h3 class="text-xl font-black text-amber-300">Instalar en iPhone</h3>
+      <p class="text-sm text-slate-300 mt-3">En iPhone la instalación se hace desde Safari:</p>
+      <ol class="text-sm text-slate-300 mt-4 space-y-2 list-decimal list-inside">
+        <li>Pulsa el botón <b>Compartir</b> de Safari.</li>
+        <li>Selecciona <b>Añadir a pantalla de inicio</b>.</li>
+        <li>Confirma con <b>Añadir</b>.</li>
+      </ol>
+      <p class="text-xs text-slate-500 mt-4">Si ya estás usando la app desde el icono de inicio, no hace falta hacer nada.</p>
+      <button onclick="closeIosInstallModal()" class="mt-5 w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-3 rounded-xl">Entendido</button>
+    </div>
+  </div>
+
+  <div id="busyOverlay" class="hidden fixed inset-0 z-[1000] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-950 border border-amber-500/40 rounded-3xl p-6 shadow-2xl text-center max-w-xs w-full">
+      <div class="mx-auto mb-4 w-12 h-12 rounded-full border-4 border-slate-700 border-t-amber-400 animate-spin"></div>
+      <div id="busyOverlayText" class="font-black text-amber-300">Procesando...</div>
+      <div class="text-xs text-slate-400 mt-2">No cierres ni pulses otros botones.</div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxVpobzZbofhiWETTwMJXmBY3C96DtyH89OSn1pSXB2nJVIgOFvguMoTrgry7Ugb12n/exec";
+
+    let state = {
+      players: [],
+      matches: [],
+      logs: [],
+      history: [],
+      venues: [],
+      currentUser: null,
+      calculatedStandings: [],
+      selectedProfilePlayer: '',
+      isEditing: false
+    };
+
+    let autoRefreshEnabled = false;
+    let autoRefreshTimer = null;
+    let deferredInstallPrompt = null;
+    let appBusy = false;
+
+    document.querySelectorAll(".field").forEach(el => {
+      el.className = "bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm w-full";
+    });
+
+
+    function setBusy(isBusy, message = "Procesando...") {
+      appBusy = isBusy;
+
+      const overlay = document.getElementById("busyOverlay");
+      const text = document.getElementById("busyOverlayText");
+
+      if (text) text.textContent = message;
+      if (overlay) overlay.classList.toggle("hidden", !isBusy);
+
+      document.querySelectorAll("button, select, input, textarea").forEach(el => {
+        if (el.id === "busyOverlayText") return;
+        if (isBusy) {
+          if (!el.dataset.prevDisabled) el.dataset.prevDisabled = el.disabled ? "1" : "0";
+          el.disabled = true;
+          el.classList.add("opacity-60", "pointer-events-none");
+        } else {
+          if (el.dataset.prevDisabled === "0") el.disabled = false;
+          if (el.dataset.prevDisabled === "1") el.disabled = true;
+          delete el.dataset.prevDisabled;
+          el.classList.remove("opacity-60", "pointer-events-none");
+        }
+      });
+    }
+
+    function isBusyGuard() {
+      if (appBusy) return true;
+      return false;
+    }
+
+
+    async function api(action, payload = {}) {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action, ...payload })
+      });
+      const txt = await res.text();
+      try {
+        return JSON.parse(txt);
+      } catch (e) {
+        throw new Error("Respuesta no JSON del backend: " + txt.slice(0, 200));
+      }
+    }
+
+    async function loadData(skipBusyGuard = false) {
+      if (!skipBusyGuard && isBusyGuard()) return;
+      if (!skipBusyGuard) setBusy(true, "Actualizando datos...");
+      setStatus("Cargando datos...");
+      try {
+        const data = await api("getData");
+        if (!data.ok) throw new Error(data.error || "Error desconocido");
+        state.players = normalizePlayers(data.players || []);
+        restoreLogin();
+        state.matches = data.matches || [];
+        state.logs = data.logs || [];
+        state.history = normalizeHistory(data.history || []);
+        state.venues = normalizeVenues(data.venues || []);
+        renderAll();
+        setStatus("Datos cargados correctamente");
+      } catch (err) {
+        console.error(err);
+        setStatus("Error cargando datos: " + err.message);
+      } finally {
+        if (!skipBusyGuard) setBusy(false);
+      }
+    }
+
+
+    function normalizeHistory(history) {
+      return (history || []).filter(h => h.season || h.category || h.winners).map(h => ({
+        season: h.season || "",
+        category: h.category || "",
+        winners: h.winners || "",
+        notes: h.notes || ""
+      }));
+    }
+
+    function normalizeVenues(venues) {
+      return (venues || []).filter(v => v.name).map(v => ({
+        name: v.name || "",
+        type: v.type || "",
+        address: v.address || "",
+        mapsUrl: v.mapsUrl || "",
+        description: v.description || "",
+        image: v.image || ""
+      }));
+    }
+
+    function normalizePlayers(players) {
+      return players.filter(p => p.id !== "" && p.name).map(p => {
+        const rawAvatar = p.avatar || "";
+        const rawPhoto = p.photoUrl || p.photo || p.image || "";
+        const avatarLooksNumeric = rawAvatar !== "" && !isNaN(Number(rawAvatar));
+        return {
+          ...p,
+          id: String(p.id),
+          name: normalizeName(p.name),
+          role: p.role || "player",
+          penal: Number(p.penal || 0),
+          avatarCount: avatarLooksNumeric ? Number(rawAvatar || 0) : Number(p.avatarCount || p.avatar_used || p.flagav || 0),
+          avatar: avatarLooksNumeric ? rawPhoto : rawAvatar,
+          description: p.description || p.descripcion || p.bio || "",
+          flagav: Number(p.flagav || 0),
+          flagpen: Number(p.flagpen || 0),
+          flagpa: Number(p.flagpa || 0),
+          flagwin: Number(p.flagwin || 0),
+          flagfinal: Number(p.flagfinal || 0),
+          flagcm: Number(p.flagcm || 0),
+          flagsf: Number(p.flagsf || 0)
+        };
+      });
+    }
+
+    function renderAll() {
+      renderLoginPlayers();
+      renderPlayerSelects();
+      state.calculatedStandings = calculateStandings();
+      renderStandings();
+      renderRoundDashboard();
+      renderStats();
+      renderPendingPanel();
+      renderMatches();
+      renderPlayers();
+      renderVenues();
+      renderHistory();
+      renderLogs();
+      renderActiveUser();
+      renderAdminControls();
+    }
+
+    function renderLoginPlayers() {
+      const options = '<option value="">Selecciona jugador</option>' + state.players.map(p =>
+        `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}${p.role === "admin" ? " 👑" : ""}</option>`
+      ).join("");
+
+      const oldSelect = document.getElementById("loginPlayer");
+      if (oldSelect) {
+        const current = oldSelect.value;
+        oldSelect.innerHTML = options;
+        oldSelect.value = current;
+      }
+
+      const screenSelect = document.getElementById("loginScreenPlayer");
+      if (screenSelect) {
+        const current = screenSelect.value;
+        screenSelect.innerHTML = options;
+        screenSelect.value = current;
+      }
+    }
+
+    function renderPlayerSelects() {
+      const options = '<option value="">Jugador</option>' + state.players.map(p => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`).join("");
+      document.querySelectorAll(".playerSelect").forEach(sel => {
+        const current = sel.value;
+        sel.innerHTML = options;
+        sel.value = current;
+      });
+    }
+
+    function calculateStandings() {
+      const table = new Map();
+
+      state.players.forEach(p => {
+        table.set(p.name, {
+          player: p.name, pj: 0, points: 0, vacasWon: 0, vacasLost: 0,
+          jg: 0, jp: 0,
+          penal: Number(p.penal || 0),
+          avatar: Number(p.avatarCount || 0),
+          sinAvatar: 0
+        });
+      });
+
+      state.matches.filter(m => effectiveStatus(m) === "confirmed").forEach(m => {
+        const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3);
+        if (!calc.valid || !calc.complete) return;
+
+        const aPlayers = [normalizeName(m.teamA_player1 || m.teamA1), normalizeName(m.teamA_player2 || m.teamA2)].filter(Boolean);
+        const bPlayers = [normalizeName(m.teamB_player1 || m.teamB1), normalizeName(m.teamB_player2 || m.teamB2)].filter(Boolean);
+
+        [...aPlayers, ...bPlayers].forEach(name => {
+          if (!table.has(name)) {
+            table.set(name, { player: name, pj: 0, points: 0, vacasWon: 0, vacasLost: 0, jg: 0, jp: 0, penal: 0, avatar: 0, sinAvatar: 0 });
+          }
+        });
+
+        aPlayers.forEach(name => {
+          const r = table.get(name);
+          r.pj += 1;
+          r.vacasWon += calc.vacasA;
+          r.vacasLost += calc.vacasB;
+          r.jg += calc.gamesA;
+          r.jp += calc.gamesB;
+          if (calc.winnerSide === "A") r.points += 3;
+        });
+
+        bPlayers.forEach(name => {
+          const r = table.get(name);
+          r.pj += 1;
+          r.vacasWon += calc.vacasB;
+          r.vacasLost += calc.vacasA;
+          r.jg += calc.gamesB;
+          r.jp += calc.gamesA;
+          if (calc.winnerSide === "B") r.points += 3;
+        });
+
+        // Avatares usados en la partida: solo cuentan en Avatar/Sin Avatar.
+        // NO modifican puntos ni penalizaciones.
+        getAvatarPlayersFromMatch(m).forEach(name => {
+          const clean = normalizeName(name);
+          if (!clean) return;
+
+          if (!table.has(clean)) {
+            table.set(clean, { player: clean, pj: 0, points: 0, vacasWon: 0, vacasLost: 0, jg: 0, jp: 0, penal: 0, avatar: 0, sinAvatar: 0 });
+          }
+
+          table.get(clean).avatar += 1;
+        });
+
+        // Penalización por falta/no presentación:
+        // - al jugador marcado se le suma 1 penalización, que se resta al final;
+        // - al resto de jugadores de la partida se les suma 1 punto.
+        const faultPlayers = getFaultPlayersFromMatch(m);
+        const faultSet = new Set(faultPlayers);
+
+        faultPlayers.forEach(name => {
+          const clean = normalizeName(name);
+          if (!clean) return;
+
+          if (!table.has(clean)) {
+            table.set(clean, { player: clean, pj: 0, points: 0, vacasWon: 0, vacasLost: 0, jg: 0, jp: 0, penal: 0, avatar: 0, sinAvatar: 0 });
+          }
+
+          table.get(clean).penal += 1;
+        });
+
+        [...aPlayers, ...bPlayers]
+          .filter(name => name && !faultSet.has(name))
+          .forEach(name => {
+            const r = table.get(name);
+            if (r) r.points += faultPlayers.length;
+          });
+      });
+
+      return [...table.values()].map(r => ({
+        ...r,
+        points: Number(r.points) - Number(r.penal || 0),
+        sinAvatar: Math.max(0, Number(r.pj || 0) - Number(r.avatar || 0))
+      })).sort((a,b) =>
+        b.points - a.points ||
+        b.jg - a.jg ||
+        a.jp - b.jp ||
+        a.penal - b.penal ||
+        b.sinAvatar - a.sinAvatar ||
+        a.player.localeCompare(b.player)
+      );
+    }
+
+    function renderStandings() {
+      const rows = state.calculatedStandings;
+      document.getElementById("standingsBody").innerHTML = rows.map((r, i) => `
+        <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+          <td class="p-2 font-bold">${i+1}</td>
+          <td class="p-2 font-bold">${renderPlayerMini(r.player)}</td>
+          <td class="p-2 text-center">${r.pj}</td>
+          <td class="p-2 text-center text-amber-400 font-black">${r.points}</td>
+          <td class="p-2 text-center">${r.vacasWon}</td>
+          <td class="p-2 text-center">${r.vacasLost}</td>
+          <td class="p-2 text-center text-emerald-400">${r.jg}</td>
+          <td class="p-2 text-center text-red-400">${r.jp}</td>
+          <td class="p-2 text-center">${r.penal}</td>
+          <td class="p-2 text-center">${r.avatar}</td>
+          <td class="p-2 text-center">${r.sinAvatar}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="11" class="p-4 text-slate-400">No hay clasificación calculada.</td></tr>`;
+    }
+
+
+
+    function isAdmin() {
+      return state.currentUser && (state.currentUser.role || "").toLowerCase() === "admin";
+    }
+
+
+    function renderAdminControls() {
+      const show = isAdmin();
+
+      const backupBtn = document.getElementById("backupBtn");
+      if (backupBtn) backupBtn.classList.toggle("hidden", !show);
+
+      const saveStandingsBtn = document.getElementById("saveStandingsBtn");
+      if (saveStandingsBtn) saveStandingsBtn.classList.toggle("hidden", !show);
+
+      const logsTabBtn = document.getElementById("logsTabBtn");
+      if (logsTabBtn) logsTabBtn.classList.toggle("hidden", !show);
+
+      if (!show) {
+        const logsPanel = document.getElementById("tab-logs");
+        if (logsPanel && !logsPanel.classList.contains("hidden")) {
+          const firstTab = document.querySelector(".tabBtn:not(.hidden)");
+          if (firstTab) showTab({ target: firstTab }, "standings");
+        }
+      }
+    }
+
+    function matchPlayers(m) {
+      return [
+        normalizeName(m.teamA_player1 || m.teamA1 || ""),
+        normalizeName(m.teamA_player2 || m.teamA2 || ""),
+        normalizeName(m.teamB_player1 || m.teamB1 || ""),
+        normalizeName(m.teamB_player2 || m.teamB2 || "")
+      ].filter(Boolean);
+    }
+
+    function userIsInMatch(m) {
+      if (!state.currentUser) return false;
+      return matchPlayers(m).includes(normalizeName(state.currentUser.name));
+    }
+
+    function canEditMatch(m) {
+      if (!state.currentUser) return false;
+      if (isAdmin()) return true;
+      if (!m || !m.id) return true;
+      return userIsInMatch(m);
+    }
+
+    function canConfirmMatch(m) {
+      if (!state.currentUser) return false;
+      if (isAdmin()) return true;
+      if (!userIsInMatch(m)) return false;
+
+      const current = normalizeName(state.currentUser.name);
+      const author = normalizeName(m.createdBy || m.updatedBy || "");
+
+      if (!author) return true;
+      if (current === author) return false;
+
+      const teamA = [
+        normalizeName(m.teamA_player1 || m.teamA1 || ""),
+        normalizeName(m.teamA_player2 || m.teamA2 || "")
+      ].filter(Boolean);
+
+      const teamB = [
+        normalizeName(m.teamB_player1 || m.teamB1 || ""),
+        normalizeName(m.teamB_player2 || m.teamB2 || "")
+      ].filter(Boolean);
+
+      const authorInA = teamA.includes(author);
+      const authorInB = teamB.includes(author);
+
+      // Si el autor está en una pareja, solo puede confirmar alguien de la pareja contraria.
+      if (authorInA) return teamB.includes(current);
+      if (authorInB) return teamA.includes(current);
+
+      // Si por datos antiguos no sabemos de qué pareja era el autor, basta con que sea participante distinto.
+      return true;
+    }
+
+    function hoursSince(dateValue) {
+      if (!dateValue) return 999999;
+      const d = new Date(dateValue);
+      if (isNaN(d.getTime())) return 999999;
+      return (Date.now() - d.getTime()) / 36e5;
+    }
+
+    function hasAnyMatchResult(m) {
+      return [m.vaca1, m.vaca2, m.vaca3].some(v => String(v || "").trim() !== "");
+    }
+
+    function hasCompleteValidMatchResult(m) {
+      const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3);
+      return calc.valid && calc.complete;
+    }
+
+    function isAutoConfirmed(m) {
+      return (m.status || "") === "pending" && hasCompleteValidMatchResult(m) && hoursSince(m.createdAt || m.updatedAt) >= 24;
+    }
+
+    function effectiveStatus(m) {
+      const rawStatus = (m.status || "").toLowerCase();
+
+      if (rawStatus === "cancelled") return "cancelled";
+      if (rawStatus === "rejected") return "rejected";
+
+      // Si se borran las vacas en Excel, la partida vuelve a Pendiente aunque el status siguiera como confirmed.
+      if (!hasAnyMatchResult(m)) return "pending";
+
+      // Una partida solo puede estar confirmada si tiene resultado completo y válido.
+      if (rawStatus === "confirmed") return hasCompleteValidMatchResult(m) ? "confirmed" : "pending";
+      if (isAutoConfirmed(m)) return "confirmed";
+
+      return "pending";
+    }
+
+    function statusLabel(m) {
+      const status = effectiveStatus(m);
+      if (status === "confirmed" && (m.status || "") === "pending") return "Confirmada auto 24h";
+      if (status === "confirmed") return "Confirmada";
+      if (status === "pending" && hasAnyMatchResult(m) && !hasCompleteValidMatchResult(m)) return "Resultado incompleto";
+      if (status === "pending" && hasCompleteValidMatchResult(m)) return "Pendiente de confirmación";
+      if (status === "pending") return "Pendiente";
+      if (status === "rejected") return "Rechazada";
+      if (status === "cancelled") return "Cancelada";
+      return status;
+    }
+
+    function renderPendingPanel() {
+      const panel = document.getElementById("pendingPanel");
+      const txt = document.getElementById("pendingPanelText");
+      if (!panel || !txt) return;
+
+      const pending = state.matches.filter(m => m.id && effectiveStatus(m) === "pending" && hasCompleteValidMatchResult(m));
+      if (!pending.length) {
+        panel.classList.add("hidden");
+        return;
+      }
+
+      panel.classList.remove("hidden");
+      txt.textContent = `${pending.length} partida(s) pendiente(s). Si no se rechazan o confirman, se aceptan automáticamente a las 24 horas.`;
+    }
+
+    function showPendingMatches() {
+      const btn = Array.from(document.querySelectorAll(".tabBtn")).find(b => b.textContent.includes("Jornadas"));
+      if (btn) showTab({ target: btn }, "rounds");
+      setTimeout(() => {
+        const filter = document.getElementById("roundFilter");
+        if (filter) filter.value = "all";
+        renderRoundDashboard(true);
+      }, 50);
+    }
+
+    function getMatchMeta(m) {
+      const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3);
+      const teamA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].filter(Boolean).map(normalizeName).join(" / ");
+      const teamB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].filter(Boolean).map(normalizeName).join(" / ");
+      const winner = calc.winnerSide === "A" ? teamA : calc.winnerSide === "B" ? teamB : "";
+      let stateLabel = statusLabel(m);
+      let stateClass = "bg-amber-500/10 text-amber-300 border-amber-500/30";
+
+      if (effectiveStatus(m) === "cancelled" || effectiveStatus(m) === "rejected") {
+        stateClass = "bg-red-500/10 text-red-300 border-red-500/30";
+      } else if (!calc.valid) {
+        stateLabel = "Error";
+        stateClass = "bg-red-500/10 text-red-300 border-red-500/30";
+      } else if (effectiveStatus(m) === "confirmed") {
+        stateClass = "bg-emerald-500/10 text-emerald-300 border-emerald-500/30";
+      } else if (effectiveStatus(m) === "pending") {
+        stateClass = "bg-cyan-500/10 text-cyan-300 border-cyan-500/30";
+      } else if (!calc.complete && [m.vaca1,m.vaca2,m.vaca3].some(Boolean)) {
+        stateLabel = "Incompleta";
+        stateClass = "bg-orange-500/10 text-orange-300 border-orange-500/30";
+      }
+      return { calc, teamA, teamB, winner, stateLabel, stateClass };
+    }
+
+
+    function renderMatchActionButtons(m) {
+      const status = effectiveStatus(m);
+      const buttons = [];
+
+      if (canEditMatch(m) && status !== "confirmed" && status !== "cancelled") {
+        buttons.push(`<button onclick='event.stopPropagation(); editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})' class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg font-bold">✏️ Meter resultado</button>`);
+      }
+
+      if (effectiveStatus(m) === "pending" && hasCompleteValidMatchResult(m) && canConfirmMatch(m)) {
+        buttons.push(`<button onclick='event.stopPropagation(); confirmMatch("${escapeHtml(m.id)}")' class="bg-emerald-700 hover:bg-emerald-600 px-3 py-1.5 rounded-lg font-bold">✅ Confirmar</button>`);
+        buttons.push(`<button onclick='event.stopPropagation(); rejectMatch("${escapeHtml(m.id)}")' class="bg-red-800 hover:bg-red-700 px-3 py-1.5 rounded-lg font-bold">❌ Rechazar</button>`);
+      }
+
+      if (!buttons.length) {
+        return `<span class="text-slate-500">Sin acciones disponibles</span>`;
+      }
+
+      return buttons.join("");
+    }
+
+    function renderRoundDashboard() {
+      const filterEl = document.getElementById("roundFilter");
+      if (!filterEl) return;
+
+      const allMatches = state.matches.filter(m => m.id);
+      const rounds = [...new Set(allMatches.filter(m => m.round).map(m => String(m.round)))].sort((a,b) => Number(a)-Number(b));
+      const current = filterEl.value || "all";
+      filterEl.innerHTML = '<option value="all">Todas las jornadas</option>' + rounds.map(r => `<option value="${escapeHtml(r)}">Jornada ${escapeHtml(r)}</option>`).join("");
+      filterEl.value = rounds.includes(current) ? current : "all";
+
+      const matches = allMatches.filter(m => filterEl.value === "all" || String(m.round) === String(filterEl.value));
+      const summary = { total: matches.length, confirmed: 0, pending: 0, errors: 0 };
+      matches.forEach(m => {
+        const meta = getMatchMeta(m);
+        if (effectiveStatus(m) === "confirmed") summary.confirmed++;
+        else if (["Error","Cancelada","Rechazada"].includes(meta.stateLabel)) summary.errors++;
+        else summary.pending++;
+      });
+
+      const card = (label, value, cls) => `<div class="bg-slate-950 border border-slate-800 rounded-xl p-4"><div class="text-xs uppercase tracking-wider text-slate-500 font-bold">${label}</div><div class="text-2xl font-black ${cls}">${value}</div></div>`;
+      document.getElementById("roundSummaryCards").innerHTML =
+        card("Partidas", summary.total, "text-white") +
+        card("Confirmadas", summary.confirmed, "text-emerald-400") +
+        card("Pendientes", summary.pending, "text-amber-400") +
+        card("Errores / canceladas", summary.errors, "text-red-400");
+
+      const isFinished = (m) => effectiveStatus(m) === "confirmed";
+      const isOpen = (m) => !isFinished(m);
+      const hasAnyResult = (m) => [m.vaca1, m.vaca2, m.vaca3].some(Boolean);
+      const roundNumber = (m) => Number(m.round || 999999);
+
+      const openMatches = matches.filter(isOpen).sort((a,b) => roundNumber(a) - roundNumber(b) || String(a.id).localeCompare(String(b.id), undefined, { numeric: true }));
+      const confirmedMatches = matches.filter(isFinished).sort((a,b) => roundNumber(b) - roundNumber(a) || String(a.id).localeCompare(String(b.id), undefined, { numeric: true }));
+
+      const nextRoundNumber = openMatches.length ? roundNumber(openMatches[0]) : null;
+      const nextMatches = nextRoundNumber === null ? [] : openMatches.filter(m => roundNumber(m) === nextRoundNumber);
+      const followingMatches = nextRoundNumber === null ? [] : openMatches.filter(m => roundNumber(m) !== nextRoundNumber);
+
+      function renderMatchCard(m) {
+        const meta = getMatchMeta(m);
+        const vacas = meta.calc.valid ? `${meta.calc.vacasA}-${meta.calc.vacasB}` : "Error";
+        const juegos = meta.calc.valid ? `${meta.calc.gamesA}-${meta.calc.gamesB}` : "-";
+        const results = [m.vaca1,m.vaca2,m.vaca3].filter(Boolean).join("/") || "Sin resultado";
+        const editable = effectiveStatus(m) !== "confirmed" && effectiveStatus(m) !== "cancelled" && canEditMatch(m);
+        const clickAttr = editable ? `onclick='editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})'` : "";
+        const cursorClass = editable ? "cursor-pointer hover:border-amber-500/50" : "cursor-default opacity-95";
+        return `<div ${clickAttr} class="${cursorClass} bg-slate-900 border border-slate-800 rounded-xl p-4 transition-all">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="font-black">${escapeHtml(m.id)} · ${escapeHtml(m.fecha || "")}</div>
+            <span class="text-[10px] px-2 py-1 border rounded-full font-bold ${meta.stateClass}">${meta.stateLabel}</span>
+          </div>
+          <div class="text-sm text-slate-300 flex items-center gap-2"><b class="text-emerald-400">A</b> <span>${renderTeamMiniFromMatch(m, "A", "w-7 h-7")}</span></div>
+          <div class="text-sm text-slate-300 flex items-center gap-2"><b class="text-cyan-400">B</b> <span>${renderTeamMiniFromMatch(m, "B", "w-7 h-7")}</span></div>
+          <div class="text-xs text-slate-400 mt-2">Resultado: <b>${escapeHtml(results)}</b> · Vacas: <b>${vacas}</b> · Juegos: <b>${juegos}</b></div>
+          <div class="text-xs text-emerald-300 mt-1">Ganador: ${escapeHtml(meta.winner || "-")}</div>
+          ${getAvatarPlayersFromMatch(m).length ? `<div class="text-xs text-amber-300 mt-1">🧞 Avatar: ${escapeHtml(getAvatarPlayersFromMatch(m).join(" / "))}</div>` : ""}
+          ${getFaultPlayersFromMatch(m).length ? `<div class="text-xs text-red-300 mt-1">⚠️ Falta: ${escapeHtml(getFaultPlayersFromMatch(m).join(" / "))}</div>` : ""}
+          <div class="mt-3 flex flex-wrap gap-2">
+            ${renderMatchActionButtons(m)}
+          </div>
+        </div>`;
+      }
+
+      function groupByRound(list) {
+        const grouped = {};
+        list.forEach(m => {
+          const r = String(m.round || "Sin jornada");
+          grouped[r] = grouped[r] || [];
+          grouped[r].push(m);
+        });
+        return grouped;
+      }
+
+      function renderRoundGroup(title, list, subtitle = "", order = "asc") {
+        if (!list.length) return "";
+        const grouped = groupByRound(list);
+        const keys = Object.keys(grouped).sort((a,b) => order === "desc" ? Number(b)-Number(a) : Number(a)-Number(b));
+        return `<div class="space-y-4">
+          <div>
+            <h3 class="font-black text-xl">${title}</h3>
+            ${subtitle ? `<p class="text-xs text-slate-400 mt-1">${subtitle}</p>` : ""}
+          </div>
+          ${keys.map(round => `<div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+            <h4 class="font-black text-lg mb-3">Jornada ${escapeHtml(round)}</h4>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              ${grouped[round].map(renderMatchCard).join("")}
+            </div>
+          </div>`).join("")}
+        </div>`;
+      }
+
+      let html = "";
+      html += renderRoundGroup("🔥 Próxima jornada", nextMatches, "Primera jornada con partidas pendientes o sin resultado.");
+      html += renderRoundGroup("⏭️ Siguientes jornadas", followingMatches, "Partidas futuras pendientes cargadas desde Excel.");
+      html += renderRoundGroup("✅ Jornadas terminadas", confirmedMatches, "Partidas confirmadas, al final de la vista.", "desc");
+
+      document.getElementById("roundDashboard").innerHTML = html || `<div class="text-slate-400 bg-slate-950 rounded-xl p-4">No hay partidas para mostrar.</div>`;
+    }
+
+
+    function getPlayerStats() {
+      const stats = {};
+
+      state.players.forEach(p => {
+        stats[p.name] = {
+          name: p.name,
+          played: 0,
+          wins: 0,
+          losses: 0,
+          gamesWon: 0,
+          gamesLost: 0,
+          vacasWon: 0,
+          vacasLost: 0,
+          streak: 0,
+          lastResults: []
+        };
+      });
+
+      state.matches.forEach(m => {
+        const meta = getMatchMeta(m);
+        if (!meta.calc.valid || !meta.calc.complete || effectiveStatus(m) !== "confirmed") return;
+
+        const teamA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].filter(Boolean);
+        const teamB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].filter(Boolean);
+
+        const winners = meta.calc.winnerSide === "A" ? teamA : teamB;
+        const losers = meta.calc.winnerSide === "A" ? teamB : teamA;
+
+        [...teamA, ...teamB].forEach(player => {
+          if (!stats[player]) return;
+          stats[player].played++;
+        });
+
+        winners.forEach(player => {
+          if (!stats[player]) return;
+          stats[player].wins++;
+          stats[player].lastResults.push("W");
+        });
+
+        losers.forEach(player => {
+          if (!stats[player]) return;
+          stats[player].losses++;
+          stats[player].lastResults.push("L");
+        });
+
+        teamA.forEach(player => {
+          if (!stats[player]) return;
+          stats[player].gamesWon += meta.calc.gamesA;
+          stats[player].gamesLost += meta.calc.gamesB;
+          stats[player].vacasWon += meta.calc.vacasA;
+          stats[player].vacasLost += meta.calc.vacasB;
+        });
+
+        teamB.forEach(player => {
+          if (!stats[player]) return;
+          stats[player].gamesWon += meta.calc.gamesB;
+          stats[player].gamesLost += meta.calc.gamesA;
+          stats[player].vacasWon += meta.calc.vacasB;
+          stats[player].vacasLost += meta.calc.vacasA;
+        });
+      });
+
+      Object.values(stats).forEach(s => {
+        let streak = 0;
+        for (let i = s.lastResults.length - 1; i >= 0; i--) {
+          const r = s.lastResults[i];
+          if (i === s.lastResults.length - 1) {
+            streak = 1;
+          } else if (r === s.lastResults[s.lastResults.length - 1]) {
+            streak++;
+          } else {
+            break;
+          }
+        }
+        s.streak = (s.lastResults[s.lastResults.length - 1] || "") + streak;
+        s.winRate = s.played ? Math.round((s.wins / s.played) * 100) : 0;
+      });
+
+      return stats;
+    }
+
+    function renderSimpleTable(containerId, rows, columns) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      container.innerHTML = `
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-slate-400 border-b border-slate-800">
+                ${columns.map(c => `<th class="text-left py-2">${c.label}</th>`).join("")}
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(r => `
+                <tr class="border-b border-slate-900 hover:bg-slate-900/50">
+                  ${columns.map(c => `<td class="py-2">${r[c.key] ?? ""}</td>`).join("")}
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderStats() {
+      const stats = Object.values(getPlayerStats());
+
+      const bestWin = [...stats].sort((a,b) => b.winRate - a.winRate)[0];
+      const bestGames = [...stats].sort((a,b) => b.gamesWon - a.gamesWon)[0];
+      const bestVacas = [...stats].sort((a,b) => b.vacasWon - a.vacasWon)[0];
+      const mostWins = [...stats].sort((a,b) => b.wins - a.wins)[0];
+
+      const card = (title, value, subtitle, color) => `
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <div class="text-xs uppercase tracking-wider text-slate-500 font-bold">${title}</div>
+          <div class="text-2xl font-black ${color} mt-1">${value || "-"}</div>
+          <div class="text-xs text-slate-400 mt-1">${subtitle || ""}</div>
+        </div>
+      `;
+
+      document.getElementById("topCards").innerHTML =
+        card("Más victorias", mostWins?.name ? renderPlayerMini(mostWins.name, "w-8 h-8") : "-", `${mostWins?.wins || 0} victorias`, "text-emerald-400") +
+        card("Mejor win ratio", bestWin?.name ? renderPlayerMini(bestWin.name, "w-8 h-8") : "-", `${bestWin?.winRate || 0}%`, "text-cyan-400") +
+        card("Más juegos", bestGames?.name ? renderPlayerMini(bestGames.name, "w-8 h-8") : "-", `${bestGames?.gamesWon || 0} juegos`, "text-amber-400") +
+        card("Más vacas", bestVacas?.name ? renderPlayerMini(bestVacas.name, "w-8 h-8") : "-", `${bestVacas?.vacasWon || 0} vacas`, "text-fuchsia-400");
+
+      renderSimpleTable(
+        "winRatioTable",
+        [...stats].sort((a,b) => b.winRate - a.winRate).map(s => ({
+          jugador: renderPlayerMini(s.name, "w-6 h-6"),
+          ratio: s.winRate + "%",
+          balance: `${s.wins}-${s.losses}`
+        })),
+        [
+          { key: "jugador", label: "Jugador" },
+          { key: "ratio", label: "Win %" },
+          { key: "balance", label: "Balance" }
+        ]
+      );
+
+      renderSimpleTable(
+        "streakTable",
+        [...stats].sort((a,b) => parseInt((b.streak||"").slice(1)||0) - parseInt((a.streak||"").slice(1)||0)).map(s => ({
+          jugador: renderPlayerMini(s.name, "w-6 h-6"),
+          racha: s.streak || "-"
+        })),
+        [
+          { key: "jugador", label: "Jugador" },
+          { key: "racha", label: "Racha" }
+        ]
+      );
+
+      const pairs = {};
+      state.matches.forEach(m => {
+        const meta = getMatchMeta(m);
+        if (!meta.calc.valid || !meta.calc.complete || effectiveStatus(m) !== "confirmed") return;
+
+        const pairA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].sort().join(" + ");
+        const pairB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].sort().join(" + ");
+
+        [pairA, pairB].forEach(p => {
+          pairs[p] = pairs[p] || { pair: p, played: 0, wins: 0 };
+          pairs[p].played++;
+        });
+
+        const winnerPair = meta.calc.winnerSide === "A" ? pairA : pairB;
+        pairs[winnerPair].wins++;
+      });
+
+      renderSimpleTable(
+        "pairsTable",
+        Object.values(pairs)
+          .map(p => ({
+            pareja: renderPlayersFromText(p.pair, /\s*\+\s*/),
+            victorias: p.wins,
+            ratio: p.played ? Math.round((p.wins/p.played)*100) + "%" : "0%"
+          }))
+          .sort((a,b) => b.victorias - a.victorias),
+        [
+          { key: "pareja", label: "Pareja" },
+          { key: "victorias", label: "Victorias" },
+          { key: "ratio", label: "Ratio" }
+        ]
+      );
+
+      renderSimpleTable(
+        "gamesWonTable",
+        [...stats].sort((a,b) => b.gamesWon - a.gamesWon).map(s => ({
+          jugador: renderPlayerMini(s.name, "w-6 h-6"),
+          juegos: s.gamesWon,
+          balance: s.gamesWon - s.gamesLost
+        })),
+        [
+          { key: "jugador", label: "Jugador" },
+          { key: "juegos", label: "JG" },
+          { key: "balance", label: "Balance" }
+        ]
+      );
+    }
+
+    function renderMatches() {
+      const rows = [...state.matches].filter(m => m.id).sort((a,b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true }));
+      document.getElementById("matchesBody").innerHTML = rows.map(m => {
+        const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3);
+        const teamA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].filter(Boolean).map(normalizeName).join(" / ");
+        const teamB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].filter(Boolean).map(normalizeName).join(" / ");
+        const vacasText = calc.valid ? `${calc.vacasA}-${calc.vacasB} (${[m.vaca1,m.vaca2,m.vaca3].filter(Boolean).join("/")})` : "Error";
+        const gamesText = calc.valid ? `${calc.gamesA}-${calc.gamesB}` : "-";
+        const winner = calc.winnerSide === "A" ? teamA : calc.winnerSide === "B" ? teamB : "";
+        return `
+          <tr class="border-b border-slate-800 hover:bg-slate-800/40 cursor-pointer" onclick='editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})'>
+            <td class="p-2 font-bold">${escapeHtml(m.id)}</td>
+            <td class="p-2 text-center">${escapeHtml(m.fecha)}</td>
+            <td class="p-2 text-center">${escapeHtml(m.round)}</td>
+            <td class="p-2">${renderPlayersFromText(teamA)}</td>
+            <td class="p-2">${renderPlayersFromText(teamB)}</td>
+            <td class="p-2 text-center font-mono">${escapeHtml(vacasText)}</td>
+            <td class="p-2 text-center font-mono">${escapeHtml(gamesText)}</td>
+            <td class="p-2 text-center text-emerald-400">${escapeHtml(winner)}</td>
+            <td class="p-2 text-center">${escapeHtml(statusLabel(m))}</td>
+          </tr>`;
+      }).join("") || `<tr><td colspan="9" class="p-4 text-slate-400">No hay partidas cargadas todavía.</td></tr>`;
+    }
+
+
+    async function saveMyProfile() {
+      if (!state.currentUser) return alert("Debes iniciar sesión.");
+
+      const player = state.players.find(p => normalizeName(p.name) === normalizeName(state.currentUser.name));
+      if (!player) return alert("Jugador no encontrado.");
+
+      player.avatar = document.getElementById("profileAvatar").value.trim();
+      player.description = document.getElementById("profileDescription").value.trim();
+
+      const res = await api("savePlayer", player);
+
+      if (res.ok) {
+        await loadData();
+        alert("Perfil actualizado.");
+      } else {
+        alert("Error guardando perfil.");
+      }
+    }
+
+
+    function renderPlayerFlags(player) {
+      const defs = [
+        { key: "flagav", icon: "🧞", title: "Avatar" },
+        { key: "flagpen", icon: "⚠️", title: "Penalización" },
+        { key: "flagpa", icon: "🥇", title: "Puto Amo" },
+        { key: "flagwin", icon: "🏆", title: "Winner" },
+        { key: "flagfinal", icon: "👏", title: "Finalista" },
+        { key: "flagcm", icon: "🥄", title: "Cuchara de madera" },
+        { key: "flagsf", icon: "🏛️", title: "Fundador" }
+      ];
+      return defs.map(d => {
+        const count = Number(player[d.key] || 0);
+        if (!count || count < 1) return "";
+        return `<span class="player-badge" title="${d.title}">${d.icon.repeat(Math.min(count, 12))}</span>`;
+      }).join("");
+    }
+
+
+    function getDetailedPlayerStats(playerName) {
+      const name = normalizeName(playerName);
+      const stats = {
+        name,
+        played: 0,
+        wins: 0,
+        losses: 0,
+        gamesWon: 0,
+        gamesLost: 0,
+        vacasWon: 0,
+        vacasLost: 0,
+        points: 0,
+        partners: {},
+        rivals: {},
+        matches: []
+      };
+
+      state.matches.forEach(m => {
+        const meta = getMatchMeta(m);
+        if (!meta.calc.valid || !meta.calc.complete || effectiveStatus(m) !== "confirmed") return;
+
+        const teamA = [normalizeName(m.teamA_player1 || m.teamA1), normalizeName(m.teamA_player2 || m.teamA2)].filter(Boolean);
+        const teamB = [normalizeName(m.teamB_player1 || m.teamB1), normalizeName(m.teamB_player2 || m.teamB2)].filter(Boolean);
+
+        const inA = teamA.includes(name);
+        const inB = teamB.includes(name);
+        if (!inA && !inB) return;
+
+        const ownTeam = inA ? teamA : teamB;
+        const rivals = inA ? teamB : teamA;
+        const partner = ownTeam.find(p => p !== name) || "";
+        const playerWon = (inA && meta.calc.winnerSide === "A") || (inB && meta.calc.winnerSide === "B");
+
+        const ownGames = inA ? meta.calc.gamesA : meta.calc.gamesB;
+        const oppGames = inA ? meta.calc.gamesB : meta.calc.gamesA;
+        const ownVacas = inA ? meta.calc.vacasA : meta.calc.vacasB;
+        const oppVacas = inA ? meta.calc.vacasB : meta.calc.vacasA;
+
+        stats.played++;
+        stats.gamesWon += ownGames;
+        stats.gamesLost += oppGames;
+        stats.vacasWon += ownVacas;
+        stats.vacasLost += oppVacas;
+
+        if (playerWon) {
+          stats.wins++;
+          stats.points += 3;
+        } else {
+          stats.losses++;
+        }
+
+        if (partner) {
+          stats.partners[partner] = stats.partners[partner] || { name: partner, played: 0, wins: 0, losses: 0 };
+          stats.partners[partner].played++;
+          playerWon ? stats.partners[partner].wins++ : stats.partners[partner].losses++;
+        }
+
+        rivals.forEach(rival => {
+          stats.rivals[rival] = stats.rivals[rival] || { name: rival, played: 0, wins: 0, losses: 0 };
+          stats.rivals[rival].played++;
+          playerWon ? stats.rivals[rival].wins++ : stats.rivals[rival].losses++;
+        });
+
+        stats.matches.push({
+          id: m.id,
+          round: m.round,
+          fecha: m.fecha,
+          partner,
+          rivals: rivals.join(" / "),
+          result: playerWon ? "Victoria" : "Derrota",
+          vacas: `${ownVacas}-${oppVacas}`,
+          games: `${ownGames}-${oppGames}`
+        });
+      });
+
+      stats.winRate = stats.played ? Math.round((stats.wins / stats.played) * 100) : 0;
+      stats.gameBalance = stats.gamesWon - stats.gamesLost;
+      stats.vacaBalance = stats.vacasWon - stats.vacasLost;
+
+      const partnerList = Object.values(stats.partners);
+      const rivalList = Object.values(stats.rivals);
+
+      stats.worstPartner = partnerList.sort((a,b) => b.losses - a.losses || b.played - a.played)[0] || null;
+      stats.bestPartner = partnerList.sort((a,b) => b.wins - a.wins || b.played - a.played)[0] || null;
+      stats.bestRival = rivalList.sort((a,b) => b.wins - a.wins || b.played - a.played)[0] || null;
+      stats.worstRival = rivalList.sort((a,b) => b.losses - a.losses || b.played - a.played)[0] || null;
+
+      return stats;
+    }
+
+    function selectProfilePlayer(playerName) {
+      state.selectedProfilePlayer = playerName;
+      renderPlayers();
+    }
+
+    function renderStatPill(label, value, cls = "text-white") {
+      return `<div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+        <div class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">${label}</div>
+        <div class="text-xl font-black ${cls}">${value}</div>
+      </div>`;
+    }
+
+    function renderMiniTable(rows, cols) {
+      if (!rows.length) return `<div class="text-sm text-slate-500">Sin datos todavía.</div>`;
+      return `<div class="overflow-x-auto"><table class="w-full text-sm">
+        <thead><tr class="text-slate-400 border-b border-slate-800">${cols.map(c => `<th class="text-left py-2">${c.label}</th>`).join("")}</tr></thead>
+        <tbody>${rows.map(r => `<tr class="border-b border-slate-900">${cols.map(c => `<td class="py-2">${r[c.key] ?? ""}</td>`).join("")}</tr>`).join("")}</tbody>
+      </table></div>`;
+    }
+
+    function renderPlayers() {
+      const avatarInput = document.getElementById("profileAvatar");
+      const descInput = document.getElementById("profileDescription");
+      const profileSelect = document.getElementById("profilePlayerSelect");
+
+      if (state.currentUser && avatarInput && descInput) {
+        const me = state.players.find(p => normalizeName(p.name) === normalizeName(state.currentUser.name));
+        if (me) {
+          avatarInput.value = me.avatar || "";
+          descInput.value = me.description || "";
+        }
+      }
+
+      if (profileSelect) {
+        const current = state.selectedProfilePlayer || (state.currentUser ? state.currentUser.name : (state.players[0]?.name || ""));
+        profileSelect.innerHTML = state.players.map(p => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`).join("");
+        profileSelect.value = current;
+        state.selectedProfilePlayer = current;
+      }
+
+      const selected = state.players.find(p => normalizeName(p.name) === normalizeName(state.selectedProfilePlayer)) || state.players[0];
+      const featured = document.getElementById("playerFeaturedCard");
+
+      if (featured && selected) {
+        const st = getDetailedPlayerStats(selected.name);
+        const img = selected.avatar || "assets/logo.png?v=0132";
+        const flags = renderPlayerFlags(selected);
+        const recentMatches = st.matches.slice(-5).reverse();
+
+        featured.innerHTML = `
+          <div class="bg-gradient-to-br from-slate-950 to-slate-900 border border-amber-500/30 rounded-3xl p-5 sm:p-6 shadow-2xl">
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+              <div class="xl:col-span-4">
+                <div class="flex flex-col items-center text-center">
+                  <img src="${escapeHtml(img)}" onerror="this.src='assets/logo.png?v=0132'"
+                       class="w-44 h-44 rounded-3xl object-contain bg-white p-2 border-2 border-amber-400/60 shadow-xl" />
+                  <h3 class="text-3xl font-black mt-4">${escapeHtml(selected.name)}</h3>
+                  <div class="text-xs uppercase tracking-wider text-slate-500 font-bold">${escapeHtml(selected.role || "player")}</div>
+                  <div class="flex flex-wrap justify-center gap-2 mt-4">${flags || '<span class="text-xs text-slate-600">Sin insignias todavía</span>'}</div>
+                </div>
+                <div class="mt-5 bg-slate-950/70 border border-slate-800 rounded-2xl p-4 text-sm text-slate-300 leading-relaxed">
+                  ${escapeHtml(selected.description || "Jugador oficial del circuito Gents & Lords.")}
+                </div>
+              </div>
+
+              <div class="xl:col-span-8 space-y-5">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  ${renderStatPill("Partidas", st.played, "text-white")}
+                  ${renderStatPill("Balance", `${st.wins}-${st.losses}`, "text-emerald-400")}
+                  ${renderStatPill("Win rate", `${st.winRate}%`, "text-cyan-400")}
+                  ${renderStatPill("Puntos", st.points, "text-amber-400")}
+                  ${renderStatPill("Juegos", `${st.gamesWon}-${st.gamesLost}`, "text-emerald-300")}
+                  ${renderStatPill("Balance JG", st.gameBalance, st.gameBalance >= 0 ? "text-emerald-400" : "text-red-400")}
+                  ${renderStatPill("Vacas", `${st.vacasWon}-${st.vacasLost}`, "text-fuchsia-300")}
+                  ${renderStatPill("Balance V", st.vacaBalance, st.vacaBalance >= 0 ? "text-emerald-400" : "text-red-400")}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+                    <div class="text-xs uppercase text-slate-500 font-bold">Peor compañero</div>
+                    <div class="text-lg font-black text-red-300 mt-1">${st.worstPartner ? renderPlayerMini(st.worstPartner.name, "w-6 h-6") : "-"}</div>
+                    <div class="text-xs text-slate-400">${st.worstPartner ? `${st.worstPartner.losses} derrotas juntos` : "Sin datos"}</div>
+                  </div>
+                  <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+                    <div class="text-xs uppercase text-slate-500 font-bold">Mejor compañero</div>
+                    <div class="text-lg font-black text-emerald-300 mt-1">${st.bestPartner ? renderPlayerMini(st.bestPartner.name, "w-6 h-6") : "-"}</div>
+                    <div class="text-xs text-slate-400">${st.bestPartner ? `${st.bestPartner.wins} victorias juntos` : "Sin datos"}</div>
+                  </div>
+                  <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+                    <div class="text-xs uppercase text-slate-500 font-bold">Mejor rival</div>
+                    <div class="text-lg font-black text-amber-300 mt-1">${st.bestRival ? renderPlayerMini(st.bestRival.name, "w-6 h-6") : "-"}</div>
+                    <div class="text-xs text-slate-400">${st.bestRival ? `${st.bestRival.wins} victorias contra él` : "Sin datos"}</div>
+                  </div>
+                </div>
+
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+                  <h4 class="font-black mb-3">📜 Últimas partidas</h4>
+                  ${renderMiniTable(recentMatches.map(r => ({...r, partner: renderPlayerMini(r.partner, "w-6 h-6"), rivals: renderPlayersFromText(r.rivals)})), [
+                    {key:"fecha", label:"Fecha"},
+                    {key:"partner", label:"Compañero"},
+                    {key:"rivals", label:"Rivales"},
+                    {key:"result", label:"Resultado"},
+                    {key:"vacas", label:"Vacas"},
+                    {key:"games", label:"Juegos"}
+                  ])}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      const grid = document.getElementById("playersGrid");
+      if (!grid) return;
+
+      grid.innerHTML = state.players.map(p => {
+        const st = getDetailedPlayerStats(p.name);
+        const img = p.avatar || "assets/logo.png?v=0132";
+        const desc = p.description || "Jugador oficial del circuito Gents & Lords.";
+        const flags = renderPlayerFlags(p);
+        return `
+          <div onclick="selectProfilePlayer('${escapeHtml(p.name)}')" class="cursor-pointer bg-slate-950/95 border border-slate-800 rounded-2xl p-5 hover:border-amber-500/40 transition-all">
+            <div class="flex items-center gap-4">
+              <img src="${escapeHtml(img)}"
+                   onerror="this.src='assets/logo.png?v=0132'"
+                   class="w-20 h-20 rounded-2xl object-contain border border-slate-700 bg-white p-1" />
+              <div>
+                <div class="text-xl font-black">${escapeHtml(p.name || "-")}</div>
+                <div class="text-xs uppercase tracking-wider text-slate-500 font-bold">${escapeHtml(p.role || "player")}</div>
+                <div class="text-xs text-slate-400 mt-1">${st.wins}-${st.losses} · ${st.winRate}% win</div>
+              </div>
+            </div>
+            <div class="mt-4 text-sm text-slate-300 min-h-[60px] leading-relaxed">
+              ${escapeHtml(desc)}
+            </div>
+            <div class="mt-4 flex flex-wrap gap-2">${flags || '<span class="text-xs text-slate-600">Sin insignias todavía</span>'}</div>
+          </div>
+        `;
+      }).join("") || `<p class="text-slate-400">No hay jugadores cargados.</p>`;
+    }
+
+
+    function renderVenues() {
+      const grid = document.getElementById("venuesGrid");
+      if (!grid) return;
+
+      const venues = state.venues || [];
+
+      if (!venues.length) {
+        grid.innerHTML = `<div class="text-slate-500 bg-slate-950 border border-slate-800 rounded-2xl p-5">No hay sedes configuradas o no se han recibido desde Google Sheets.</div>`;
+        return;
+      }
+
+      grid.innerHTML = venues.map(v => `
+        <div class="bg-slate-950 border border-slate-800 rounded-3xl overflow-hidden hover:border-amber-500/40 transition-all shadow-xl">
+          <div class="h-44 bg-gradient-to-br from-slate-800 to-slate-950 flex items-center justify-center overflow-hidden">
+            ${v.image ? `<img src="${escapeHtml(v.image)}" class="w-full h-full object-cover" onerror="this.style.display='none'" />`
+            : `<div class="text-6xl">♠️</div>`}
+          </div>
+
+          <div class="p-5">
+            <h3 class="text-xl font-black">${escapeHtml(v.name)}</h3>
+            <div class="text-xs uppercase tracking-wider text-amber-400 font-bold mt-1">${escapeHtml(v.type || "Sede oficial")}</div>
+
+            <p class="text-sm text-slate-300 mt-4 leading-relaxed">
+              ${escapeHtml(v.description || "Sede oficial del circuito Gents & Lords.")}
+            </p>
+
+            ${v.address ? `<div class="mt-4 text-sm text-slate-400">📍 ${escapeHtml(v.address)}</div>` : ""}
+
+            ${v.mapsUrl ? `
+              <a href="${escapeHtml(v.mapsUrl)}" target="_blank"
+                 class="mt-4 inline-flex items-center gap-2 bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-xl font-black text-sm">
+                🗺️ Abrir en Google Maps
+              </a>` : ""}
+          </div>
+        </div>
+      `).join("");
+    }
+
+
+    function historyKey(category) {
+      const c = String(category || "").toLowerCase();
+      if (c.includes("puto")) return "puto";
+      if (c.includes("ganador") || c.includes("champion") || c.includes("winner")) return "ganadores";
+      if (c.includes("final")) return "finalistas";
+      if (c.includes("cuchara")) return "cuchara";
+      return "otros";
+    }
+
+    function playerAvatarByName(name) {
+      const clean = normalizeName(String(name || "").split("/")[0].trim());
+      const player = state.players.find(p => normalizeName(p.name) === clean);
+      return player?.avatar || "assets/logo.png?v=0154";
+    }
+
+    function renderWinnerAvatars(winners, colorClass = "border-amber-400") {
+      const names = String(winners || "")
+        .split("/")
+        .map(x => normalizeName(x.trim()))
+        .filter(Boolean);
+
+      if (!names.length) return "";
+
+      return `
+        <div class="flex justify-center ${names.length > 1 ? "-space-x-3" : ""} mb-2">
+          ${names.map((name, idx) => `
+            <img src="${escapeHtml(playerAvatarByName(name))}"
+                 onerror="this.src='assets/logo.png?v=0154'"
+                 class="w-16 h-16 rounded-full object-cover bg-white p-1 border-2 ${colorClass} shadow-xl" />
+          `).join("")}
+        </div>
+      `;
+    }
+
+
+    function renderPlayerMini(name, size = "w-7 h-7") {
+      const clean = normalizeName(name || "");
+      if (!clean) return "";
+      return `
+        <span class="inline-flex items-center gap-2 align-middle">
+          <img src="${escapeHtml(playerAvatarByName(clean))}"
+               onerror="this.src='assets/logo.png?v=0154'"
+               class="${size} rounded-full object-cover bg-white p-[1px] border border-slate-600 shadow-sm" />
+          <span>${escapeHtml(clean)}</span>
+        </span>
+      `;
+    }
+
+    function renderPlayersInline(names, size = "w-7 h-7") {
+      return (names || [])
+        .map(n => normalizeName(n || ""))
+        .filter(Boolean)
+        .map(n => renderPlayerMini(n, size))
+        .join('<span class="text-slate-500 mx-1">/</span>');
+    }
+
+    function renderTeamMiniFromMatch(m, side, size = "w-7 h-7") {
+      const names = side === "A"
+        ? [m.teamA_player1 || m.teamA1 || "", m.teamA_player2 || m.teamA2 || ""]
+        : [m.teamB_player1 || m.teamB1 || "", m.teamB_player2 || m.teamB2 || ""];
+      return renderPlayersInline(names, size) || "-";
+    }
+
+    function renderPlayersFromText(text, separatorRegex = /\s*[+/]\s*/) {
+      return String(text || "")
+        .split(separatorRegex)
+        .map(x => normalizeName(x.trim()))
+        .filter(Boolean)
+        .map(n => renderPlayerMini(n, "w-6 h-6"))
+        .join('<span class="text-slate-500 mx-1">/</span>') || "-";
+    }
+
+
+    function renderHofCell(item, icon, colorClass) {
+      if (!item) {
+        return `
+          <div class="flex flex-col items-center justify-center text-center min-h-[120px] opacity-35">
+            <div class="text-4xl mb-2">${icon}</div>
+            <div class="text-sm text-slate-500 font-bold">Sin dato</div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="flex flex-col items-center justify-center text-center min-h-[120px]">
+          ${renderWinnerAvatars(item.winners, colorClass)}
+          <div class="text-xl font-black text-white leading-tight">${escapeHtml(item.winners || "-")}</div>
+        </div>
+      `;
+    }
+
+    function renderHistory() {
+      const grid = document.getElementById("historyGrid");
+      if (!grid) return;
+
+      const history = state.history || [];
+
+      if (!history.length) {
+        grid.innerHTML = `<div class="text-slate-500 bg-slate-950 border border-slate-800 rounded-2xl p-5">No hay histórico configurado.</div>`;
+        return;
+      }
+
+      const grouped = {};
+      history.forEach(h => {
+        const season = h.season || "Sin temporada";
+        grouped[season] = grouped[season] || {};
+        grouped[season][historyKey(h.category)] = h;
+      });
+
+      const seasons = Object.keys(grouped).sort((a, b) => String(b).localeCompare(String(a)));
+
+      grid.innerHTML = `
+        <div class="bg-slate-950/55 border border-slate-700/70 rounded-3xl p-4 sm:p-6 shadow-2xl overflow-x-auto backdrop-blur-sm">
+          <div class="min-w-[980px]">
+            <div class="grid grid-cols-[190px_repeat(4,1fr)] gap-4 items-end pb-5 border-b border-slate-700/70">
+              <div class="text-amber-400 font-black text-lg uppercase tracking-wide">Temporada</div>
+              <div class="text-center">
+                <div class="text-6xl drop-shadow-xl">🥇</div>
+                <div class="text-amber-400 font-black mt-2 text-lg">Puto Amo</div>
+              </div>
+              <div class="text-center">
+                <div class="text-6xl drop-shadow-xl">🏆</div>
+                <div class="text-amber-400 font-black mt-2 text-lg">Ganadores</div>
+              </div>
+              <div class="text-center">
+                <div class="text-6xl drop-shadow-xl">👏</div>
+                <div class="text-amber-400 font-black mt-2 text-lg">Finalistas</div>
+              </div>
+              <div class="text-center">
+                <div class="text-6xl drop-shadow-xl">🥄</div>
+                <div class="text-amber-400 font-black mt-2 text-lg">Cuchara de madera</div>
+              </div>
+            </div>
+
+            ${seasons.map((season, idx) => {
+              const row = grouped[season];
+              const isCurrent = idx === 0 ? "Temporada actual" : "Temporada histórica";
+              return `
+                <div class="grid grid-cols-[190px_repeat(4,1fr)] gap-4 items-center my-3 bg-slate-900/55 hover:bg-slate-900/75 border border-slate-700/50 rounded-2xl px-4 py-4 transition-all">
+                  <div class="flex flex-col justify-center">
+                    <div class="text-3xl font-black text-amber-300">${escapeHtml(season)}</div>
+                    <div class="text-sm text-slate-400 mt-2">${isCurrent}</div>
+                  </div>
+
+                  ${renderHofCell(row.puto, "🥇", "border-yellow-400")}
+                  ${renderHofCell(row.ganadores, "🏆", "border-emerald-400")}
+                  ${renderHofCell(row.finalistas, "👏", "border-cyan-400")}
+                  ${renderHofCell(row.cuchara, "🥄", "border-orange-400")}
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+
+    function renderLogs() {
+      const logsBody = document.getElementById("logsBody");
+      if (!logsBody) return;
+
+      if (!isAdmin()) {
+        logsBody.innerHTML = `<tr><td colspan="4" class="p-4 text-slate-400">Solo administrador.</td></tr>`;
+        return;
+      }
+
+      const rows = [...state.logs].reverse().slice(0, 50);
+      logsBody.innerHTML = rows.map(l => `
+        <tr class="border-b border-slate-800">
+          <td class="p-2 text-xs">${escapeHtml(l.timestamp)}</td>
+          <td class="p-2">${escapeHtml(l.user)}</td>
+          <td class="p-2">${escapeHtml(l.action)}</td>
+          <td class="p-2 text-xs text-slate-400 max-w-xl truncate">${escapeHtml(l.details)}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="4" class="p-4 text-slate-400">Sin cambios registrados.</td></tr>`;
+    }
+
+    function calculateMatch(v1, v2, v3) {
+      const vacas = [v1, v2, v3].filter(v => String(v || "").trim() !== "");
+      let vacasA = 0, vacasB = 0, gamesA = 0, gamesB = 0;
+      for (const v of vacas) {
+        const parsed = parseVaca(v);
+        if (!parsed.valid) return { valid: false, complete: false, error: parsed.error, vacasA: 0, vacasB: 0, gamesA: 0, gamesB: 0, winnerSide: "" };
+        gamesA += parsed.a;
+        gamesB += parsed.b;
+        if (parsed.winner === "A") vacasA++;
+        if (parsed.winner === "B") vacasB++;
+      }
+      const complete = vacasA === 2 || vacasB === 2;
+      return {
+        valid: true,
+        complete,
+        vacasA,
+        vacasB,
+        gamesA,
+        gamesB,
+        winnerSide: vacasA === 2 ? "A" : vacasB === 2 ? "B" : ""
+      };
+    }
+
+    function parseVaca(value) {
+      let s = String(value ?? "").trim().replace("-", "").replace(" ", "");
+
+      // Google Sheets puede convertir 03 en número 3.
+      // En ese caso recuperamos el formato correcto como 03.
+      if (/^\d$/.test(s)) s = "0" + s;
+
+      if (!/^\d{2}$/.test(s)) return { valid: false, error: "Formato inválido" };
+
+      const a = Number(s[0]);
+      const b = Number(s[1]);
+
+      const validScores = (a === 3 && [0,1,2].includes(b)) || (b === 3 && [0,1,2].includes(a));
+      if (!validScores) return { valid: false, error: "Una vaca debe ser 30/31/32 o 03/13/23" };
+
+      return { valid: true, a, b, winner: a === 3 ? "A" : "B", normalized: s };
+    }
+
+    function previewMatchResult() {
+      const calc = calculateMatch(
+        document.getElementById("vaca1").value,
+        document.getElementById("vaca2").value,
+        document.getElementById("vaca3").value
+      );
+      const preview = document.getElementById("matchPreview");
+      const validation = document.getElementById("matchValidation");
+      const teamA = [document.getElementById("teamA1").value, document.getElementById("teamA2").value].filter(Boolean).join(" / ") || "Pareja A";
+      const teamB = [document.getElementById("teamB1").value, document.getElementById("teamB2").value].filter(Boolean).join(" / ") || "Pareja B";
+
+      if (validation) {
+        const playerValidation = validateSelectedPlayers(false);
+        validation.innerHTML = playerValidation.ok
+          ? '<span class="text-emerald-400">Jugadores correctos: 4 jugadores distintos.</span>'
+          : `<span class="text-amber-400">${escapeHtml(playerValidation.message)}</span>`;
+      }
+
+      if (!calc.valid) {
+        preview.innerHTML = '<span class="text-red-400 font-bold">Resultado inválido.</span> Usa 30, 31, 32, 03, 13 o 23.';
+        return;
+      }
+
+      const winner = calc.winnerSide === "A" ? teamA : calc.winnerSide === "B" ? teamB : "Sin ganador todavía";
+      const completion = calc.complete
+        ? '<span class="text-emerald-400 font-bold">Partida completa</span>'
+        : '<span class="text-amber-400 font-bold">Partida incompleta: debe acabar 2-0 o 2-1 en vacas</span>';
+
+      preview.innerHTML = `Vacas: <b>${calc.vacasA}-${calc.vacasB}</b> · Juegos: <b>${calc.gamesA}-${calc.gamesB}</b> · Ganador: <span class="text-emerald-400 font-bold">${escapeHtml(winner)}</span><br>${completion}`;
+    }
+
+    function renderResultButtons() {
+      const values = ["30", "31", "32", "03", "13", "23"];
+      document.querySelectorAll(".resultButtons").forEach(container => {
+        const target = container.dataset.target;
+        container.innerHTML = values.map(v => `
+          <button type="button" onclick="setVacaValue('${target}','${v}')" class="bg-slate-800 hover:bg-amber-500 hover:text-slate-950 border border-slate-700 rounded-lg py-1.5 text-xs font-black transition-all">${v}</button>
+        `).join("");
+      });
+    }
+
+    function setVacaValue(target, value) {
+      document.getElementById(target).value = value;
+      previewMatchResult();
+    }
+
+    function validateSelectedPlayers(showAlert = true) {
+      const teamA1 = document.getElementById("teamA1").value;
+      const teamA2 = document.getElementById("teamA2").value;
+      const teamB1 = document.getElementById("teamB1").value;
+      const teamB2 = document.getElementById("teamB2").value;
+      const allPlayers = [teamA1, teamA2, teamB1, teamB2];
+
+      if (allPlayers.some(x => !x)) {
+        const msg = "Selecciona los 4 jugadores.";
+        if (showAlert) alert(msg);
+        return { ok: false, message: msg };
+      }
+
+      if (new Set(allPlayers).size !== 4) {
+        const msg = "No puede repetirse ningún jugador en la misma partida.";
+        if (showAlert) alert(msg);
+        return { ok: false, message: msg };
+      }
+
+      return { ok: true, message: "OK" };
+    }
+
+    function showLoginScreen(force = false) {
+      const screen = document.getElementById("loginScreen");
+      if (!screen) return;
+      if (force || !state.currentUser) screen.classList.remove("hidden");
+    }
+
+    function hideLoginScreen() {
+      const screen = document.getElementById("loginScreen");
+      if (screen) screen.classList.add("hidden");
+    }
+
+    function login() {
+      const id = document.getElementById("loginPlayer")?.value || document.getElementById("loginScreenPlayer")?.value;
+      const pass = document.getElementById("loginPassword")?.value || document.getElementById("loginScreenPassword")?.value;
+      return performLogin(id, pass);
+    }
+
+    function loginFromScreen() {
+      const id = document.getElementById("loginScreenPlayer").value;
+      const pass = document.getElementById("loginScreenPassword").value;
+      return performLogin(id, pass);
+    }
+
+    function performLogin(id, pass) {
+      const player = state.players.find(p => String(p.id) === String(id));
+      if (!player) return alert("Selecciona un jugador.");
+      if (String(player.password || "") !== String(pass || "")) return alert("Clave incorrecta.");
+
+      state.currentUser = player;
+      localStorage.setItem("mus_current_user_id", player.id);
+      localStorage.setItem("mus_current_user_name", player.name);
+
+      hideLoginScreen();
+      renderActiveUser();
+      renderPlayers();
+      renderAdminControls();
+    }
+
+    function logout() {
+      state.currentUser = null;
+      localStorage.removeItem("mus_current_user_id");
+      localStorage.removeItem("mus_current_user_name");
+      renderActiveUser();
+      renderAdminControls();
+      showLoginScreen(true);
+    }
+
+    function restoreLogin() {
+      const id = localStorage.getItem("mus_current_user_id");
+      if (!id) {
+        showLoginScreen(true);
+        return;
+      }
+
+      const player = state.players.find(p => String(p.id) === String(id));
+      if (player) {
+        state.currentUser = player;
+        hideLoginScreen();
+      } else {
+        showLoginScreen(true);
+      }
+    }
+
+    function renderActiveUser() {
+      const label = state.currentUser
+        ? `${state.currentUser.name} (${state.currentUser.role || "player"})`
+        : "No identificado";
+
+      const active = document.getElementById("activeUser");
+      if (active) active.textContent = label;
+
+      const header = document.getElementById("headerUser");
+      if (header) header.textContent = label;
+    }
+
+    function requireLogin() {
+      if (!state.currentUser) {
+        alert("Debes identificarte primero.");
+        return false;
+      }
+      return true;
+    }
+
+    function ensureMatchFormInRounds() {
+      const form = document.getElementById("matchForm");
+      const roundsTab = document.getElementById("tab-rounds");
+      const dashboard = document.getElementById("roundDashboard");
+      if (!form || !roundsTab || !dashboard) return;
+      if (!roundsTab.contains(form)) {
+        roundsTab.insertBefore(form, dashboard);
+      }
+    }
+
+    function setMatchFormResultMode() {
+      ["matchId", "matchFecha", "matchRound"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.readOnly = true;
+      });
+      ["teamA1", "teamA2", "teamB1", "teamB2", "matchStatus"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+      const title = document.querySelector("#matchForm h3");
+      if (title) title.textContent = "Meter / editar resultado";
+    }
+
+    function ensureSelectOption(selectId, value) {
+      const el = document.getElementById(selectId);
+      const safeValue = normalizeName(value || "");
+      if (!el) return;
+      if (!safeValue) {
+        el.value = "";
+        return;
+      }
+      const exists = Array.from(el.options || []).some(opt => normalizeName(opt.value) === safeValue || normalizeName(opt.textContent) === safeValue);
+      if (!exists) {
+        const opt = document.createElement("option");
+        opt.value = safeValue;
+        opt.textContent = safeValue;
+        el.appendChild(opt);
+      }
+      el.value = safeValue;
+    }
+
+    function getAvatarPlayersFromMatch(m = {}) {
+      const raw = m.avatarPlayers || m.avatarPlayer || m.avatarUsedBy || "";
+      return String(raw)
+        .split(/[;,|]/)
+        .map(normalizeName)
+        .filter(Boolean);
+    }
+
+    function populateAvatarFlagsFromMatch(m = {}) {
+      const container = document.getElementById("matchAvatarFlags");
+      if (!container) return;
+
+      const players = [
+        m.teamA_player1 || m.teamA1 || document.getElementById("teamA1")?.value || "",
+        m.teamA_player2 || m.teamA2 || document.getElementById("teamA2")?.value || "",
+        m.teamB_player1 || m.teamB1 || document.getElementById("teamB1")?.value || "",
+        m.teamB_player2 || m.teamB2 || document.getElementById("teamB2")?.value || ""
+      ].map(normalizeName).filter(Boolean);
+
+      const selected = new Set(getAvatarPlayersFromMatch(m));
+      container.innerHTML = players.map((p, idx) => `
+        <label class="flex items-center justify-between gap-3 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm">
+          <span class="font-bold text-slate-200">${escapeHtml(p)}</span>
+          <span class="inline-flex items-center gap-2 text-xs text-slate-400">
+            Avatar
+            <input type="checkbox" class="avatarFlag w-5 h-5 accent-amber-500" data-player="${escapeHtml(p)}" ${selected.has(p) ? "checked" : ""} />
+          </span>
+        </label>
+      `).join("") || `<div class="text-xs text-amber-300">Selecciona los 4 jugadores antes de marcar avatares.</div>`;
+    }
+
+    function getSelectedAvatarPlayers() {
+      return Array.from(document.querySelectorAll("#matchAvatarFlags .avatarFlag:checked"))
+        .map(cb => normalizeName(cb.dataset.player || ""))
+        .filter(Boolean);
+    }
+
+    function getFaultPlayersFromMatch(m = {}) {
+      const raw = m.faultPlayers || m.penaltyPlayers || m.noShowPlayers || "";
+      return String(raw)
+        .split(/[;,|]/)
+        .map(normalizeName)
+        .filter(Boolean);
+    }
+
+    function populateFaultFlagsFromMatch(m = {}) {
+      const container = document.getElementById("matchFaultFlags");
+      if (!container) return;
+
+      const players = [
+        m.teamA_player1 || m.teamA1 || document.getElementById("teamA1")?.value || "",
+        m.teamA_player2 || m.teamA2 || document.getElementById("teamA2")?.value || "",
+        m.teamB_player1 || m.teamB1 || document.getElementById("teamB1")?.value || "",
+        m.teamB_player2 || m.teamB2 || document.getElementById("teamB2")?.value || ""
+      ].map(normalizeName).filter(Boolean);
+
+      const selected = new Set(getFaultPlayersFromMatch(m));
+      container.innerHTML = players.map(p => `
+        <label class="flex items-center justify-between gap-3 bg-slate-950 border border-red-900/70 rounded-xl px-3 py-2 text-sm">
+          <span class="font-bold text-slate-200">${escapeHtml(p)}</span>
+          <span class="inline-flex items-center gap-2 text-xs text-red-300">
+            Falta
+            <input type="checkbox" class="faultFlag w-5 h-5 accent-red-500" data-player="${escapeHtml(p)}" ${selected.has(p) ? "checked" : ""} />
+          </span>
+        </label>
+      `).join("") || `<div class="text-xs text-amber-300">Selecciona los 4 jugadores antes de marcar faltas.</div>`;
+    }
+
+    function getSelectedFaultPlayers() {
+      return Array.from(document.querySelectorAll("#matchFaultFlags .faultFlag:checked"))
+        .map(cb => normalizeName(cb.dataset.player || ""))
+        .filter(Boolean);
+    }
+
+    function openMatchForm() {
+      alert("Las partidas se crean manualmente en Google Sheets. Desde la app solo se introducen resultados.");
+    }
+
+    function closeMatchForm() {
+      const form = document.getElementById("matchForm");
+      if (form) form.classList.add("hidden");
+      state.isEditing = false;
+      clearMatchForm();
+    }
+
+    function clearMatchForm() {
+      ["matchId","matchFecha","matchRound","vaca1","vaca2","vaca3"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+      ["teamA1","teamA2","teamB1","teamB2"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+      const status = document.getElementById("matchStatus");
+      if (status) status.value = "confirmed";
+      const avatarFlags = document.getElementById("matchAvatarFlags");
+      if (avatarFlags) avatarFlags.innerHTML = "";
+      const faultFlags = document.getElementById("matchFaultFlags");
+      if (faultFlags) faultFlags.innerHTML = "";
+      previewMatchResult();
+    }
+
+    function editMatch(m) {
+      if (isBusyGuard()) return;
+      if (!requireLogin()) return;
+      if (!canEditMatch(m)) return alert("Solo puedes editar partidas en las que participas.");
+      ensureMatchFormInRounds();
+      state.isEditing = true;
+      document.getElementById("matchForm").classList.remove("hidden");
+      renderResultButtons();
+      setMatchFormResultMode();
+      document.getElementById("matchId").value = m.id || "";
+      document.getElementById("matchFecha").value = m.fecha || "";
+      document.getElementById("matchRound").value = m.round || "";
+      ensureSelectOption("teamA1", m.teamA_player1 || m.teamA1 || "");
+      ensureSelectOption("teamA2", m.teamA_player2 || m.teamA2 || "");
+      ensureSelectOption("teamB1", m.teamB_player1 || m.teamB1 || "");
+      ensureSelectOption("teamB2", m.teamB_player2 || m.teamB2 || "");
+      document.getElementById("vaca1").value = m.vaca1 || "";
+      document.getElementById("vaca2").value = m.vaca2 || "";
+      document.getElementById("vaca3").value = m.vaca3 || "";
+      document.getElementById("matchStatus").value = m.status || "confirmed";
+      populateAvatarFlagsFromMatch(m);
+      populateFaultFlagsFromMatch(m);
+      previewMatchResult();
+      document.getElementById("matchForm").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    async function saveMatch() {
+      if (isBusyGuard()) return;
+      if (!requireLogin()) return;
+
+      const calc = calculateMatch(
+        document.getElementById("vaca1").value,
+        document.getElementById("vaca2").value,
+        document.getElementById("vaca3").value
+      );
+
+      if (!calc.valid) return alert("Resultado inválido. Usa 30, 31, 32, 03, 13 o 23.");
+      if (!calc.complete) return alert("La partida no está completa. Debe terminar 2-0 o 2-1 en vacas.");
+
+      const teamA1 = document.getElementById("teamA1").value;
+      const teamA2 = document.getElementById("teamA2").value;
+      const teamB1 = document.getElementById("teamB1").value;
+      const teamB2 = document.getElementById("teamB2").value;
+
+      if (!validateSelectedPlayers(true).ok) return;
+
+      const teamA = `${teamA1}/${teamA2}`;
+      const teamB = `${teamB1}/${teamB2}`;
+
+      const payload = {
+        id: document.getElementById("matchId").value.trim(),
+        fecha: document.getElementById("matchFecha").value.trim(),
+        round: document.getElementById("matchRound").value.trim(),
+        teamA_player1: teamA1,
+        teamA_player2: teamA2,
+        teamB_player1: teamB1,
+        teamB_player2: teamB2,
+        vaca1: document.getElementById("vaca1").value.trim(),
+        vaca2: document.getElementById("vaca2").value.trim(),
+        vaca3: document.getElementById("vaca3").value.trim(),
+        vacasA: calc.vacasA,
+        vacasB: calc.vacasB,
+        gamesA: calc.gamesA,
+        gamesB: calc.gamesB,
+        winner: calc.winnerSide === "A" ? teamA : teamB,
+        status: "pending",
+        avatarPlayers: getSelectedAvatarPlayers().join(";"),
+        avatarPlayer: getSelectedAvatarPlayers().join(";"),
+        avatarUsedBy: getSelectedAvatarPlayers().join(";"),
+        faultPlayers: getSelectedFaultPlayers().join(";"),
+        penaltyPlayers: getSelectedFaultPlayers().join(";"),
+        noShowPlayers: getSelectedFaultPlayers().join(";"),
+        createdBy: state.currentUser.name,
+        createdAt: new Date().toISOString(),
+        updatedBy: state.currentUser.name,
+        updatedAt: new Date().toISOString(),
+        confirmedBy: "",
+        confirmedAt: "",
+        rejectedBy: "",
+        rejectedAt: "",
+        rejectionReason: ""
+      };
+
+      if (!payload.id || !payload.fecha || !payload.round) return alert("Faltan ID, fecha o jornada.");
+
+      setStatus("Guardando partida...");
+      setBusy(true, "Guardando resultado...");
+      try {
+        const res = await api("saveMatch", payload);
+        if (!res.ok) throw new Error(res.error || "Error guardando");
+        closeMatchForm();
+        await loadData(true);
+        alert("Partida guardada.");
+      } catch (err) {
+        console.error(err);
+        alert("Error guardando partida: " + err.message);
+        setStatus("Error guardando partida");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+
+    async function updateMatchStatus(matchId, newStatus, extra = {}) {
+      if (isBusyGuard()) return;
+      if (!requireLogin()) return;
+      const match = state.matches.find(m => String(m.id) === String(matchId));
+      if (!match) return alert("Partida no encontrada.");
+      if (newStatus === "confirmed" && !hasCompleteValidMatchResult(match)) return alert("No se puede confirmar una partida sin resultado completo.");
+
+      const updated = {
+        ...match,
+        status: newStatus,
+        updatedBy: state.currentUser.name,
+        updatedAt: new Date().toISOString(),
+        ...extra
+      };
+
+      setBusy(true, newStatus === "confirmed" ? "Confirmando resultado..." : newStatus === "rejected" ? "Rechazando resultado..." : "Actualizando partida...");
+      try {
+        const res = await api("saveMatch", updated);
+        if (!res.ok) return alert("Error actualizando partida.");
+        await loadData(true);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function confirmMatch(matchId) {
+      const match = state.matches.find(m => String(m.id) === String(matchId));
+      if (!match) return alert("Partida no encontrada.");
+      if (!canConfirmMatch(match)) return alert("No puedes confirmar esta partida.");
+      await updateMatchStatus(matchId, "confirmed", {
+        confirmedBy: state.currentUser.name,
+        confirmedAt: new Date().toISOString()
+      });
+      alert("Resultado confirmado.");
+    }
+
+    async function rejectMatch(matchId) {
+      const match = state.matches.find(m => String(m.id) === String(matchId));
+      if (!match) return alert("Partida no encontrada.");
+      if (!canConfirmMatch(match)) return alert("No puedes rechazar esta partida.");
+      const reason = prompt("Motivo del rechazo:", "Resultado incorrecto");
+      if (reason === null) return;
+      await updateMatchStatus(matchId, "rejected", {
+        rejectedBy: state.currentUser.name,
+        rejectedAt: new Date().toISOString(),
+        rejectionReason: reason
+      });
+      alert("Resultado rechazado.");
+    }
+
+    async function saveCalculatedStandings() {
+      if (!requireLogin()) return;
+      if (!isAdmin()) return alert("Solo el administrador puede volcar la clasificación.");
+
+      const ok = confirm("Esto guardará la clasificación calculada en la pestaña standings. ¿Continuar?");
+      if (!ok) return;
+
+      setStatus("Guardando clasificación...");
+      try {
+        for (const r of state.calculatedStandings) {
+          await api("saveStanding", r);
+        }
+        setStatus("Clasificación guardada en Sheet");
+        alert("Clasificación volcada.");
+      } catch (err) {
+        alert("El backend todavía no tiene saveStanding. Te paso ahora el Apps Script actualizado.");
+        console.error(err);
+      }
+    }
+
+    function showTab(event, tab) {
+      if (tab === "logs" && !isAdmin()) {
+        alert("Solo el administrador puede acceder al Log.");
+        return;
+      }
+      document.querySelectorAll(".tabContent").forEach(el => el.classList.add("hidden"));
+      document.getElementById("tab-" + tab).classList.remove("hidden");
+      document.querySelectorAll(".tabBtn").forEach(el => {
+        el.classList.remove("bg-emerald-700");
+        el.classList.add("bg-slate-800");
+      });
+      event.target.classList.add("bg-emerald-700");
+      event.target.classList.remove("bg-slate-800");
+    }
+
+
+    function toggleTopPanel() {
+      const panel = document.getElementById("topPanelActions");
+      if (!panel) return;
+      panel.classList.toggle("hidden");
+      panel.classList.toggle("flex");
+    }
+
+    function setStatus(txt) {
+      const now = new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      document.getElementById("appStatus").textContent = `${txt} · ${now}`;
+    }
+
+    function normalizeName(name) {
+      const n = String(name || "").trim();
+      if (n.toLowerCase() === "chetin") return "Chete";
+      return n;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+
+
+    function exportBackupJson() {
+      if (!isAdmin()) {
+        alert("Solo el administrador puede descargar backups.");
+        return;
+      }
+
+      const backup = {
+        exportedAt: new Date().toISOString(),
+        players: state.players,
+        matches: state.matches,
+        calculatedStandings: state.calculatedStandings,
+        logs: state.logs
+      };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "backup_torneo_mus_gents_lords_" + new Date().toISOString().slice(0,10) + ".json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function isIosDevice() {
+      const ua = window.navigator.userAgent || "";
+      const platform = window.navigator.platform || "";
+      const iOS = /iPad|iPhone|iPod/.test(ua) || (platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      return iOS;
+    }
+
+    function isAndroidDevice() {
+      return /Android/i.test(window.navigator.userAgent || "");
+    }
+
+    function isStandaloneMode() {
+      return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    }
+
+    function updateInstallButton() {
+      const btn = document.getElementById("installBtn");
+      if (!btn) return;
+
+      if (isStandaloneMode()) {
+        btn.classList.add("hidden");
+        return;
+      }
+
+      if (isIosDevice()) {
+        btn.textContent = "📲 Instalar en iPhone";
+        btn.classList.remove("hidden");
+        return;
+      }
+
+      if (deferredInstallPrompt) {
+        btn.textContent = isAndroidDevice() ? "📲 Instalar en Android" : "📲 Instalar";
+        btn.classList.remove("hidden");
+        return;
+      }
+
+      btn.classList.add("hidden");
+    }
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      updateInstallButton();
+    });
+
+    window.addEventListener("appinstalled", () => {
+      deferredInstallPrompt = null;
+      updateInstallButton();
+    });
+
+    function closeIosInstallModal() {
+      const modal = document.getElementById("iosInstallModal");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    async function installApp() {
+      if (isStandaloneMode()) {
+        alert("La app ya está instalada.");
+        updateInstallButton();
+        return;
+      }
+
+      if (isIosDevice()) {
+        const modal = document.getElementById("iosInstallModal");
+        if (modal) modal.classList.remove("hidden");
+        return;
+      }
+
+      if (!deferredInstallPrompt) {
+        alert("Si no aparece instalación automática, usa el menú del navegador: Añadir a pantalla de inicio.");
+        return;
+      }
+
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      updateInstallButton();
+    }
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(console.error);
+      });
+    }
+
+    function toggleAutoRefresh() {
+      autoRefreshEnabled = !autoRefreshEnabled;
+      document.getElementById("autoRefreshBtn").textContent = autoRefreshEnabled ? "⏱️ Auto 5m: ON" : "⏱️ Auto: OFF";
+      document.getElementById("autoRefreshBtn").className = autoRefreshEnabled
+        ? "bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold"
+        : "bg-red-900 hover:bg-red-800 px-4 py-2 rounded-lg text-sm font-bold";
+    }
+
+    function startAutoRefresh() {
+      if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+      autoRefreshTimer = setInterval(() => {
+        if (autoRefreshEnabled && !state.isEditing) {
+          loadData();
+        }
+      }, 300000);
+    }
+
+    loadData();
+    updateInstallButton();
+    startAutoRefresh();
+  </script>
+</body>
+</html>
