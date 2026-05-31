@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v1.0.3</title>
+  <title>Torneo de Mus Gents & Lords · v1.0.4</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json?v=0132" />
   <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
@@ -55,7 +55,7 @@
     }
   </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    VERSION 1.0.3 · INSTALACIÓN IOS ANDROID</div>
+    VERSION 1.0.4 · CABECERA MÓVIL COMPACTA</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
     <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0153') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
@@ -74,7 +74,7 @@
       </div>
 
       <div class="text-center text-[11px] text-slate-500 mt-5">
-        v1.0.3 · La sesión se recordará en este dispositivo
+        v1.0.4 · La sesión se recordará en este dispositivo
       </div>
     </div>
   </section>
@@ -86,7 +86,7 @@
           <img src="assets/logo.png?v=0132" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
           <div>
             <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-xs text-amber-300 font-black">v1.0.3 · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-xs text-amber-300 font-black">v1.0.4 · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -96,25 +96,29 @@
           <span class="text-slate-400">Usuario:</span>
           <span id="headerUser" class="font-black text-amber-300">No identificado</span>
         </div>
-        <button onclick="showLoginScreen(true)" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-lg text-sm">Cambiar usuario</button>
-        <button onclick="logout()" class="bg-red-900 hover:bg-red-800 text-white font-bold px-3 py-2 rounded-lg text-sm">Salir</button>
+        <button onclick="showLoginScreen(true)" class="hidden md:inline-flex bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-lg text-sm">Cambiar usuario</button>
+        <button onclick="logout()" class="hidden md:inline-flex bg-red-900 hover:bg-red-800 text-white font-bold px-3 py-2 rounded-lg text-sm">Salir</button>
       </div>
     </div>
   </header>
 
   <main class="max-w-7xl mx-auto p-4 space-y-6">
-    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div>
-          <p class="text-sm">Usuario activo: <span id="activeUser" class="font-bold text-amber-400">No identificado</span></p>
-          <p class="text-xs text-slate-400">Estado: <span id="appStatus">Cargando datos...</span></p>
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-3 md:p-4">
+      <button onclick="toggleTopPanel()" class="w-full flex items-center justify-between gap-3 text-left md:pointer-events-none">
+        <div class="min-w-0">
+          <p class="text-sm truncate">👤 <span id="activeUser" class="font-bold text-amber-400">No identificado</span></p>
+          <p class="text-xs text-slate-400 truncate">Estado: <span id="appStatus">Cargando datos...</span></p>
         </div>
-        <div class="flex flex-wrap gap-2 items-center">
-          <button onclick="loadData()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg text-sm font-bold">🔄 Actualizar datos</button>
-          <button id="autoRefreshBtn" onclick="toggleAutoRefresh()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⏱️ Auto: OFF</button>
-          <button id="installBtn" onclick="installApp()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-lg text-sm font-black">📲 Instalar</button>
-          <button id="backupBtn" onclick="exportBackupJson()" class="hidden bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⬇️ Backup</button>
-        </div>
+        <div class="md:hidden bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm font-black">⚙️</div>
+      </button>
+
+      <div id="topPanelActions" class="hidden md:flex flex-wrap gap-2 items-center mt-3 md:mt-4">
+        <button onclick="loadData()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg text-sm font-bold">🔄 Actualizar datos</button>
+        <button id="autoRefreshBtn" onclick="toggleAutoRefresh()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⏱️ Auto: OFF</button>
+        <button id="installBtn" onclick="installApp()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-lg text-sm font-black">📲 Instalar</button>
+        <button id="backupBtn" onclick="exportBackupJson()" class="hidden bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⬇️ Backup</button>
+        <button onclick="showLoginScreen(true)" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-2 rounded-lg text-sm">Cambiar usuario</button>
+        <button onclick="logout()" class="bg-red-900 hover:bg-red-800 text-white font-bold px-4 py-2 rounded-lg text-sm">Salir</button>
       </div>
     </section>
 
@@ -2354,6 +2358,14 @@
       });
       event.target.classList.add("bg-emerald-700");
       event.target.classList.remove("bg-slate-800");
+    }
+
+
+    function toggleTopPanel() {
+      const panel = document.getElementById("topPanelActions");
+      if (!panel) return;
+      panel.classList.toggle("hidden");
+      panel.classList.toggle("flex");
     }
 
     function setStatus(txt) {
