@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v0.17.0</title>
+  <title>Torneo de Mus Gents & Lords · v0.17.1</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json?v=0132" />
   <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
@@ -52,7 +52,7 @@
     }
   </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    VERSION 0.17.0 · JORNADAS RESULTADOS</div>
+    VERSION 0.17.1 · CONFIRMACIÓN PAREJA RIVAL</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
     <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0153') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
@@ -71,7 +71,7 @@
       </div>
 
       <div class="text-center text-[11px] text-slate-500 mt-5">
-        v0.17.0 · La sesión se recordará en este dispositivo
+        v0.17.1 · La sesión se recordará en este dispositivo
       </div>
     </div>
   </section>
@@ -83,7 +83,7 @@
           <img src="assets/logo.png?v=0132" class="w-14 h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70" />
           <div>
             <h1 class="text-2xl font-black text-white">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-xs text-amber-300 font-black">v0.17.0 · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-xs text-amber-300 font-black">v0.17.1 · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -750,7 +750,31 @@
       if (!state.currentUser) return false;
       if (isAdmin()) return true;
       if (!userIsInMatch(m)) return false;
-      if (normalizeName(m.createdBy || m.updatedBy || "") === normalizeName(state.currentUser.name)) return false;
+
+      const current = normalizeName(state.currentUser.name);
+      const author = normalizeName(m.createdBy || m.updatedBy || "");
+
+      if (!author) return true;
+      if (current === author) return false;
+
+      const teamA = [
+        normalizeName(m.teamA_player1 || m.teamA1 || ""),
+        normalizeName(m.teamA_player2 || m.teamA2 || "")
+      ].filter(Boolean);
+
+      const teamB = [
+        normalizeName(m.teamB_player1 || m.teamB1 || ""),
+        normalizeName(m.teamB_player2 || m.teamB2 || "")
+      ].filter(Boolean);
+
+      const authorInA = teamA.includes(author);
+      const authorInB = teamB.includes(author);
+
+      // Si el autor está en una pareja, solo puede confirmar alguien de la pareja contraria.
+      if (authorInA) return teamB.includes(current);
+      if (authorInB) return teamA.includes(current);
+
+      // Si por datos antiguos no sabemos de qué pareja era el autor, basta con que sea participante distinto.
       return true;
     }
 
