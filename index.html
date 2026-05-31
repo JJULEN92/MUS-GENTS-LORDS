@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v1.0.5</title>
+  <title>Torneo de Mus Gents & Lords · v1.0.7</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json?v=0132" />
   <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
@@ -41,7 +41,18 @@
       background:rgba(15,23,42,.85); border:1px solid rgba(51,65,85,.9);
       font-size:.8rem; line-height:1.1;
     }
-  </style>
+  
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+
+</style>
   <style>
     .hero-bg {
       background: rgba(15,23,42,.88);
@@ -53,9 +64,20 @@
       background:rgba(15,23,42,.85); border:1px solid rgba(51,65,85,.9);
       font-size:.8rem; line-height:1.1;
     }
-  </style>
+  
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+
+</style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    VERSION 1.0.5 · HEADER MÓVIL COMPACTO</div>
+    VERSION 1.0.7 · TABS COMPACTAS</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
     <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0153') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
@@ -74,7 +96,7 @@
       </div>
 
       <div class="text-center text-[11px] text-slate-500 mt-5">
-        v1.0.5 · La sesión se recordará en este dispositivo
+        v1.0.7 · La sesión se recordará en este dispositivo
       </div>
     </div>
   </section>
@@ -86,7 +108,7 @@
           <img src="assets/logo.png?v=0132" class="w-9 h-9 md:w-14 md:h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70 shrink-0" />
           <div>
             <h1 class="text-lg md:text-2xl font-black text-white leading-tight whitespace-nowrap truncate">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-[10px] md:text-xs text-amber-300 font-black leading-tight whitespace-nowrap truncate">v1.0.5 · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-[10px] md:text-xs text-amber-300 font-black leading-tight whitespace-nowrap truncate">v1.0.7 · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -133,14 +155,14 @@
       </div>
     </section>
 
-<nav class="flex flex-wrap gap-2">
-      <button onclick="showTab(event,'standings')" class="tabBtn bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Clasificación</button>
-      <button onclick="showTab(event,'rounds')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Jornadas</button>
-      <button onclick="showTab(event,'stats')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Estadísticas</button>
+<nav class="flex gap-1 overflow-x-auto scrollbar-hide pb-1">
+      <button onclick="showTab(event,'standings')" class="tabBtn bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Rank</button>
+      <button onclick="showTab(event,'rounds')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Juegos</button>
+      <button onclick="showTab(event,'stats')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Stats</button>
       <button onclick="showTab(event,'venues')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Sedes</button>
-      <button onclick="showTab(event,'history')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Hall of Fame</button>
+      <button onclick="showTab(event,'history')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Hall</button>
       <button onclick="showTab(event,'rules')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Reglas</button>
-      <button onclick="showTab(event,'players')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Jugadores</button>
+      <button onclick="showTab(event,'players')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Gents</button>
       <button id="logsTabBtn" onclick="showTab(event,'logs')" class="tabBtn hidden bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Log</button>
     </nav>
 
@@ -150,7 +172,7 @@
           <h2 class="text-xl font-black">📊 Clasificación automática</h2>
           <p class="text-xs text-slate-400">Orden: Puntos → JG → menor JP → menor Penal → Sin Avatar</p>
         </div>
-        <button onclick="saveCalculatedStandings()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-lg text-sm">💾 Volcar clasificación al Sheet</button>
+        <button id="saveStandingsBtn" onclick="saveCalculatedStandings()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-lg text-sm">💾 Volcar clasificación al Sheet</button>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -846,6 +868,9 @@
 
       const backupBtn = document.getElementById("backupBtn");
       if (backupBtn) backupBtn.classList.toggle("hidden", !show);
+
+      const saveStandingsBtn = document.getElementById("saveStandingsBtn");
+      if (saveStandingsBtn) saveStandingsBtn.classList.toggle("hidden", !show);
 
       const logsTabBtn = document.getElementById("logsTabBtn");
       if (logsTabBtn) logsTabBtn.classList.toggle("hidden", !show);
@@ -2327,7 +2352,7 @@
 
     async function saveCalculatedStandings() {
       if (!requireLogin()) return;
-      if ((state.currentUser.role || "") !== "admin") return alert("Solo admin puede volcar la clasificación.");
+      if (!isAdmin()) return alert("Solo el administrador puede volcar la clasificación.");
 
       const ok = confirm("Esto guardará la clasificación calculada en la pestaña standings. ¿Continuar?");
       if (!ok) return;
