@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v2.1.3 PREPROD</title>
+  <title>Torneo de Mus Gents & Lords · v2.1.5 PREPROD</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json?v=0132" />
   <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
@@ -77,7 +77,7 @@
 
 </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    PREPROD · VERSION 2.1.3 · WINNER SOURCE</div>
+    PREPROD · VERSION 2.1.5 · RANKING LIGUILLA</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
     <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0153') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
@@ -96,7 +96,7 @@
       </div>
 
       <div class="text-center text-[11px] text-slate-500 mt-5">
-        v2.1.3 PREPROD · La sesión se recordará en este dispositivo
+        v2.1.5 PREPROD · La sesión se recordará en este dispositivo
       </div>
     </div>
   </section>
@@ -108,7 +108,7 @@
           <img src="assets/logo.png?v=0132" class="w-9 h-9 md:w-14 md:h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70 shrink-0" />
           <div>
             <h1 class="text-lg md:text-2xl font-black text-white leading-tight whitespace-nowrap truncate">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-[10px] md:text-xs text-amber-300 font-black leading-tight whitespace-nowrap truncate">v2.1.3 PREPROD · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-[10px] md:text-xs text-amber-300 font-black leading-tight whitespace-nowrap truncate">v2.1.5 PREPROD · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -170,7 +170,7 @@
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
         <div>
           <h2 class="text-xl font-black">📊 Clasificación temporada</h2>
-          <p class="text-xs text-slate-400">Orden: Puntos → JG → menor JP → menor Penal → Sin Avatar</p>
+          <p class="text-xs text-slate-400">Liguilla principal: 8 primeros. Orden: Puntos → JG → menor JP → menor Penal → Sin Avatar</p>
           <p class="text-xs text-amber-300 font-bold mt-1">Temporada activa: <span id="activeSeasonLabelRank">-</span></p>
         </div>
         <button id="saveStandingsBtn" onclick="saveCalculatedStandings()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-lg text-sm">💾 Volcar clasificación al Sheet</button>
@@ -194,6 +194,33 @@
           </thead>
           <tbody id="standingsBody"></tbody>
         </table>
+      </div>
+
+      <div class="mt-6 bg-slate-950/60 border border-cyan-700/30 rounded-2xl p-4">
+        <div class="mb-4">
+          <h2 class="text-xl font-black">🧞 Avatares preferentes</h2>
+          <p class="text-xs text-slate-400 mt-1">Jugadores fuera de la liguilla principal de 8. Prioridad para cubrir ausencias.</p>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-xs uppercase text-slate-400 border-b border-slate-700">
+              <tr>
+                <th class="text-left p-2">Pos</th>
+                <th class="text-left p-2">Jugador</th>
+                <th class="text-center p-2">PJ</th>
+                <th class="text-center p-2 text-amber-400">Puntos</th>
+                <th class="text-center p-2">V+</th>
+                <th class="text-center p-2">V-</th>
+                <th class="text-center p-2 text-emerald-400">JG</th>
+                <th class="text-center p-2 text-red-400">JP</th>
+                <th class="text-center p-2">Penal</th>
+                <th class="text-center p-2">Avatar</th>
+              </tr>
+            </thead>
+            <tbody id="preferredAvatarsBody"></tbody>
+          </table>
+        </div>
       </div>
 
       <div class="mt-8 bg-slate-950/60 border border-amber-700/30 rounded-2xl p-4">
@@ -277,7 +304,14 @@
 
         <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
           <h3 class="font-black mb-3">🤝 Mejores parejas</h3>
+          <p class="text-xs text-slate-500 mb-3">Solo parejas con más de una victoria juntas.</p>
           <div id="pairsTable"></div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h3 class="font-black mb-3">💀 Peores parejas</h3>
+          <p class="text-xs text-slate-500 mb-3">Solo parejas con más de una derrota juntas.</p>
+          <div id="worstPairsTable"></div>
         </div>
 
         <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
@@ -990,7 +1024,10 @@
     }
 
     function renderStandings() {
-      const rows = state.calculatedStandings;
+      const allRows = state.calculatedStandings;
+      const rows = allRows.slice(0, 8);
+      const preferredRows = allRows.slice(8);
+
       document.getElementById("standingsBody").innerHTML = rows.map((r, i) => `
         <tr class="border-b border-slate-800 hover:bg-slate-800/40">
           <td class="p-2 font-bold">${i+1}</td>
@@ -1006,6 +1043,24 @@
           <td class="p-2 text-center">${r.sinAvatar}</td>
         </tr>
       `).join("") || `<tr><td colspan="11" class="p-4 text-slate-400">No hay clasificación calculada.</td></tr>`;
+
+      const preferredBody = document.getElementById("preferredAvatarsBody");
+      if (preferredBody) {
+        preferredBody.innerHTML = preferredRows.map((r, idx) => `
+          <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+            <td class="p-2 font-bold">${idx + 9}</td>
+            <td class="p-2 font-bold">${renderPlayerMini(r.player)}</td>
+            <td class="p-2 text-center">${r.pj}</td>
+            <td class="p-2 text-center text-amber-400 font-black">${r.points}</td>
+            <td class="p-2 text-center">${r.vacasWon}</td>
+            <td class="p-2 text-center">${r.vacasLost}</td>
+            <td class="p-2 text-center text-emerald-400">${r.jg}</td>
+            <td class="p-2 text-center text-red-400">${r.jp}</td>
+            <td class="p-2 text-center">${r.penal}</td>
+            <td class="p-2 text-center">${r.avatar}</td>
+          </tr>
+        `).join("") || `<tr><td colspan="10" class="p-4 text-slate-400">No hay avatares preferentes.</td></tr>`;
+      }
 
       const allTimeRows = calculateAllTimeRanking();
       const allTimeBody = document.getElementById("allTimeRankingBody");
@@ -1433,11 +1488,11 @@
               </tr>
             </thead>
             <tbody>
-              ${rows.map(r => `
+              ${rows.length ? rows.map(r => `
                 <tr class="border-b border-slate-900 hover:bg-slate-900/50">
                   ${columns.map(c => `<td class="py-2">${r[c.key] ?? ""}</td>`).join("")}
                 </tr>
-              `).join("")}
+              `).join("") : `<tr><td colspan="${columns.length}" class="py-3 text-slate-500">Sin datos suficientes.</td></tr>`}
             </tbody>
           </table>
         </div>
@@ -1494,10 +1549,18 @@
 
       renderSimpleTable(
         "streakTable",
-        [...stats].sort((a,b) => parseInt((b.streak||"").slice(1)||0) - parseInt((a.streak||"").slice(1)||0)).map(s => ({
-          jugador: renderPlayerMini(s.name, "w-6 h-6"),
-          racha: s.streak || "-"
-        })),
+        [...stats]
+          .map(s => ({
+            ...s,
+            streakCount: parseInt((s.streak || "").slice(1) || 0),
+            streakType: (s.streak || "").slice(0, 1)
+          }))
+          .filter(s => s.streakCount > 1)
+          .sort((a,b) => b.streakCount - a.streakCount)
+          .map(s => ({
+            jugador: renderPlayerMini(s.name, "w-6 h-6"),
+            racha: s.streakType === "W" ? `${s.streakCount} victorias` : `${s.streakCount} derrotas`
+          })),
         [
           { key: "jugador", label: "Jugador" },
           { key: "racha", label: "Racha" }
@@ -1506,24 +1569,38 @@
 
       const pairs = {};
       state.matches.forEach(m => {
-        const meta = getMatchMeta(m);
-        if (!meta.calc.valid || !meta.calc.complete || effectiveStatus(m) !== "confirmed") return;
+        if (effectiveStatus(m) !== "confirmed") return;
 
-        const pairA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].sort().join(" + ");
-        const pairB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].sort().join(" + ");
+        const outcome = getMatchOutcome(m);
+        if (!outcome.isResolved) return;
 
-        [pairA, pairB].forEach(p => {
-          pairs[p] = pairs[p] || { pair: p, played: 0, wins: 0 };
-          pairs[p].played++;
+        const pairAPlayers = [normalizeName(m.teamA_player1 || m.teamA1), normalizeName(m.teamA_player2 || m.teamA2)].filter(Boolean);
+        const pairBPlayers = [normalizeName(m.teamB_player1 || m.teamB1), normalizeName(m.teamB_player2 || m.teamB2)].filter(Boolean);
+
+        const pairA = pairAPlayers.slice().sort().join(" + ");
+        const pairB = pairBPlayers.slice().sort().join(" + ");
+
+        [
+          { pair: pairA, players: pairAPlayers },
+          { pair: pairB, players: pairBPlayers }
+        ].forEach(item => {
+          if (!item.pair || item.players.length !== 2) return;
+
+          pairs[item.pair] = pairs[item.pair] || { pair: item.pair, played: 0, wins: 0, losses: 0 };
+          pairs[item.pair].played++;
+
+          const bothWon = item.players.every(p => outcome.winners.includes(p));
+          const bothLost = item.players.every(p => outcome.losers.includes(p));
+
+          if (bothWon) pairs[item.pair].wins++;
+          if (bothLost) pairs[item.pair].losses++;
         });
-
-        const winnerPair = meta.calc.winnerSide === "A" ? pairA : pairB;
-        pairs[winnerPair].wins++;
       });
 
       renderSimpleTable(
         "pairsTable",
         Object.values(pairs)
+          .filter(p => p.wins > 1)
           .map(p => ({
             pareja: renderPlayersFromText(p.pair, /\s*\+\s*/),
             victorias: p.wins,
@@ -1534,6 +1611,23 @@
           { key: "pareja", label: "Pareja" },
           { key: "victorias", label: "Victorias" },
           { key: "ratio", label: "Ratio" }
+        ]
+      );
+
+      renderSimpleTable(
+        "worstPairsTable",
+        Object.values(pairs)
+          .filter(p => p.losses > 1)
+          .map(p => ({
+            pareja: renderPlayersFromText(p.pair, /\s*\+\s*/),
+            derrotas: p.losses,
+            ratio: p.played ? Math.round((p.losses/p.played)*100) + "%" : "0%"
+          }))
+          .sort((a,b) => b.derrotas - a.derrotas),
+        [
+          { key: "pareja", label: "Pareja" },
+          { key: "derrotas", label: "Derrotas" },
+          { key: "ratio", label: "Ratio derrota" }
         ]
       );
 
