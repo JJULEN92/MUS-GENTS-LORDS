@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v2.2.1 PREPROD</title>
+  <title>Torneo de Mus Gents & Lords · v2.1.14 PREPROD</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json?v=0132" />
   <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
@@ -77,7 +77,7 @@
 
 </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    PREPROD · VERSION 2.2.1 · PERSONAL HOME SAFE</div>
+    PREPROD · VERSION 2.1.14 · PLAYER ORDER</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
     <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0153') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
@@ -96,7 +96,7 @@
       </div>
 
       <div class="text-center text-[11px] text-slate-500 mt-5">
-        v2.2.1 PREPROD · La sesión se recordará en este dispositivo
+        v2.1.14 PREPROD · La sesión se recordará en este dispositivo
       </div>
     </div>
   </section>
@@ -108,7 +108,7 @@
           <img src="assets/logo.png?v=0132" class="w-9 h-9 md:w-14 md:h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70 shrink-0" />
           <div>
             <h1 class="text-lg md:text-2xl font-black text-white leading-tight whitespace-nowrap truncate">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-[10px] md:text-xs text-amber-300 font-black leading-tight whitespace-nowrap truncate">v2.2.1 PREPROD · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-[10px] md:text-xs text-amber-300 font-black leading-tight whitespace-nowrap truncate">v2.1.14 PREPROD · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -156,7 +156,6 @@
     </section>
 
 <nav class="flex gap-1 overflow-x-auto scrollbar-hide pb-1">
-      <button onclick="showTab(event,'home')" class="tabBtn active whitespace-nowrap bg-emerald-600 text-white font-bold px-2.5 py-1.5 rounded-lg text-xs transition shrink-0">Home</button>
       <button onclick="showTab(event,'standings')" class="tabBtn bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Rank</button>
       <button onclick="showTab(event,'rounds')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Games</button>
       <button onclick="showTab(event,'stats')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Stats</button>
@@ -167,47 +166,7 @@
       <button id="logsTabBtn" onclick="showTab(event,'logs')" class="tabBtn hidden bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Log</button>
     </nav>
 
-    
-    <section id="tab-home" class="tabContent bg-slate-900 border border-slate-800 rounded-2xl p-3 md:p-4 space-y-4">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div>
-          <h2 class="text-xl font-black">🏠 Home</h2>
-          <p class="text-xs text-amber-300 font-bold mt-1">Season: <span id="homeSeasonLabel">-</span></p>
-        </div>
-        <button onclick="goToGames()" class="bg-emerald-700 hover:bg-emerald-600 px-3 py-2 rounded-lg text-xs font-black w-fit">📅 Games</button>
-      </div>
-
-      <div id="homeUserCards" class="grid grid-cols-2 xl:grid-cols-4 gap-3"></div>
-
-      <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-          <div class="flex items-center justify-between gap-3 mb-3">
-            <h3 class="font-black">🎯 Your next game</h3>
-            <button id="homeGoGamesBtn" onclick="goToGames()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-2 rounded-lg text-xs font-black">Open Games</button>
-          </div>
-          <div id="homeNextMatch" class="text-sm text-slate-300"></div>
-        </div>
-
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-          <h3 class="font-black mb-3">🏆 Championship</h3>
-          <div id="homeChampionshipCards" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-          <h3 class="font-black mb-3">🧠 Personal insights</h3>
-          <div id="homeInsights" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
-        </div>
-
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-          <h3 class="font-black mb-3">🕘 Last game</h3>
-          <div id="homeLastMatch" class="text-sm text-slate-300"></div>
-        </div>
-      </div>
-    </section>
-
-<section id="tab-standings" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4">
+    <section id="tab-standings" class="tabContent bg-slate-900 border border-slate-800 rounded-2xl p-4">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
         <div>
           <h2 class="text-base sm:text-xl font-black">📊 Clasificación temporada</h2>
@@ -852,7 +811,6 @@
       renderPlayerSelects();
       state.calculatedStandings = calculateStandings();
       renderStandings();
-      renderHome();
       renderRoundDashboard();
       renderStats();
       renderPendingPanel();
@@ -1069,160 +1027,6 @@
         a.player.localeCompare(b.player)
       );
     }
-
-
-    function homeCard(title, value, subtitle = "", color = "text-white") {
-      return `
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 md:p-4">
-          <div class="text-[10px] md:text-xs uppercase tracking-wider text-slate-500 font-black">${title}</div>
-          <div class="text-xl md:text-2xl font-black ${color} mt-1">${value}</div>
-          <div class="text-xs text-slate-400 mt-1">${subtitle || ""}</div>
-        </div>
-      `;
-    }
-
-    function currentPlayerNameSafe() {
-      return normalizeName(state.currentUser?.name || "");
-    }
-
-    function getHomeStanding(playerName) {
-      const rows = state.calculatedStandings || [];
-      const idx = rows.findIndex(r => normalizeName(r.player) === playerName);
-      return idx >= 0 ? { ...rows[idx], pos: idx + 1 } : null;
-    }
-
-    function getHomeNextMatch(playerName) {
-      return (state.matches || [])
-        .filter(m => isActiveSeasonMatch(m))
-        .filter(m => matchPlayers(m).includes(playerName))
-        .filter(m => effectiveStatus(m) !== "confirmed" && effectiveStatus(m) !== "cancelled" && effectiveStatus(m) !== "rejected")
-        .sort((a,b) => Number(a.round || 999) - Number(b.round || 999))[0] || null;
-    }
-
-    function getHomeLastMatch(playerName) {
-      return (state.matches || [])
-        .filter(m => matchPlayers(m).includes(playerName))
-        .filter(m => effectiveStatus(m) === "confirmed")
-        .sort((a,b) => String(b.fecha || "").localeCompare(String(a.fecha || "")))[0] || null;
-    }
-
-    function getHomePendingCount() {
-      return (state.matches || []).filter(m =>
-        isActiveSeasonMatch(m) &&
-        effectiveStatus(m) === "pending" &&
-        hasAnyMatchResult(m)
-      ).length;
-    }
-
-    function formatHomeMatch(m) {
-      if (!m) return `<div class="text-slate-500">No game found.</div>`;
-
-      const a = [normalizeName(m.teamA_player1 || m.teamA1), normalizeName(m.teamA_player2 || m.teamA2)].filter(Boolean);
-      const b = [normalizeName(m.teamB_player1 || m.teamB1), normalizeName(m.teamB_player2 || m.teamB2)].filter(Boolean);
-
-      return `
-        <div class="space-y-2">
-          <div class="text-xs text-slate-500 font-bold">${escapeHtml(m.id || "")} · ${escapeHtml(formatDate(m.fecha) || "")}</div>
-          <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-            <div>${a.map(p => renderPlayerMini(p, "w-6 h-6")).join(" / ")}</div>
-            <div class="text-slate-500 font-black">vs</div>
-            <div>${b.map(p => renderPlayerMini(p, "w-6 h-6")).join(" / ")}</div>
-          </div>
-        </div>
-      `;
-    }
-
-    function getHomeTopPair() {
-      const pairs = {};
-      (state.matches || []).forEach(m => {
-        if (effectiveStatus(m) !== "confirmed") return;
-        const outcome = getMatchOutcome(m);
-        if (!outcome.isResolved) return;
-
-        const teamA = [normalizeName(m.teamA_player1 || m.teamA1), normalizeName(m.teamA_player2 || m.teamA2)].filter(Boolean);
-        const teamB = [normalizeName(m.teamB_player1 || m.teamB1), normalizeName(m.teamB_player2 || m.teamB2)].filter(Boolean);
-
-        [teamA, teamB].forEach(team => {
-          if (team.length !== 2) return;
-          const key = team.slice().sort().join(" + ");
-          pairs[key] = pairs[key] || { pair: key, wins: 0, played: 0 };
-          pairs[key].played += 1;
-          if (team.every(p => outcome.winners.includes(p))) pairs[key].wins += 1;
-        });
-      });
-
-      return Object.values(pairs).sort((a,b) => b.wins - a.wins || b.played - a.played)[0] || null;
-    }
-
-    function getHomeBestStreak() {
-      const stats = Object.values(getPlayerStats(state.matches.filter(m => isActiveSeasonMatch(m))));
-      return stats
-        .map(s => ({
-          ...s,
-          streakCount: parseInt((s.streak || "").slice(1) || 0),
-          streakType: (s.streak || "").slice(0, 1)
-        }))
-        .filter(s => s.streakCount > 1)
-        .sort((a,b) => b.streakCount - a.streakCount)[0] || null;
-    }
-
-    function goToGames() {
-      const btn = [...document.querySelectorAll(".tabBtn")].find(b =>
-        b.textContent.trim().toLowerCase() === "games" ||
-        b.textContent.trim().toLowerCase() === "juegos"
-      );
-      if (btn) showTab({ currentTarget: btn }, "rounds");
-    }
-
-    function renderHome() {
-      const season = document.getElementById("homeSeasonLabel");
-      if (season) season.textContent = getActiveSeasonLabel();
-
-      const playerName = currentPlayerNameSafe();
-      const row = playerName ? getHomeStanding(playerName) : null;
-      const leader = (state.calculatedStandings || [])[0] || null;
-      const nextMatch = playerName ? getHomeNextMatch(playerName) : null;
-      const lastMatch = playerName ? getHomeLastMatch(playerName) : null;
-      const detailed = playerName && typeof getDetailedPlayerStats === "function" ? getDetailedPlayerStats(playerName) : null;
-      const rival = playerName && typeof calculateRivalInsights === "function"
-        ? calculateRivalInsights(playerName)
-        : { nemesis: null, victim: null };
-
-      const cards = document.getElementById("homeUserCards");
-      if (cards) {
-        cards.innerHTML =
-          homeCard("Your rank", row ? `#${row.pos}` : "-", row ? `${row.points} pts` : "No ranking", "text-amber-300") +
-          homeCard("W-L", detailed ? `${detailed.wins}-${detailed.losses}` : "-", "All-time", "text-emerald-300") +
-          homeCard("Nemesis", rival.nemesis ? renderPlayerMini(rival.nemesis.rival, "w-7 h-7") : "-", rival.nemesis ? `${rival.nemesis.lossesAgainst} losses vs him` : "No data", "text-red-300") +
-          homeCard("Victim", rival.victim ? renderPlayerMini(rival.victim.rival, "w-7 h-7") : "-", rival.victim ? `${rival.victim.winsAgainst} wins vs him` : "No data", "text-cyan-300");
-      }
-
-      const nextBox = document.getElementById("homeNextMatch");
-      if (nextBox) nextBox.innerHTML = nextMatch ? formatHomeMatch(nextMatch) : `<div class="text-slate-500">No pending game for you.</div>`;
-
-      const champ = document.getElementById("homeChampionshipCards");
-      if (champ) {
-        const topPair = getHomeTopPair();
-        const streak = getHomeBestStreak();
-        champ.innerHTML =
-          homeCard("Leader", leader ? renderPlayerMini(leader.player, "w-7 h-7") : "-", leader ? `${leader.points} pts` : "No data", "text-emerald-300") +
-          homeCard("Pending", getHomePendingCount(), "results / confirmations", "text-amber-300") +
-          homeCard("Top pair", topPair ? renderPlayersFromText(topPair.pair, /\s*\+\s*/) : "-", topPair ? `${topPair.wins} wins together` : "No data", "text-cyan-300") +
-          homeCard("Best streak", streak ? renderPlayerMini(streak.name, "w-7 h-7") : "-", streak ? `${streak.streakCount} ${streak.streakType === "W" ? "wins" : "losses"}` : "No streak", "text-fuchsia-300");
-      }
-
-      const insights = document.getElementById("homeInsights");
-      if (insights && detailed) {
-        insights.innerHTML =
-          homeCard("Best mate", detailed.bestPartner ? renderPlayerMini(detailed.bestPartner.name, "w-7 h-7") : "-", detailed.bestPartner ? `${detailed.bestPartner.wins} wins juntos` : "No data", "text-emerald-300") +
-          homeCard("Worst mate", detailed.worstPartner ? renderPlayerMini(detailed.worstPartner.name, "w-7 h-7") : "-", detailed.worstPartner ? `${detailed.worstPartner.losses} losses juntos` : "No data", "text-red-300") +
-          homeCard("Win rate", `${detailed.winRate || 0}%`, `${detailed.wins || 0}-${detailed.losses || 0}`, "text-cyan-300");
-      }
-
-      const lastBox = document.getElementById("homeLastMatch");
-      if (lastBox) lastBox.innerHTML = lastMatch ? formatHomeMatch(lastMatch) : `<div class="text-slate-500">No previous game.</div>`;
-    }
-
 
     function renderStandings() {
       const allRows = state.calculatedStandings;
@@ -2158,10 +1962,30 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
                   <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+                    <div class="text-xs uppercase text-slate-500 font-bold">Best mate</div>
+                    <div class="text-lg font-black text-emerald-300 mt-1">${st.bestPartner ? renderPlayerMini(st.bestPartner.name, "w-6 h-6") : "-"}</div>
+                    <div class="text-xs text-slate-400">${st.bestPartner ? `${st.bestPartner.wins} wins juntos` : "Sin datos"}</div>
+                  </div>
+
+                  <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
                     <div class="text-xs uppercase text-slate-500 font-bold">Worst mate</div>
                     <div class="text-lg font-black text-red-300 mt-1">${st.worstPartner ? renderPlayerMini(st.worstPartner.name, "w-6 h-6") : "-"}</div>
                     <div class="text-xs text-slate-400">${st.worstPartner ? `${st.worstPartner.losses} losses juntos` : "Sin datos"}</div>
                   </div>
+
+                  <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+                    <div class="text-xs uppercase text-slate-500 font-bold">Victim</div>
+                    <div class="text-lg font-black text-amber-300 mt-1">${rivalInsights.victim ? renderPlayerMini(rivalInsights.victim.rival, "w-6 h-6") : "-"}</div>
+                    <div class="text-xs text-slate-400">${rivalInsights.victim ? `${rivalInsights.victim.winsAgainst} wins vs him` : "Sin datos"}</div>
+                  </div>
+
+                  <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+                    <div class="text-xs uppercase text-slate-500 font-bold">Nemesis</div>
+                    <div class="text-lg font-black text-red-300 mt-1">${rivalInsights.nemesis ? renderPlayerMini(rivalInsights.nemesis.rival, "w-6 h-6") : "-"}</div>
+                    <div class="text-xs text-slate-400">${rivalInsights.nemesis ? `${rivalInsights.nemesis.lossesAgainst} losses vs him` : "Sin datos"}</div>
+                  </div>
+                </div>
+              </div>
                   <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
                     <div class="text-xs uppercase text-slate-500 font-bold">Best mate</div>
                     <div class="text-lg font-black text-emerald-300 mt-1">${st.bestPartner ? renderPlayerMini(st.bestPartner.name, "w-6 h-6") : "-"}</div>
