@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v2.1.2 PREPROD</title>
+  <title>Torneo de Mus Gents & Lords · v2.1.3 PREPROD</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json?v=0132" />
   <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
@@ -77,7 +77,7 @@
 
 </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    PREPROD · VERSION 2.1.2 · MANUAL WINNERS</div>
+    PREPROD · VERSION 2.1.3 · WINNER SOURCE</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
     <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0153') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
@@ -96,7 +96,7 @@
       </div>
 
       <div class="text-center text-[11px] text-slate-500 mt-5">
-        v2.1.2 PREPROD · La sesión se recordará en este dispositivo
+        v2.1.3 PREPROD · La sesión se recordará en este dispositivo
       </div>
     </div>
   </section>
@@ -108,7 +108,7 @@
           <img src="assets/logo.png?v=0132" class="w-9 h-9 md:w-14 md:h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70 shrink-0" />
           <div>
             <h1 class="text-lg md:text-2xl font-black text-white leading-tight whitespace-nowrap truncate">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-[10px] md:text-xs text-amber-300 font-black leading-tight whitespace-nowrap truncate">v2.1.2 PREPROD · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-[10px] md:text-xs text-amber-300 font-black leading-tight whitespace-nowrap truncate">v2.1.3 PREPROD · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -1132,11 +1132,19 @@
       if (rawStatus === "cancelled") return "cancelled";
       if (rawStatus === "rejected") return "rejected";
 
-      // Si se borran las vacas en Excel, la partida vuelve a Pendiente aunque el status siguiera como confirmed.
-      if (!hasAnyMatchResult(m)) return "pending";
+      const hasManualResolution =
+        getWinnerPlayersFromMatch(m).length > 0 ||
+        getFaultPlayersFromMatch(m).length > 0;
 
-      // Una partida solo puede estar confirmada si tiene resultado completo y válido.
-      if (rawStatus === "confirmed") return hasCompleteValidMatchResult(m) ? "confirmed" : "pending";
+      // Si se borran las vacas en Excel, la partida vuelve a Pendiente,
+      // salvo que tenga resolución administrativa explícita por winner/faultPlayers.
+      if (!hasAnyMatchResult(m) && !hasManualResolution) return "pending";
+
+      // Una partida confirmada puede estar resuelta por resultado o por decisión administrativa.
+      if (rawStatus === "confirmed") {
+        return (hasCompleteValidMatchResult(m) || hasManualResolution) ? "confirmed" : "pending";
+      }
+
       if (isAutoConfirmed(m)) return "confirmed";
 
       return "pending";
@@ -1183,7 +1191,8 @@
       const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3, matchSeason(m));
       const teamA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].filter(Boolean).map(normalizeName).join(" / ");
       const teamB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].filter(Boolean).map(normalizeName).join(" / ");
-      const winner = calc.winnerSide === "A" ? teamA : calc.winnerSide === "B" ? teamB : "";
+      const manualWinner = getWinnerPlayersFromMatch(m).join(" / ");
+      const winner = manualWinner || (calc.winnerSide === "A" ? teamA : calc.winnerSide === "B" ? teamB : "");
       let stateLabel = statusLabel(m);
       let stateClass = "bg-amber-500/10 text-amber-300 border-amber-500/30";
 
@@ -1551,7 +1560,8 @@
         const teamB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].filter(Boolean).map(normalizeName).join(" / ");
         const vacasText = calc.valid ? `${calc.vacasA}-${calc.vacasB} (${[m.vaca1,m.vaca2,m.vaca3].filter(Boolean).join("/")})` : "Error";
         const gamesText = calc.valid ? `${calc.gamesA}-${calc.gamesB}` : "-";
-        const winner = calc.winnerSide === "A" ? teamA : calc.winnerSide === "B" ? teamB : "";
+        const manualWinner = getWinnerPlayersFromMatch(m).join(" / ");
+      const winner = manualWinner || (calc.winnerSide === "A" ? teamA : calc.winnerSide === "B" ? teamB : "");
         return `
           <tr class="border-b border-slate-800 hover:bg-slate-800/40 cursor-pointer" onclick='editMatch(${JSON.stringify(m).replaceAll("'", "&apos;")})'>
             <td class="p-2 font-bold">${escapeHtml(m.id)}</td>
@@ -2375,17 +2385,20 @@
       let winners = [];
       let losers = [];
 
-      if (calc.valid && calc.complete && calc.winnerSide) {
-        const teamA = [normalizeName(m.teamA_player1 || m.teamA1), normalizeName(m.teamA_player2 || m.teamA2)].filter(Boolean);
-        const teamB = [normalizeName(m.teamB_player1 || m.teamB1), normalizeName(m.teamB_player2 || m.teamB2)].filter(Boolean);
-        winners = calc.winnerSide === "A" ? teamA : teamB;
-        losers = calc.winnerSide === "A" ? teamB : teamA;
-      } else if (manualWinners.length) {
+      // Regla v2.1.3:
+      // La columna winner es la fuente oficial si está rellena con jugadores.
+      // Esto evita errores en temporadas legacy o partidas administrativas.
+      if (manualWinners.length) {
         winners = manualWinners;
         losers = participants.filter(p => !manualWinners.includes(p));
       } else if (faultPlayers.length) {
         winners = participants.filter(p => !faultPlayers.includes(p));
         losers = faultPlayers;
+      } else if (calc.valid && calc.complete && calc.winnerSide) {
+        const teamA = [normalizeName(m.teamA_player1 || m.teamA1), normalizeName(m.teamA_player2 || m.teamA2)].filter(Boolean);
+        const teamB = [normalizeName(m.teamB_player1 || m.teamB1), normalizeName(m.teamB_player2 || m.teamB2)].filter(Boolean);
+        winners = calc.winnerSide === "A" ? teamA : teamB;
+        losers = calc.winnerSide === "A" ? teamB : teamA;
       }
 
       return {
@@ -2398,7 +2411,6 @@
         isResolved: winners.length > 0 || losers.length > 0
       };
     }
-
 
     function populateFaultFlagsFromMatch(m = {}) {
       const container = document.getElementById("matchFaultFlags");
