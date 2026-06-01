@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Torneo de Mus Gents & Lords · v2.1.0 PREPROD</title>
+  <title>Torneo de Mus Gents & Lords · v2.1.2 PREPROD</title>
   <meta name="theme-color" content="#020617" />
   <link rel="manifest" href="manifest.json?v=0132" />
   <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
@@ -77,7 +77,7 @@
 
 </style>
   <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
-    PREPROD · VERSION 2.1.0 · ALL-TIME RANKING</div>
+    PREPROD · VERSION 2.1.2 · MANUAL WINNERS</div>
   <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
     <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0153') center center / cover no-repeat;"></div>
     <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
@@ -96,7 +96,7 @@
       </div>
 
       <div class="text-center text-[11px] text-slate-500 mt-5">
-        v2.1.0 PREPROD · La sesión se recordará en este dispositivo
+        v2.1.2 PREPROD · La sesión se recordará en este dispositivo
       </div>
     </div>
   </section>
@@ -108,7 +108,7 @@
           <img src="assets/logo.png?v=0132" class="w-9 h-9 md:w-14 md:h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70 shrink-0" />
           <div>
             <h1 class="text-lg md:text-2xl font-black text-white leading-tight whitespace-nowrap truncate">🏆 Torneo de Mus Gents & Lords</h1>
-            <p class="text-[10px] md:text-xs text-amber-300 font-black leading-tight whitespace-nowrap truncate">v2.1.0 PREPROD · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+            <p class="text-[10px] md:text-xs text-amber-300 font-black leading-tight whitespace-nowrap truncate">v2.1.2 PREPROD · Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
           </div>
         </div>
       </div>
@@ -832,7 +832,8 @@
         isActiveSeasonMatch(m)
       ).forEach(m => {
         const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3, matchSeason(m));
-        if (!calc.valid || !calc.complete) return;
+        const outcome = getMatchOutcome(m);
+        if (!outcome.isResolved) return;
 
         const aPlayers = [normalizeName(m.teamA_player1 || m.teamA1), normalizeName(m.teamA_player2 || m.teamA2)].filter(Boolean);
         const bPlayers = [normalizeName(m.teamB_player1 || m.teamB1), normalizeName(m.teamB_player2 || m.teamB2)].filter(Boolean);
@@ -850,7 +851,7 @@
           r.vacasLost += calc.vacasB;
           r.jg += calc.gamesA;
           r.jp += calc.gamesB;
-          if (calc.winnerSide === "A") r.points += 3;
+          if (outcome.winners.includes(name)) r.points += 3;
         });
 
         bPlayers.forEach(name => {
@@ -860,7 +861,7 @@
           r.vacasLost += calc.vacasA;
           r.jg += calc.gamesB;
           r.jp += calc.gamesA;
-          if (calc.winnerSide === "B") r.points += 3;
+          if (outcome.winners.includes(name)) r.points += 3;
         });
 
         // Avatares usados en la partida: solo cuentan en Avatar/Sin Avatar.
@@ -931,30 +932,30 @@
       });
 
       state.matches.forEach(m => {
-        const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3, matchSeason(m));
-        if (!calc.valid || !calc.complete || effectiveStatus(m) !== "confirmed") return;
+        if (effectiveStatus(m) !== "confirmed") return;
 
-        const teamA = [normalizeName(m.teamA_player1 || m.teamA1), normalizeName(m.teamA_player2 || m.teamA2)].filter(Boolean);
-        const teamB = [normalizeName(m.teamB_player1 || m.teamB1), normalizeName(m.teamB_player2 || m.teamB2)].filter(Boolean);
+        const outcome = getMatchOutcome(m);
+        if (!outcome.isResolved) return;
 
-        [...teamA, ...teamB].forEach(name => {
+        outcome.participants.forEach(name => {
           if (!table.has(name)) {
             table.set(name, { player: name, pj: 0, wins: 0, losses: 0, winRate: 0, penal: 0, avatar: 0 });
           }
           table.get(name).pj += 1;
         });
 
-        const winners = calc.winnerSide === "A" ? teamA : calc.winnerSide === "B" ? teamB : [];
-        const losers = calc.winnerSide === "A" ? teamB : calc.winnerSide === "B" ? teamA : [];
-
-        winners.forEach(name => {
-          const r = table.get(name);
-          if (r) r.wins += 1;
+        outcome.winners.forEach(name => {
+          if (!table.has(name)) {
+            table.set(name, { player: name, pj: 0, wins: 0, losses: 0, winRate: 0, penal: 0, avatar: 0 });
+          }
+          table.get(name).wins += 1;
         });
 
-        losers.forEach(name => {
-          const r = table.get(name);
-          if (r) r.losses += 1;
+        outcome.losers.forEach(name => {
+          if (!table.has(name)) {
+            table.set(name, { player: name, pj: 0, wins: 0, losses: 0, winRate: 0, penal: 0, avatar: 0 });
+          }
+          table.get(name).losses += 1;
         });
 
         getAvatarPlayersFromMatch(m).forEach(name => {
@@ -978,7 +979,7 @@
 
       return [...table.values()].map(r => ({
         ...r,
-        winRate: r.pj ? Math.round((r.wins / r.pj) * 100) : 0
+        winRate: (r.wins + r.losses) ? Math.round((r.wins / (r.wins + r.losses)) * 100) : 0
       })).sort((a,b) =>
         b.wins - a.wins ||
         b.winRate - a.winRate ||
@@ -1346,47 +1347,49 @@
       const sourceMatches = matchesSource || state.matches;
 
       sourceMatches.forEach(m => {
-        const meta = getMatchMeta(m);
-        if (!meta.calc.valid || !meta.calc.complete || effectiveStatus(m) !== "confirmed") return;
+        if (effectiveStatus(m) !== "confirmed") return;
 
-        const teamA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].filter(Boolean);
-        const teamB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].filter(Boolean);
+        const outcome = getMatchOutcome(m);
+        if (!outcome.isResolved) return;
 
-        const winners = meta.calc.winnerSide === "A" ? teamA : teamB;
-        const losers = meta.calc.winnerSide === "A" ? teamB : teamA;
-
-        [...teamA, ...teamB].forEach(player => {
+        outcome.participants.forEach(player => {
           if (!stats[player]) return;
           stats[player].played++;
         });
 
-        winners.forEach(player => {
+        outcome.winners.forEach(player => {
           if (!stats[player]) return;
           stats[player].wins++;
           stats[player].lastResults.push("W");
         });
 
-        losers.forEach(player => {
+        outcome.losers.forEach(player => {
           if (!stats[player]) return;
           stats[player].losses++;
           stats[player].lastResults.push("L");
         });
 
-        teamA.forEach(player => {
-          if (!stats[player]) return;
-          stats[player].gamesWon += meta.calc.gamesA;
-          stats[player].gamesLost += meta.calc.gamesB;
-          stats[player].vacasWon += meta.calc.vacasA;
-          stats[player].vacasLost += meta.calc.vacasB;
-        });
+        // Juegos/vacas solo son comparables dentro de partidas con resultado real calculable.
+        if (outcome.calc.valid && outcome.calc.complete && outcome.calc.winnerSide) {
+          const teamA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].filter(Boolean).map(normalizeName);
+          const teamB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].filter(Boolean).map(normalizeName);
 
-        teamB.forEach(player => {
-          if (!stats[player]) return;
-          stats[player].gamesWon += meta.calc.gamesB;
-          stats[player].gamesLost += meta.calc.gamesA;
-          stats[player].vacasWon += meta.calc.vacasB;
-          stats[player].vacasLost += meta.calc.vacasA;
-        });
+          teamA.forEach(player => {
+            if (!stats[player]) return;
+            stats[player].gamesWon += outcome.calc.gamesA;
+            stats[player].gamesLost += outcome.calc.gamesB;
+            stats[player].vacasWon += outcome.calc.vacasA;
+            stats[player].vacasLost += outcome.calc.vacasB;
+          });
+
+          teamB.forEach(player => {
+            if (!stats[player]) return;
+            stats[player].gamesWon += outcome.calc.gamesB;
+            stats[player].gamesLost += outcome.calc.gamesA;
+            stats[player].vacasWon += outcome.calc.vacasB;
+            stats[player].vacasLost += outcome.calc.vacasA;
+          });
+        }
       });
 
       Object.values(stats).forEach(s => {
@@ -1402,7 +1405,7 @@
           }
         }
         s.streak = (s.lastResults[s.lastResults.length - 1] || "") + streak;
-        s.winRate = s.played ? Math.round((s.wins / s.played) * 100) : 0;
+        s.winRate = (s.wins + s.losses) ? Math.round((s.wins / (s.wins + s.losses)) * 100) : 0;
       });
 
       return stats;
@@ -2348,6 +2351,54 @@
         .map(normalizeName)
         .filter(Boolean);
     }
+
+    function getWinnerPlayersFromMatch(m = {}) {
+      const raw = String(m.winner || "").trim();
+      const lower = raw.toLowerCase();
+
+      if (!raw || lower === "empate" || lower === "sin resultado" || lower === "cancelada" || lower === "cancelado") {
+        return [];
+      }
+
+      return raw
+        .split(/[;,/|+]/)
+        .map(normalizeName)
+        .filter(Boolean);
+    }
+
+    function getMatchOutcome(m = {}) {
+      const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3, matchSeason(m));
+      const participants = matchPlayers(m);
+      const manualWinners = getWinnerPlayersFromMatch(m);
+      const faultPlayers = getFaultPlayersFromMatch(m);
+
+      let winners = [];
+      let losers = [];
+
+      if (calc.valid && calc.complete && calc.winnerSide) {
+        const teamA = [normalizeName(m.teamA_player1 || m.teamA1), normalizeName(m.teamA_player2 || m.teamA2)].filter(Boolean);
+        const teamB = [normalizeName(m.teamB_player1 || m.teamB1), normalizeName(m.teamB_player2 || m.teamB2)].filter(Boolean);
+        winners = calc.winnerSide === "A" ? teamA : teamB;
+        losers = calc.winnerSide === "A" ? teamB : teamA;
+      } else if (manualWinners.length) {
+        winners = manualWinners;
+        losers = participants.filter(p => !manualWinners.includes(p));
+      } else if (faultPlayers.length) {
+        winners = participants.filter(p => !faultPlayers.includes(p));
+        losers = faultPlayers;
+      }
+
+      return {
+        calc,
+        participants,
+        winners,
+        losers,
+        faultPlayers,
+        manualWinners,
+        isResolved: winners.length > 0 || losers.length > 0
+      };
+    }
+
 
     function populateFaultFlagsFromMatch(m = {}) {
       const container = document.getElementById("matchFaultFlags");
