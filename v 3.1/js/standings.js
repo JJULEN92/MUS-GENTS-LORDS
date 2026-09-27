@@ -48,8 +48,9 @@
           if (outcome.winners.includes(name)) r.points += 3;
         });
 
-        // Avatares usados en la partida: solo cuentan en Avatar/Sin Avatar.
-        // NO modifican puntos ni penalizaciones.
+        // Avatares usados en la partida.
+        // Desde seasonId 4, cada jugador que usa avatar pierde 0,1 puntos en esa partida.
+        // En temporadas 1-3 el avatar solo cuenta para las estadísticas Avatar/Sin Avatar.
         getAvatarPlayersFromMatch(m).forEach(name => {
           const clean = normalizeName(name);
           if (!clean) return;
@@ -58,7 +59,9 @@
             table.set(clean, { player: clean, pj: 0, points: 0, vacasWon: 0, vacasLost: 0, jg: 0, jp: 0, penal: 0, avatar: 0, sinAvatar: 0 });
           }
 
-          table.get(clean).avatar += 1;
+          const row = table.get(clean);
+          row.avatar += 1;
+          if (Number(matchSeasonId(m)) >= 4) row.points -= 0.1;
         });
 
         // Penalización por falta/no presentación:
@@ -88,7 +91,7 @@
 
       return [...table.values()].map(r => ({
         ...r,
-        points: Number(r.points) - Number(r.penal || 0),
+        points: Math.round((Number(r.points) - Number(r.penal || 0)) * 10) / 10,
         sinAvatar: Math.max(0, Number(r.pj || 0) - Number(r.avatar || 0))
       })).sort((a,b) =>
         b.points - a.points ||
