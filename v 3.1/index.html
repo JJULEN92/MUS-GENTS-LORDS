@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Torneo de Mus Gents & Lords</title>
+  <meta name="theme-color" content="#020617" />
+  <link rel="manifest" href="manifest.json?v=0132" />
+  <link rel="apple-touch-icon" href="assets/logo.png?v=0132" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Mus G&L" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/app.css?v=310">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <div class="w-full bg-amber-500 text-slate-950 text-center text-xs font-black py-1 tracking-widest">
+    TORNEO DE MUS · GENTS & LORDS</div>
+  <section id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
+    <div class="absolute inset-0 opacity-45" style="background: url('assets/background.jpg?v=0153') center center / cover no-repeat;"></div>
+    <div class="relative w-full max-w-md bg-slate-950/90 border border-amber-500/30 rounded-3xl p-6 shadow-2xl">
+      <div class="text-center">
+        <img src="assets/logo.png?v=0153" onerror="this.src='assets/logo.png'" class="w-28 h-28 rounded-3xl bg-white p-2 object-contain mx-auto border border-amber-400/70" />
+        <h1 class="text-3xl font-black mt-4">Torneo de Mus</h1>
+        <p class="text-amber-300 font-black text-sm">Gents & Lords</p>
+      </div>
+
+      <div class="mt-6 space-y-3">
+        <select id="loginScreenPlayer" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm">
+          <option value="">Selecciona jugador</option>
+        </select>
+        <input id="loginScreenPassword" type="password" placeholder="Clave" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm" />
+        <button onclick="loginFromScreen()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-3 rounded-xl">Entrar</button>
+      </div>
+
+      <div class="text-center text-[11px] text-slate-500 mt-5">
+        La sesión se recordará en este dispositivo
+      </div>
+    </div>
+  </section>
+
+  <header class="hero-bg border-b border-emerald-800 px-3 py-2 md:p-4 sticky top-0 z-10 shadow-2xl">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
+      <div>
+        <div class="flex items-center gap-2 md:gap-3 min-w-0">
+          <img src="assets/logo.png?v=0132" class="w-9 h-9 md:w-14 md:h-14 rounded-xl bg-white object-contain p-1 border border-amber-400/70 shrink-0" />
+          <div>
+            <h1 class="text-lg md:text-2xl font-black text-white leading-tight whitespace-nowrap truncate">🏆 Torneo de Mus Gents & Lords</h1>
+            <p class="text-[10px] md:text-xs text-amber-300 font-black leading-tight whitespace-nowrap truncate">Al mejor de 3 vacas · Vaca al mejor de 5 juegos</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="hidden md:flex flex-wrap gap-2 items-center justify-end">
+        <div class="bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-2 text-sm">
+          <span class="text-slate-400">Usuario:</span>
+          <span id="headerUser" class="font-black text-amber-300">No identificado</span>
+        </div>
+        <button onclick="showLoginScreen(true)" class="hidden md:inline-flex bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-lg text-sm">Cambiar usuario</button>
+        <button onclick="logout()" class="hidden md:inline-flex bg-red-900 hover:bg-red-800 text-white font-bold px-3 py-2 rounded-lg text-sm">Salir</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-4 space-y-6">
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-3 md:p-4">
+      <button onclick="toggleTopPanel()" class="w-full flex items-center justify-between gap-3 text-left md:pointer-events-none">
+        <div class="min-w-0">
+          <p class="text-sm truncate">👤 <span id="activeUser" class="font-bold text-amber-400">No identificado</span></p>
+          <p class="text-xs text-slate-400 truncate">Estado: <span id="appStatus">Cargando datos...</span></p>
+        </div>
+        <div class="md:hidden bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm font-black">⚙️</div>
+      </button>
+
+      <div id="topPanelActions" class="hidden md:flex flex-wrap gap-2 items-center mt-3 md:mt-4">
+        <button onclick="loadData()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg text-sm font-bold">🔄 Actualizar datos</button>
+        <button id="autoRefreshBtn" onclick="toggleAutoRefresh()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⏱️ Auto: OFF</button>
+        <button id="installBtn" onclick="installApp()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-lg text-sm font-black">📲 Instalar</button>
+        <button id="backupBtn" onclick="exportBackupJson()" class="hidden bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">⬇️ Backup</button>
+        <button onclick="showLoginScreen(true)" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-2 rounded-lg text-sm">Cambiar usuario</button>
+        <button onclick="logout()" class="bg-red-900 hover:bg-red-800 text-white font-bold px-4 py-2 rounded-lg text-sm">Salir</button>
+      </div>
+    </section>
+
+    
+    <section id="pendingPanel" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <div class="font-black text-amber-300">🔔 Resultados pendientes de confirmación</div>
+          <div id="pendingPanelText" class="text-sm text-slate-300">Hay partidas pendientes.</div>
+        </div>
+        <button onclick="showPendingMatches()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl">Ver pendientes</button>
+      </div>
+    </section>
+
+<nav class="flex gap-1 overflow-x-auto scrollbar-hide pb-1">
+      <button onclick="showTab(event,'standings')" class="tabBtn bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Rank</button>
+      <button onclick="showTab(event,'rounds')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Games</button>
+      <button onclick="showTab(event,'stats')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Stats</button>
+      <button onclick="showTab(event,'venues')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Sedes</button>
+      <button onclick="showTab(event,'history')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Hall</button>
+      <button onclick="showTab(event,'rules')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Rules</button>
+      <button onclick="showTab(event,'players')" class="tabBtn bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Gents</button>
+      <button id="logsTabBtn" onclick="showTab(event,'logs')" class="tabBtn hidden bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">Log</button>
+    </nav>
+
+    <section id="tab-standings" class="tabContent bg-slate-900 border border-slate-800 rounded-2xl p-4">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
+        <div>
+          <h2 class="text-base sm:text-xl font-black">📊 Clasificación temporada</h2>
+          <p class="text-xs text-slate-400">Liguilla principal: 8 primeros. Orden: Puntos → JG → menor JP → menor Penal → Sin Avatar</p>
+          <p class="text-xs text-amber-300 font-bold mt-1">Temporada activa: <span id="activeSeasonLabelRank">-</span></p>
+        </div>
+        <button id="saveStandingsBtn" onclick="saveCalculatedStandings()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-lg text-sm">💾 Guardar clasificación</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="text-xs uppercase text-slate-400 border-b border-slate-700">
+            <tr>
+              <th class="text-left p-2">Pos</th>
+              <th class="text-left p-2">Jugador</th>
+              <th class="text-center p-2">PJ</th>
+              <th class="text-center p-2 text-amber-400">Puntos</th>
+              <th class="text-center p-2">V+</th>
+              <th class="text-center p-2">V-</th>
+              <th class="text-center p-2 text-emerald-400">JG</th>
+              <th class="text-center p-2 text-red-400">JP</th>
+              <th class="text-center p-2">Penal</th>
+              <th class="text-center p-2">Avatar</th>
+              <th class="text-center p-2">Sin Avatar</th>
+            </tr>
+          </thead>
+          <tbody id="standingsBody"></tbody>
+        </table>
+      </div>
+
+      <div class="mt-6 bg-slate-950/60 border border-cyan-700/30 rounded-2xl p-4">
+        <div class="mb-4">
+          <h2 class="text-base sm:text-xl font-black">🧞 Avatares preferentes</h2>
+          <p class="text-xs text-slate-400 mt-1">Jugadores fuera de la liguilla principal de 8. Prioridad para cubrir ausencias.</p>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-xs uppercase text-slate-400 border-b border-slate-700">
+              <tr>
+                <th class="text-left p-2">Pos</th>
+                <th class="text-left p-2">Jugador</th>
+                <th class="text-center p-2">PJ</th>
+                <th class="text-center p-2 text-amber-400">Puntos</th>
+                <th class="text-center p-2">V+</th>
+                <th class="text-center p-2">V-</th>
+                <th class="text-center p-2 text-emerald-400">JG</th>
+                <th class="text-center p-2 text-red-400">JP</th>
+                <th class="text-center p-2">Penal</th>
+                <th class="text-center p-2">Avatar</th>
+              </tr>
+            </thead>
+            <tbody id="preferredAvatarsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="mt-8 bg-slate-950/60 border border-amber-700/30 rounded-2xl p-4">
+        <div class="mb-4">
+          <h2 class="text-base sm:text-xl font-black">🏆 All-Time Ranking</h2>
+          <p class="text-xs text-slate-400 mt-1">Histórico completo. Métricas comparables entre temporadas: PJ, wins, loss, win %, penalizaciones y avatares.</p>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-xs uppercase text-slate-400 border-b border-slate-700">
+              <tr>
+                <th class="text-left p-2">Pos</th>
+                <th class="text-left p-2">Jugador</th>
+                <th class="text-center p-2">PJ</th>
+                <th class="text-center p-2 text-emerald-400">Wins</th>
+                <th class="text-center p-2 text-red-400">Loss</th>
+                <th class="text-center p-2 text-cyan-400">Win %</th>
+                <th class="text-center p-2">Penal</th>
+                <th class="text-center p-2">Avatar</th>
+              </tr>
+            </thead>
+            <tbody id="allTimeRankingBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="tab-rounds" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-3 md:p-4 space-y-3">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h2 class="text-base sm:text-xl font-black">📅 Jornadas y resultados</h2>
+          <p class="hidden md:block text-xs text-slate-400">Vista principal para consultar, editar, confirmar o rechazar resultados.</p>
+          <p class="text-[11px] md:text-xs text-amber-300 font-bold mt-1">Season: <span id="activeSeasonLabelGames">-</span></p>
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <select id="roundFilter" onchange="renderRoundDashboard()" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs md:text-sm">
+            <option value="all">Todas las jornadas</option>
+          </select>
+        </div>
+      </div>
+      <div id="roundSummaryCards" class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-2"></div>
+      <div id="roundDashboard" class="space-y-4"></div>
+    </section>
+
+
+    <section id="tab-stats" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-5">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h2 class="text-base sm:text-xl font-black">📊 Estadísticas avanzadas</h2>
+          <p class="text-xs text-slate-400">Rankings automáticos del torneo.</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="text-xs uppercase tracking-wider text-slate-500 font-black mb-2">Histórico completo</div>
+        <div id="topCards" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3"></div>
+      </div>
+
+      <div class="bg-slate-950/50 border border-amber-700/30 rounded-2xl p-4">
+        <div class="flex items-center justify-between gap-3 mb-3">
+          <div>
+            <div class="text-xs uppercase tracking-wider text-amber-300 font-black">Temporada activa</div>
+            <div id="statsActiveSeasonLabel" class="text-xs text-slate-400 mt-1">-</div>
+          </div>
+        </div>
+        <div id="topCardsSeason" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3"></div>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h3 class="font-black mb-3">🏆 Mejor rate de wins</h3>
+          <div id="winRateTable"></div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h3 class="font-black mb-3">🔥 Racha actual</h3>
+          <div id="streakTable"></div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h3 class="font-black mb-3">🤝 Mejores parejas</h3>
+          <p class="text-xs text-slate-500 mb-3">Solo parejas con más de una win juntas.</p>
+          <div id="pairsTable"></div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h3 class="font-black mb-3">💀 Peores parejas</h3>
+          <p class="text-xs text-slate-500 mb-3">Solo parejas con más de una loss juntas.</p>
+          <div id="worstPairsTable"></div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h3 class="font-black mb-3">🎯 Juegos ganados</h3>
+          <div id="gamesWonTable"></div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+          <h3 class="font-black mb-3">💥 Juegos perdidos</h3>
+          <div id="gamesLostTable"></div>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="tab-rules" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6">
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3">
+        <div>
+          <div class="inline-flex px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-black uppercase tracking-wider">Reglamento oficial 2025-2026</div>
+          <h2 class="text-2xl font-black mt-3">📜 Código Gents & Lords</h2>
+          <p class="text-sm text-slate-400 max-w-3xl">Resumen operativo del reglamento: lo importante para jugar, resolver dudas y evitar discusiones de mesa.</p>
+        </div>
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-sm">
+          <div class="text-slate-400 text-xs uppercase font-bold">Formato oficial</div>
+          <div class="text-white font-black">Partida: mejor de 3 vacas · Vaca: mejor de 5 juegos · Juego: 40 tantos</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="bg-slate-950 border border-emerald-800/40 rounded-2xl p-5">
+          <div class="text-3xl mb-2">🎴</div>
+          <h3 class="font-black text-lg text-emerald-300">Formato y puntuación</h3>
+          <ul class="text-sm text-slate-300 mt-3 space-y-2">
+            <li><b>Win:</b> 3 puntos para cada jugador de la pareja ganadora.</li>
+            <li><b>Loss:</b> 0 puntos.</li>
+            <li><b>Desempates:</b> puntos → juegos ganados → menos juegos perdidos → menos penalizaciones → más partidas sin avatar.</li>
+            <li><b>Empate absoluto:</b> se resuelve con quijotes de Brugal cola hasta rendición honorable.</li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-950 border border-cyan-800/40 rounded-2xl p-5">
+          <div class="text-3xl mb-2">👥</div>
+          <h3 class="font-black text-lg text-cyan-300">Fase liguilla</h3>
+          <ul class="text-sm text-slate-300 mt-3 space-y-2">
+            <li>8 jugadores en formato rotativo.</li>
+            <li>7 partidas: una vez con cada compañero y al menos una vez contra cada rival.</li>
+            <li>Las partidas se programan mensualmente, normalmente el último viernes.</li>
+            <li>Los 4 primeros pasan a la Gran Final.</li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-950 border border-amber-800/40 rounded-2xl p-5">
+          <div class="text-3xl mb-2">🧙‍♂️</div>
+          <h3 class="font-black text-lg text-amber-300">Avatar y ausencias</h3>
+          <ul class="text-sm text-slate-300 mt-3 space-y-2">
+            <li>Si un jugador no puede asistir, puede intentar cambiar fecha con una semana de antelación.</li>
+            <li>Si no se puede cuadrar, puede buscar un avatar válido.</li>
+            <li>Si no encuentra avatar: -1 punto para él y +1 punto para el resto de la mesa.</li>
+            <li>El avatar debe ser varón, conocido, mayor de 30 y no jugador activo, salvo eliminados habilitados.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5">
+          <h3 class="font-black text-lg mb-4">🤫 Señas y cartas</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-amber-300">Ocho reyes y ocho ases</b><br><span class="text-slate-400">Formato oficial de baraja.</span></div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-amber-300">Señas tradicionales</b><br><span class="text-slate-400">Las falsas o no tradicionales quedan prohibidas.</span></div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-amber-300">No se pregunta seña</b><br><span class="text-slate-400">Toda seña implica jugada real.</span></div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-amber-300">Sin deje</b><br><span class="text-slate-400">En pares, juego o punto se juega sin deje.</span></div>
+          </div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5">
+          <h3 class="font-black text-lg mb-4">⚖️ Incidencias de mesa</h3>
+          <div class="space-y-3 text-sm text-slate-300">
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-cyan-300">Mus visto:</b> admitido si se descubre involuntariamente una carta; en caso de duda decide el Mano.</div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-cyan-300">CANTA:</b> si alguien niega pares o juego teniendo, los contrarios pueden exigir que declare la verdad.</div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-cyan-300">Perete:</b> no existe. 4,5,6,7 no da derecho a cartas nuevas ni tanto. Sí autoriza burla general.</div>
+            <div class="bg-slate-900 rounded-xl p-3"><b class="text-cyan-300">Discrepancias:</b> deciden los Comisarios de Juego; resolución inapelable.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-r from-amber-500/10 to-emerald-500/10 border border-amber-500/30 rounded-2xl p-5">
+        <h3 class="font-black text-lg">👑 Gran Final y trofeos</h3>
+        <p class="text-sm text-slate-300 mt-2">Los cuatro mejores juegan la gran final: 1º + 4º contra 2º + 3º. El ganador de liguilla recibe el reconocimiento de <b>EL PUTO AMO</b>. Los ganadores finales son <b>THE CHAMPIONS</b> y obtienen trofeo, certificado de expertos y privilegio de propuesta de nuevos jugadores. El último clasificado con participación suficiente recibe la honorable <b>Cuchara de Madera</b>.</p>
+      </div>
+    </section>
+
+    
+    <section id="tab-venues" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6">
+      <div class="flex items-end justify-between gap-4 mb-5">
+        <div>
+          <h2 class="text-2xl font-black">📍 Sedes del circuito</h2>
+          <p class="text-sm text-slate-400">Sedes del torneo.</p>
+        </div>
+      </div>
+
+      <div id="venuesGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+    </section>
+
+
+    
+
+    <section id="tab-history" class="tabContent hidden p-4 sm:p-6">
+      <div class="mb-7">
+        <h2 class="text-4xl sm:text-5xl font-black tracking-tight">🏛️ Hall of Fame</h2>
+      </div>
+
+      <div id="historyGrid" class="space-y-4"></div>
+    </section>
+
+
+
+
+    <section id="tab-matches" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-5">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h2 class="text-base sm:text-xl font-black">🎴 Partidas</h2>
+          <p class="text-xs text-slate-400">Formato vaca: 30, 31, 32 si gana Pareja A; 03, 13, 23 si gana Pareja B.</p>
+        </div>
+        <button onclick="openMatchForm()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-lg text-sm">➕ Añadir/Editar partida</button>
+      </div>
+
+      <div id="matchForm" class="hidden bg-slate-950 border border-slate-700 rounded-2xl p-4 space-y-4">
+        <h3 class="font-bold text-amber-400">Registrar partida</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <input id="matchId" placeholder="ID, ej. J1-M1" class="field" />
+          <input id="matchFecha" placeholder="Fecha, ej. 26/12/2025" class="field" />
+          <input id="matchRound" placeholder="Jornada, ej. 1" class="field" />
+          <select id="matchStatus" class="field">
+            <option value="confirmed">Confirmada</option>
+            <option value="pending">Pendiente</option>
+            <option value="rejected">Rechazada</option>
+            <option value="cancelled">Cancelada</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+            <h4 class="font-bold text-emerald-400 mb-2">Pareja A</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <select id="teamA1" class="field playerSelect" onchange="previewMatchResult()"></select>
+              <select id="teamA2" class="field playerSelect" onchange="previewMatchResult()"></select>
+            </div>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+            <h4 class="font-bold text-cyan-400 mb-2">Pareja B</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <select id="teamB1" class="field playerSelect" onchange="previewMatchResult()"></select>
+              <select id="teamB2" class="field playerSelect" onchange="previewMatchResult()"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+          <h4 class="font-bold text-white mb-2">Resultado por vacas</h4>
+          <p class="text-xs text-slate-400 mb-3">Introduce solo las vacas jugadas. Ejemplo: 30 / 13 / 31.</p>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+              <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 1</label>
+              <input id="vaca1" placeholder="30 / 31 / 32 / 03 / 13 / 23" class="field mb-2" oninput="previewMatchResult()" />
+              <div class="grid grid-cols-3 gap-1 resultButtons" data-target="vaca1"></div>
+            </div>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+              <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 2</label>
+              <input id="vaca2" placeholder="30 / 31 / 32 / 03 / 13 / 23" class="field mb-2" oninput="previewMatchResult()" />
+              <div class="grid grid-cols-3 gap-1 resultButtons" data-target="vaca2"></div>
+            </div>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+              <label class="block text-xs font-bold text-slate-400 mb-2">Vaca 3</label>
+              <input id="vaca3" placeholder="Solo si hace falta desempate" class="field mb-2" oninput="previewMatchResult()" />
+              <div class="grid grid-cols-3 gap-1 resultButtons" data-target="vaca3"></div>
+            </div>
+          </div>
+          <div class="mt-3 bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm">
+            <div id="matchPreview" class="text-slate-300">Resultado pendiente de calcular.</div>
+            <div id="matchValidation" class="text-xs mt-2 text-slate-400"></div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+          <h4 class="font-bold text-white mb-2">🧞 Avatar usado</h4>
+          <p class="text-xs text-slate-400 mb-3">Marca bajo cada jugador si esa plaza fue cubierta por avatar. Puede haber varios.</p>
+          <div id="matchAvatarFlags" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2"></div>
+        </div>
+
+        <div class="bg-red-950/40 border border-red-800/60 rounded-xl p-3">
+          <h4 class="font-bold text-red-300 mb-2">⚠️ Penalización por falta</h4>
+          <p class="text-xs text-slate-400 mb-3">Marca si un jugador no se presentó y la partida no pudo jugarse. Al jugador marcado se le resta 1 punto y al resto de jugadores de la partida se les suma 1.</p>
+          <div id="matchFaultFlags" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2"></div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button onclick="saveMatch()" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-lg font-bold text-sm">💾 Guardar partida</button>
+          <button onclick="closeMatchForm()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold text-sm">Cancelar</button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="text-xs uppercase text-slate-400 border-b border-slate-700">
+            <tr>
+              <th class="text-left p-2">ID</th>
+              <th class="text-center p-2">Fecha</th>
+              <th class="text-center p-2">J</th>
+              <th class="text-left p-2">Pareja A</th>
+              <th class="text-left p-2">Pareja B</th>
+              <th class="text-center p-2">Vacas</th>
+              <th class="text-center p-2">Games</th>
+              <th class="text-center p-2">Ganador</th>
+              <th class="text-center p-2">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="matchesBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    
+
+    <section id="tab-players" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6">
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-black">👥 Jugadores y perfiles</h2>
+          <p class="text-sm text-slate-400 mt-1">Ficha de jugador con foto, descripción, insignias y estadísticas personales.</p>
+        </div>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+          <label class="block text-xs uppercase font-bold text-slate-400 mb-2">Ver ficha de</label>
+          <select id="profilePlayerSelect" onchange="selectProfilePlayer(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm min-w-[220px]"></select>
+        </div>
+      </div>
+
+      <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-4">
+        <h3 class="font-black text-lg mb-3">🏷️ Leyenda de símbolos</h3>
+        <div class="flex flex-wrap gap-3 text-sm">
+          <div class="player-badge"><span>🧞</span><span>Avatar</span></div>
+          <div class="player-badge"><span>⚠️</span><span>Penalización</span></div>
+          <div class="player-badge"><span>🥇</span><span>Puto Amo</span></div>
+          <div class="player-badge"><span>🏆</span><span>Winner</span></div>
+          <div class="player-badge"><span>👏</span><span>Finalista</span></div>
+          <div class="player-badge"><span>🥄</span><span>Cuchara de madera</span></div>
+          <div class="player-badge"><span>🏛️</span><span>Fundador</span></div>
+        </div>
+      </div>
+
+      <div id="playerFeaturedCard"></div>
+
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+        <h3 class="font-black text-lg mb-3">🪪 Mi perfil</h3>
+        <p class="text-xs text-slate-400 mb-4">Inicia sesión con tu jugador para modificar tu foto y descripción.</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs uppercase font-bold text-slate-400 mb-2">Foto / avatar URL</label>
+            <input id="profileAvatar" class="field" placeholder="https://..." />
+            <p class="text-xs text-slate-500 mt-2">Debe ser una URL pública de imagen.</p>
+          </div>
+          <div class="lg:col-span-2">
+            <label class="block text-xs uppercase font-bold text-slate-400 mb-2">Descripción del jugador</label>
+            <textarea id="profileDescription" class="field min-h-[100px]" placeholder="Especialista en órdagos imposibles, presión psicológica y cierre de vacas..."></textarea>
+          </div>
+        </div>
+
+        <div class="flex justify-end mt-4">
+          <button onclick="saveMyProfile()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl">💾 Guardar perfil</button>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="font-black text-lg mb-3">📇 Todos los jugadores</h3>
+        <div id="playersGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      </div>
+    </section>
+
+
+
+    <section id="tab-logs" class="tabContent hidden bg-slate-900 border border-slate-800 rounded-2xl p-4">
+      <h2 class="text-base sm:text-xl font-black mb-4">🧾 Log de cambios</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="text-xs uppercase text-slate-400 border-b border-slate-700">
+            <tr>
+              <th class="text-left p-2">Fecha</th>
+              <th class="text-left p-2">Usuario</th>
+              <th class="text-left p-2">Acción</th>
+              <th class="text-left p-2">Detalle</th>
+            </tr>
+          </thead>
+          <tbody id="logsBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+
+
+  <div id="iosInstallModal" class="hidden fixed inset-0 z-[1001] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-950 border border-amber-500/40 rounded-3xl p-6 shadow-2xl max-w-sm w-full">
+      <div class="text-3xl mb-2">📲</div>
+      <h3 class="text-base sm:text-xl font-black text-amber-300">Instalar en iPhone</h3>
+      <p class="text-sm text-slate-300 mt-3">En iPhone la instalación se hace desde Safari:</p>
+      <ol class="text-sm text-slate-300 mt-4 space-y-2 list-decimal list-inside">
+        <li>Pulsa el botón <b>Compartir</b> de Safari.</li>
+        <li>Selecciona <b>Añadir a pantalla de inicio</b>.</li>
+        <li>Confirma con <b>Añadir</b>.</li>
+      </ol>
+      <p class="text-xs text-slate-500 mt-4">Si ya estás usando la app desde el icono de inicio, no hace falta hacer nada.</p>
+      <button onclick="closeIosInstallModal()" class="mt-5 w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-3 rounded-xl">Entendido</button>
+    </div>
+  </div>
+
+  <div id="busyOverlay" class="hidden fixed inset-0 z-[1000] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-950 border border-amber-500/40 rounded-3xl p-6 shadow-2xl text-center max-w-xs w-full">
+      <div class="mx-auto mb-4 w-12 h-12 rounded-full border-4 border-slate-700 border-t-amber-400 animate-spin"></div>
+      <div id="busyOverlayText" class="font-black text-amber-300">Procesando...</div>
+      <div class="text-xs text-slate-400 mt-2">No cierres ni pulses otros botones.</div>
+    </div>
+  </div>
+  <script src="js/config.js?v=310"></script>
+  <script src="js/state.js?v=310"></script>
+  <script src="js/api.js?v=310"></script>
+  <script src="js/data.js?v=310"></script>
+  <script src="js/standings.js?v=310"></script>
+  <script src="js/rounds.js?v=310"></script>
+  <script src="js/stats.js?v=310"></script>
+  <script src="js/players.js?v=310"></script>
+  <script src="js/venues.js?v=310"></script>
+  <script src="js/history.js?v=310"></script>
+  <script src="js/logs.js?v=310"></script>
+  <script src="js/match-engine.js?v=310"></script>
+  <script src="js/auth.js?v=310"></script>
+  <script src="js/matches.js?v=310"></script>
+  <script src="js/ui.js?v=310"></script>
+  <script src="js/pwa.js?v=310"></script>
+  <script src="js/app.js?v=310"></script>
+</body>
+</html>
