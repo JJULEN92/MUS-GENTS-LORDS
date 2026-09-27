@@ -1,7 +1,7 @@
     function renderMatches() {
       const rows = [...state.matches].filter(m => m.id).sort((a,b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true }));
       document.getElementById("matchesBody").innerHTML = rows.map(m => {
-        const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3, matchSeason(m));
+        const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3, matchSeasonId(m));
         const teamA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].filter(Boolean).map(normalizeName).join(" / ");
         const teamB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].filter(Boolean).map(normalizeName).join(" / ");
         const vacasText = calc.valid ? `${calc.vacasA}-${calc.vacasB} (${[m.vaca1,m.vaca2,m.vaca3].filter(Boolean).join("/")})` : "Error";
@@ -126,7 +126,7 @@
     }
 
     function getMatchOutcome(m = {}) {
-      const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3, matchSeason(m));
+      const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3, matchSeasonId(m));
       const participants = matchPlayers(m);
       const manualWinners = getWinnerPlayersFromMatch(m);
       const faultPlayers = getFaultPlayersFromMatch(m);
@@ -243,10 +243,16 @@
       if (isBusyGuard()) return;
       if (!requireLogin()) return;
 
+      const editingId = document.getElementById("matchId").value.trim();
+      const existingMatch = state.matches.find(m => String(m.id) === editingId);
+      const targetSeasonId = existingMatch ? matchSeasonId(existingMatch) : state.activeSeasonId;
+      const targetSeason = getSeasonById(targetSeasonId);
+
       const calc = calculateMatch(
         document.getElementById("vaca1").value,
         document.getElementById("vaca2").value,
-        document.getElementById("vaca3").value
+        document.getElementById("vaca3").value,
+        targetSeasonId
       );
 
       if (!calc.valid) return alert("Resultado inválido. Usa 30, 31, 32, 03, 13 o 23.");
@@ -263,7 +269,9 @@
       const teamB = `${teamB1}/${teamB2}`;
 
       const payload = {
-        id: document.getElementById("matchId").value.trim(),
+        seasonId: targetSeasonId,
+        Season: targetSeason?.season || targetSeason?.label || "",
+        id: editingId,
         fecha: document.getElementById("matchFecha").value.trim(),
         round: document.getElementById("matchRound").value.trim(),
         teamA_player1: teamA1,

@@ -1,8 +1,8 @@
-    function calculateMatch(v1, v2, v3, season = "") {
+    function calculateMatch(v1, v2, v3, seasonId = null) {
       const vacas = [v1, v2, v3].filter(v => String(v || "").trim() !== "");
       let vacasA = 0, vacasB = 0, gamesA = 0, gamesB = 0;
       for (const v of vacas) {
-        const parsed = parseVaca(v, season);
+        const parsed = parseVaca(v, seasonId);
         if (!parsed.valid) return { valid: false, complete: false, error: parsed.error, vacasA: 0, vacasB: 0, gamesA: 0, gamesB: 0, winnerSide: "" };
         gamesA += parsed.a;
         gamesB += parsed.b;
@@ -21,12 +21,11 @@
       };
     }
 
-    function isLegacySeason(season) {
-      const s = String(season || "").trim();
-      return s === "2024-2025";
+    function isLegacySeason(seasonId) {
+      return Number(seasonId) === 1;
     }
 
-    function parseVaca(value, season = "") {
+    function parseVaca(value, seasonId = null) {
       let s = String(value ?? "").trim().replace("-", "").replace(" ", "");
 
       // Google Sheets puede convertir 03/02 en número 3/2.
@@ -37,7 +36,7 @@
       const a = Number(s[0]);
       const b = Number(s[1]);
 
-      if (isLegacySeason(season)) {
+      if (isLegacySeason(seasonId)) {
         const validLegacyScores = (a === 2 && [0,1].includes(b)) || (b === 2 && [0,1].includes(a)) || (a === 0 && b === 0);
         if (!validLegacyScores) return { valid: false, error: "En 2024-2025 una vaca debe ser 20/21 o 02/12" };
         return { valid: true, a, b, winner: a === 2 ? "A" : b === 2 ? "B" : "", normalized: s };
@@ -53,7 +52,8 @@
       const calc = calculateMatch(
         document.getElementById("vaca1").value,
         document.getElementById("vaca2").value,
-        document.getElementById("vaca3").value
+        document.getElementById("vaca3").value,
+        state.activeSeasonId
       );
       const preview = document.getElementById("matchPreview");
       const validation = document.getElementById("matchValidation");

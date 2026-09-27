@@ -32,13 +32,20 @@
       return n;
     }
 
+    function matchSeasonId(match) {
+      const raw = match?.seasonId ?? match?.SeasonId ?? match?.SEASONID ?? "";
+      const id = Number(raw);
+      return Number.isFinite(id) ? id : null;
+    }
+
     function matchSeason(match) {
-      return String(match?.Season || match?.season || "").trim();
+      const season = getSeasonById(matchSeasonId(match));
+      return season?.label || season?.season || "";
     }
 
     function isActiveSeasonMatch(match) {
-      if (!state.activeSeason) return true;
-      return matchSeason(match) === state.activeSeason;
+      if (state.activeSeasonId === null) return true;
+      return matchSeasonId(match) === state.activeSeasonId;
     }
 
     function escapeHtml(value) {

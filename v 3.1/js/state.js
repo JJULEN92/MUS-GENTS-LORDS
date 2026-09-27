@@ -5,7 +5,8 @@
       history: [],
       venues: [],
       seasons: [],
-      activeSeason: "",
+      activeSeasonId: null,
+      activeSeason: "", // etiqueta visible; la identidad real es activeSeasonId
       currentUser: null,
       calculatedStandings: [],
       selectedProfilePlayer: '',

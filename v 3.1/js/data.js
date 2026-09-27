@@ -12,7 +12,8 @@
         state.history = normalizeHistory(data.history || []);
         state.venues = normalizeVenues(data.venues || []);
         state.seasons = normalizeSeasons(data.seasons || []);
-        state.activeSeason = getActiveSeason();
+        state.activeSeasonId = getActiveSeasonId();
+        state.activeSeason = getActiveSeasonLabel();
         renderAll();
         setStatus("Datos actualizados");
       } catch (err) {
@@ -46,32 +47,37 @@
 
     function normalizeSeasons(seasons) {
       return (seasons || []).map(s => {
+        const rawId = s.seasonId ?? s.SeasonId ?? s.SEASONID ?? s.id ?? s.ID ?? "";
         const season = s.season ?? s.Season ?? s.SEASON ?? s.temporada ?? s.Temporada ?? "";
         const active = s.active ?? s.Active ?? s.ACTIVE ?? s.activa ?? s.Activa ?? s.ACTIVA ?? "";
         const label = s.label ?? s.Label ?? s.LABEL ?? s.nombre ?? s.Nombre ?? season;
+        const seasonId = Number(rawId);
 
         return {
+          seasonId: Number.isFinite(seasonId) ? seasonId : null,
           season: String(season || "").trim(),
           active: String(active || "").trim(),
           label: String(label || season || "").trim()
         };
-      }).filter(s => s.season);
+      }).filter(s => s.seasonId !== null);
     }
 
-    function getActiveSeason() {
+    function getActiveSeasonId() {
       const active = (state.seasons || []).find(s => {
         const value = String(s.active || "").trim().toLowerCase();
         return value === "si" || value === "sí" || value === "yes" || value === "true" || value === "1";
       });
+      return active?.seasonId ?? null;
+    }
 
-      if (active && active.season) return active.season;
-
-      return "";
+    function getSeasonById(seasonId) {
+      const id = Number(seasonId);
+      return (state.seasons || []).find(s => s.seasonId === id) || null;
     }
 
     function getActiveSeasonLabel() {
-      const active = (state.seasons || []).find(s => s.season === state.activeSeason);
-      return active?.label || state.activeSeason || "Todas las temporadas";
+      const active = getSeasonById(state.activeSeasonId);
+      return active?.label || active?.season || "Todas las temporadas";
     }
 
     function normalizePlayers(players) {

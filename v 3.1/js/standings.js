@@ -15,7 +15,7 @@
         effectiveStatus(m) === "confirmed" &&
         isActiveSeasonMatch(m)
       ).forEach(m => {
-        const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3, matchSeason(m));
+        const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3, matchSeasonId(m));
         const outcome = getMatchOutcome(m);
         if (!outcome.isResolved) return;
 

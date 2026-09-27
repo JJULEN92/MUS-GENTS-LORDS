@@ -63,7 +63,7 @@
     }
 
     function hasCompleteValidMatchResult(m) {
-      const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3, matchSeason(m));
+      const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3, matchSeasonId(m));
       return calc.valid && calc.complete;
     }
 
@@ -133,7 +133,7 @@
     }
 
     function getMatchMeta(m) {
-      const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3, matchSeason(m));
+      const calc = calculateMatch(m.vaca1, m.vaca2, m.vaca3, matchSeasonId(m));
       const teamA = [m.teamA_player1 || m.teamA1, m.teamA_player2 || m.teamA2].filter(Boolean).map(normalizeName).join(" / ");
       const teamB = [m.teamB_player1 || m.teamB1, m.teamB_player2 || m.teamB2].filter(Boolean).map(normalizeName).join(" / ");
       const manualWinner = getWinnerPlayersFromMatch(m).join(" / ");
