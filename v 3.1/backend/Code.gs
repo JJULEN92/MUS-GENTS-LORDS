@@ -117,6 +117,8 @@ function addLog(body) {
 
 function sheetToObjects(sheetName) {
   const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(sheetName);
+  // Las hojas opcionales no deben tumbar todo getData si se eliminan.
+  if (!sheet) return [];
   const rows = sheet.getDataRange().getValues();
 
   if (rows.length < 2) return [];
