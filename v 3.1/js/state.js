@@ -10,7 +10,8 @@
       currentUser: null,
       calculatedStandings: [],
       selectedProfilePlayer: '',
-      isEditing: false
+      isEditing: false,
+      editingSeasonId: null
     };
 
     let autoRefreshEnabled = false;

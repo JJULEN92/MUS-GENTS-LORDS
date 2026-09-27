@@ -198,6 +198,7 @@
       const form = document.getElementById("matchForm");
       if (form) form.classList.add("hidden");
       state.isEditing = false;
+      state.editingSeasonId = null;
       clearMatchForm();
     }
 
@@ -219,6 +220,7 @@
       if (!canEditMatch(m)) return alert("Solo puedes editar partidas en las que participas.");
       ensureMatchFormInRounds();
       state.isEditing = true;
+      state.editingSeasonId = matchSeasonId(m);
       document.getElementById("matchForm").classList.remove("hidden");
       renderResultButtons();
       setMatchFormResultMode();
@@ -244,8 +246,8 @@
       if (!requireLogin()) return;
 
       const editingId = document.getElementById("matchId").value.trim();
-      const existingMatch = state.matches.find(m => String(m.id) === editingId);
-      const targetSeasonId = existingMatch ? matchSeasonId(existingMatch) : state.activeSeasonId;
+      const targetSeasonId = state.editingSeasonId ?? state.activeSeasonId;
+      const existingMatch = findMatch(editingId, targetSeasonId);
       const targetSeason = getSeasonById(targetSeasonId);
 
       const calc = calculateMatch(
@@ -324,10 +326,10 @@
     }
 
 
-    async function updateMatchStatus(matchId, newStatus, extra = {}) {
+    async function updateMatchStatus(matchId, seasonId, newStatus, extra = {}) {
       if (isBusyGuard()) return;
       if (!requireLogin()) return;
-      const match = state.matches.find(m => String(m.id) === String(matchId));
+      const match = findMatch(matchId, seasonId);
       if (!match) return alert("Partida no encontrada.");
       if (newStatus === "confirmed" && !hasCompleteValidMatchResult(match)) return alert("No se puede confirmar una partida sin resultado completo.");
 
@@ -349,48 +351,28 @@
       }
     }
 
-    async function confirmMatch(matchId) {
-      const match = state.matches.find(m => String(m.id) === String(matchId));
+    async function confirmMatch(matchId, seasonId) {
+      const match = findMatch(matchId, seasonId);
       if (!match) return alert("Partida no encontrada.");
       if (!canConfirmMatch(match)) return alert("No puedes confirmar esta partida.");
-      await updateMatchStatus(matchId, "confirmed", {
+      await updateMatchStatus(matchId, seasonId, "confirmed", {
         confirmedBy: state.currentUser.name,
         confirmedAt: new Date().toISOString()
       });
       alert("Resultado confirmado.");
     }
 
-    async function rejectMatch(matchId) {
-      const match = state.matches.find(m => String(m.id) === String(matchId));
+    async function rejectMatch(matchId, seasonId) {
+      const match = findMatch(matchId, seasonId);
       if (!match) return alert("Partida no encontrada.");
       if (!canConfirmMatch(match)) return alert("No puedes rechazar esta partida.");
       const reason = prompt("Motivo del rechazo:", "Resultado incorrecto");
       if (reason === null) return;
-      await updateMatchStatus(matchId, "rejected", {
+      await updateMatchStatus(matchId, seasonId, "rejected", {
         rejectedBy: state.currentUser.name,
         rejectedAt: new Date().toISOString(),
         rejectionReason: reason
       });
       alert("Resultado rechazado.");
-    }
-
-    async function saveCalculatedStandings() {
-      if (!requireLogin()) return;
-      if (!isAdmin()) return alert("Solo el administrador puede guardar la clasificación.");
-
-      const ok = confirm("Esto guardará la clasificación calculada en la pestaña standings. ¿Continuar?");
-      if (!ok) return;
-
-      setStatus("Guardando clasificación...");
-      try {
-        for (const r of state.calculatedStandings) {
-          await api("saveStanding", r);
-        }
-        setStatus("Clasificación guardada");
-        alert("Clasificación volcada.");
-      } catch (err) {
-        alert("No se ha podido guardar la clasificación.");
-        console.error(err);
-      }
     }
 

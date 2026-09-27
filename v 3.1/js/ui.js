@@ -38,13 +38,20 @@
       return Number.isFinite(id) ? id : null;
     }
 
+    function findMatch(matchId, seasonId = state.activeSeasonId) {
+      const sid = Number(seasonId);
+      return (state.matches || []).find(m =>
+        String(m.id) === String(matchId) && matchSeasonId(m) === sid
+      ) || null;
+    }
+
     function matchSeason(match) {
       const season = getSeasonById(matchSeasonId(match));
       return season?.label || season?.season || "";
     }
 
     function isActiveSeasonMatch(match) {
-      if (state.activeSeasonId === null) return true;
+      if (state.activeSeasonId === null) return false;
       return matchSeasonId(match) === state.activeSeasonId;
     }
 

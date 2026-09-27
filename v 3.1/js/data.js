@@ -63,11 +63,15 @@
     }
 
     function getActiveSeasonId() {
-      const active = (state.seasons || []).find(s => {
+      const active = (state.seasons || []).filter(s => {
         const value = String(s.active || "").trim().toLowerCase();
         return value === "si" || value === "sí" || value === "yes" || value === "true" || value === "1";
       });
-      return active?.seasonId ?? null;
+      if (active.length !== 1) {
+        console.error(`Configuración de temporadas inválida: se esperaba 1 activa y hay ${active.length}.`);
+        return null;
+      }
+      return active[0].seasonId;
     }
 
     function getSeasonById(seasonId) {
@@ -77,7 +81,7 @@
 
     function getActiveSeasonLabel() {
       const active = getSeasonById(state.activeSeasonId);
-      return active?.label || active?.season || "Todas las temporadas";
+      return active?.label || active?.season || "Sin temporada activa";
     }
 
     function normalizePlayers(players) {

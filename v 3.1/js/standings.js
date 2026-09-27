@@ -255,9 +255,6 @@
       const backupBtn = document.getElementById("backupBtn");
       if (backupBtn) backupBtn.classList.toggle("hidden", !show);
 
-      const saveStandingsBtn = document.getElementById("saveStandingsBtn");
-      if (saveStandingsBtn) saveStandingsBtn.classList.toggle("hidden", !show);
-
       const logsTabBtn = document.getElementById("logsTabBtn");
       if (logsTabBtn) logsTabBtn.classList.toggle("hidden", !show);
 

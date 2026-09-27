@@ -24,7 +24,6 @@ function getData() {
     ok: true,
     players: sheetToObjects("players"),
     matches: sheetToObjects("matches"),
-    standings: sheetToObjects("standings"),
     logs: sheetToObjects("logs"),
     history: sheetToObjects("history"),
     venues: sheetToObjects("venues"),
@@ -38,10 +37,19 @@ function saveMatch(body) {
   const rows = sheet.getDataRange().getValues();
   const headers = rows[0];
   const idCol = headers.indexOf("id");
+  const seasonIdCol = headers.indexOf("seasonId");
+
+  if (idCol === -1 || seasonIdCol === -1) {
+    return jsonResponse({ ok: false, error: "La hoja matches necesita las columnas id y seasonId" });
+  }
+  if (body.id === undefined || body.id === "" || body.seasonId === undefined || body.seasonId === "") {
+    return jsonResponse({ ok: false, error: "saveMatch requiere id y seasonId" });
+  }
 
   let rowIndex = -1;
   for (let i = 1; i < rows.length; i++) {
-    if (String(rows[i][idCol]) === String(body.id)) {
+    if (String(rows[i][idCol]) === String(body.id) &&
+        String(rows[i][seasonIdCol]) === String(body.seasonId)) {
       rowIndex = i + 1;
       break;
     }

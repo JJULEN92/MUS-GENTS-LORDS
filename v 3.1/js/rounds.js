@@ -167,8 +167,8 @@
       }
 
       if (effectiveStatus(m) === "pending" && hasCompleteValidMatchResult(m) && canConfirmMatch(m)) {
-        buttons.push(`<button onclick='event.stopPropagation(); confirmMatch("${escapeHtml(m.id)}")' class="bg-emerald-700 hover:bg-emerald-600 px-3 py-1.5 rounded-lg font-bold">✅ Confirmar</button>`);
-        buttons.push(`<button onclick='event.stopPropagation(); rejectMatch("${escapeHtml(m.id)}")' class="bg-red-800 hover:bg-red-700 px-3 py-1.5 rounded-lg font-bold">❌ Rechazar</button>`);
+        buttons.push(`<button onclick='event.stopPropagation(); confirmMatch("${escapeHtml(m.id)}", ${matchSeasonId(m)})' class="bg-emerald-700 hover:bg-emerald-600 px-3 py-1.5 rounded-lg font-bold">✅ Confirmar</button>`);
+        buttons.push(`<button onclick='event.stopPropagation(); rejectMatch("${escapeHtml(m.id)}", ${matchSeasonId(m)})' class="bg-red-800 hover:bg-red-700 px-3 py-1.5 rounded-lg font-bold">❌ Rechazar</button>`);
       }
 
       if (!buttons.length) {

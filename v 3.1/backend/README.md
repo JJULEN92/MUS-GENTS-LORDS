@@ -7,4 +7,4 @@
 
 **No usar ni el Sheet ID ni la URL de Apps Script de V2 PROD.**
 
-El código de backend de esta baseline conserva el comportamiento del Apps Script entregado. La inconsistencia heredada `saveStanding` se deja documentada y no se corrige en esta fase para evitar introducir cambios funcionales silenciosos.
+La clasificación se calcula dinámicamente desde `matches`; no existe dependencia de una hoja `standings`. Las partidas se identifican por la clave compuesta `seasonId + id`.
