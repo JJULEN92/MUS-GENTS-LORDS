@@ -217,7 +217,7 @@
     function editMatch(m) {
       if (isBusyGuard()) return;
       if (!requireLogin()) return;
-      if (!canEditMatch(m)) return alert("Solo puedes editar partidas en las que participas.");
+      if (!canEditMatch(m)) return alert("Este resultado ya fue propuesto por otro jugador. Puedes confirmarlo o rechazarlo si te corresponde.");
       ensureMatchFormInRounds();
       state.isEditing = true;
       state.editingSeasonId = matchSeasonId(m);
@@ -295,8 +295,8 @@
         faultPlayers: getSelectedFaultPlayers().join(";"),
         penaltyPlayers: getSelectedFaultPlayers().join(";"),
         noShowPlayers: getSelectedFaultPlayers().join(";"),
-        createdBy: state.currentUser.name,
-        createdAt: new Date().toISOString(),
+        createdBy: existingMatch?.createdBy || state.currentUser.name,
+        createdAt: existingMatch?.createdAt || new Date().toISOString(),
         updatedBy: state.currentUser.name,
         updatedAt: new Date().toISOString(),
         confirmedBy: "",

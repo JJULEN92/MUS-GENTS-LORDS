@@ -14,9 +14,21 @@
 
     function canEditMatch(m) {
       if (!state.currentUser) return false;
+
+      // El administrador puede introducir o corregir cualquier resultado.
       if (isAdmin()) return true;
+
       if (!m || !m.id) return true;
-      return userIsInMatch(m);
+      if (!userIsInMatch(m)) return false;
+
+      // Si todavía no hay resultado, cualquiera de los cuatro jugadores puede introducirlo.
+      if (!hasAnyMatchResult(m)) return true;
+
+      // Una vez propuesto un resultado, solo su autor puede modificarlo.
+      // Así la pareja contraria puede confirmar/rechazar, pero no alterar la propuesta.
+      const current = normalizeName(state.currentUser.name);
+      const author = normalizeName(m.createdBy || "");
+      return !!author && current === author;
     }
 
     function canConfirmMatch(m) {
