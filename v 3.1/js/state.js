@@ -5,6 +5,7 @@
       history: [],
       venues: [],
       seasons: [],
+      seasonBonus: [],
       activeSeasonId: null,
       activeSeason: "", // etiqueta visible; la identidad real es activeSeasonId
       currentUser: null,

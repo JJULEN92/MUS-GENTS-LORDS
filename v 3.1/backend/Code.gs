@@ -27,7 +27,8 @@ function getData() {
     logs: sheetToObjects("logs"),
     history: sheetToObjects("history"),
     venues: sheetToObjects("venues"),
-    seasons: sheetToObjects("seasons")
+    seasons: sheetToObjects("seasons"),
+    seasonBonus: sheetToObjects("seasonbonus")
   });
 }
 

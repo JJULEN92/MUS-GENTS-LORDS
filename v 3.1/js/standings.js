@@ -6,10 +6,22 @@
           player: p.name, pj: 0, points: 0, vacasWon: 0, vacasLost: 0,
           jg: 0, jp: 0,
           penal: Number(p.penal || 0),
-          avatar: Number(p.avatarCount || 0),
-          sinAvatar: 0
+          avatar: Number(p.avatarCount || 0)
         });
       });
+
+      // Bonus/puntos iniciales configurados en la hoja seasonbonus.
+      // Se aplican aunque el jugador todavía no haya disputado ninguna partida.
+      (state.seasonBonus || [])
+        .filter(b => Number(b.seasonId) === Number(state.activeSeasonId))
+        .forEach(b => {
+          const name = normalizeName(b.player);
+          if (!name) return;
+          if (!table.has(name)) {
+            table.set(name, { player: name, pj: 0, points: 0, vacasWon: 0, vacasLost: 0, jg: 0, jp: 0, penal: 0, avatar: 0 });
+          }
+          table.get(name).points += Number(b.points || 0);
+        });
 
       state.matches.filter(m =>
         effectiveStatus(m) === "confirmed" &&
@@ -24,7 +36,7 @@
 
         [...aPlayers, ...bPlayers].forEach(name => {
           if (!table.has(name)) {
-            table.set(name, { player: name, pj: 0, points: 0, vacasWon: 0, vacasLost: 0, jg: 0, jp: 0, penal: 0, avatar: 0, sinAvatar: 0 });
+            table.set(name, { player: name, pj: 0, points: 0, vacasWon: 0, vacasLost: 0, jg: 0, jp: 0, penal: 0, avatar: 0 });
           }
         });
 
@@ -50,13 +62,13 @@
 
         // Avatares usados en la partida.
         // Desde seasonId 4, cada jugador que usa avatar pierde 0,1 puntos en esa partida.
-        // En temporadas 1-3 el avatar solo cuenta para las estadísticas Avatar/Sin Avatar.
+        // En temporadas 1-3 el avatar solo cuenta como estadística de uso.
         getAvatarPlayersFromMatch(m).forEach(name => {
           const clean = normalizeName(name);
           if (!clean) return;
 
           if (!table.has(clean)) {
-            table.set(clean, { player: clean, pj: 0, points: 0, vacasWon: 0, vacasLost: 0, jg: 0, jp: 0, penal: 0, avatar: 0, sinAvatar: 0 });
+            table.set(clean, { player: clean, pj: 0, points: 0, vacasWon: 0, vacasLost: 0, jg: 0, jp: 0, penal: 0, avatar: 0 });
           }
 
           const row = table.get(clean);
@@ -75,7 +87,7 @@
           if (!clean) return;
 
           if (!table.has(clean)) {
-            table.set(clean, { player: clean, pj: 0, points: 0, vacasWon: 0, vacasLost: 0, jg: 0, jp: 0, penal: 0, avatar: 0, sinAvatar: 0 });
+            table.set(clean, { player: clean, pj: 0, points: 0, vacasWon: 0, vacasLost: 0, jg: 0, jp: 0, penal: 0, avatar: 0 });
           }
 
           table.get(clean).penal += 1;
@@ -91,14 +103,14 @@
 
       return [...table.values()].map(r => ({
         ...r,
-        points: Math.round((Number(r.points) - Number(r.penal || 0)) * 10) / 10,
-        sinAvatar: Math.max(0, Number(r.pj || 0) - Number(r.avatar || 0))
+        points: Math.round((Number(r.points) - Number(r.penal || 0)) * 10) / 10
       })).sort((a,b) =>
         b.points - a.points ||
+        ((b.jg - b.jp) - (a.jg - a.jp)) ||
         b.jg - a.jg ||
         a.jp - b.jp ||
         a.penal - b.penal ||
-        b.sinAvatar - a.sinAvatar ||
+        a.avatar - b.avatar ||
         a.player.localeCompare(b.player)
       );
     }
@@ -205,9 +217,8 @@
           <td class="p-2 text-center text-red-400">${r.jp}</td>
           <td class="p-2 text-center">${r.penal}</td>
           <td class="p-2 text-center">${r.avatar}</td>
-          <td class="p-2 text-center">${r.sinAvatar}</td>
         </tr>
-      `).join("") || `<tr><td colspan="11" class="p-4 text-slate-400">No hay clasificación calculada.</td></tr>`;
+      `).join("") || `<tr><td colspan="10" class="p-4 text-slate-400">No hay clasificación calculada.</td></tr>`;
 
       const preferredBody = document.getElementById("preferredAvatarsBody");
       if (preferredBody) {

@@ -12,6 +12,7 @@
         state.history = normalizeHistory(data.history || []);
         state.venues = normalizeVenues(data.venues || []);
         state.seasons = normalizeSeasons(data.seasons || []);
+        state.seasonBonus = normalizeSeasonBonus(data.seasonBonus || data.seasonbonus || []);
         state.activeSeasonId = getActiveSeasonId();
         state.activeSeason = getActiveSeasonLabel();
         renderAll();
@@ -24,6 +25,24 @@
       }
     }
 
+
+
+    function normalizeSeasonBonus(rows) {
+      return (rows || []).map(r => {
+        const rawSeasonId = r.seasonId ?? r.SeasonId ?? r.SEASONID ?? "";
+        const player = normalizeName(r.player ?? r.Player ?? "");
+        const points = Number(r.points ?? r.Points ?? 0);
+        const reason = String(r.reason ?? r.Reason ?? "").trim();
+        const seasonId = Number(rawSeasonId);
+
+        return {
+          seasonId: Number.isFinite(seasonId) ? seasonId : null,
+          player,
+          points: Number.isFinite(points) ? points : 0,
+          reason
+        };
+      }).filter(r => r.seasonId !== null && r.player);
+    }
 
     function normalizeHistory(history) {
       return (history || []).filter(h => h.season || h.category || h.winners).map(h => ({
