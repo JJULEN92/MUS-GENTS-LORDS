@@ -56,11 +56,18 @@ function saveMatch(body) {
     }
   }
 
-  const values = headers.map(h => body[h] ?? "");
-
+  let values;
   if (rowIndex === -1) {
+    // Nueva partida: las columnas no enviadas nacen vacías.
+    values = headers.map(h => Object.prototype.hasOwnProperty.call(body, h) ? body[h] : "");
     sheet.appendRow(values);
   } else {
+    // Partida existente: actualización NO destructiva.
+    // Conserva cualquier columna que el frontend no haya enviado.
+    values = rows[rowIndex - 1].slice();
+    headers.forEach((h, i) => {
+      if (Object.prototype.hasOwnProperty.call(body, h)) values[i] = body[h];
+    });
     sheet.getRange(rowIndex, 1, 1, headers.length).setValues([values]);
   }
 
@@ -87,11 +94,18 @@ function savePlayer(body) {
     }
   }
 
-  const values = headers.map(h => body[h] ?? "");
-
+  let values;
   if (rowIndex === -1) {
+    // Nueva partida: las columnas no enviadas nacen vacías.
+    values = headers.map(h => Object.prototype.hasOwnProperty.call(body, h) ? body[h] : "");
     sheet.appendRow(values);
   } else {
+    // Partida existente: actualización NO destructiva.
+    // Conserva cualquier columna que el frontend no haya enviado.
+    values = rows[rowIndex - 1].slice();
+    headers.forEach((h, i) => {
+      if (Object.prototype.hasOwnProperty.call(body, h)) values[i] = body[h];
+    });
     sheet.getRange(rowIndex, 1, 1, headers.length).setValues([values]);
   }
 

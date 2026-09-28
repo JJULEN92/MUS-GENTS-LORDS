@@ -83,6 +83,48 @@
       return (m.status || "") === "pending" && hasCompleteValidMatchResult(m) && hoursSince(m.createdAt || m.updatedAt) >= 24;
     }
 
+    async function persistExpiredAutoConfirmations() {
+      const expired = (state.matches || []).filter(m =>
+        m.id &&
+        (m.status || "").toLowerCase() === "pending" &&
+        isAutoConfirmed(m)
+      );
+
+      if (!expired.length) return 0;
+
+      const confirmedAt = new Date().toISOString();
+      let persisted = 0;
+
+      for (const m of expired) {
+        const seasonId = matchSeasonId(m);
+        if (seasonId === null || seasonId === undefined || seasonId === "") continue;
+
+        try {
+          const result = await api("saveMatch", {
+            id: m.id,
+            seasonId,
+            status: "confirmed",
+            confirmedBy: "AUTO-24H",
+            confirmedAt,
+            updatedBy: "AUTO-24H",
+            updatedAt: confirmedAt
+          });
+          if (!result?.ok) throw new Error(result?.error || "No se pudo confirmar automáticamente");
+
+          m.status = "confirmed";
+          m.confirmedBy = "AUTO-24H";
+          m.confirmedAt = confirmedAt;
+          m.updatedBy = "AUTO-24H";
+          m.updatedAt = confirmedAt;
+          persisted++;
+        } catch (err) {
+          console.error(`Error persistiendo auto-confirmación ${seasonId}/${m.id}:`, err);
+        }
+      }
+
+      return persisted;
+    }
+
     function effectiveStatus(m) {
       const rawStatus = (m.status || "").toLowerCase();
 

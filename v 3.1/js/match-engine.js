@@ -53,7 +53,7 @@
         document.getElementById("vaca1").value,
         document.getElementById("vaca2").value,
         document.getElementById("vaca3").value,
-        state.activeSeasonId
+        state.editingSeasonId ?? state.activeSeasonId
       );
       const preview = document.getElementById("matchPreview");
       const validation = document.getElementById("matchValidation");

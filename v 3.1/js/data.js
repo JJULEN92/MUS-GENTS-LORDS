@@ -15,6 +15,7 @@
         state.seasonBonus = normalizeSeasonBonus(data.seasonBonus || data.seasonbonus || []);
         state.activeSeasonId = getActiveSeasonId();
         state.activeSeason = getActiveSeasonLabel();
+        await persistExpiredAutoConfirmations();
         renderAll();
         setStatus("Datos actualizados");
       } catch (err) {
