@@ -1,0 +1,201 @@
+const SHEET_ID = "1kmLp6qs9sTmF2f0j6RzHPVfxZK7H97Hf04rseUEd6NE";
+
+const BACKEND_VERSION = "3.2.9";
+
+function doGet(e) {
+  const action = e && e.parameter ? String(e.parameter.action || "") : "";
+  if (action === "getSeasonBonus") return getSeasonBonus();
+  if (action === "getData") return getData();
+  return jsonResponse({
+    ok: true,
+    version: BACKEND_VERSION,
+    message: "Backend Torneo Mus Gents & Lords activo"
+  });
+}
+
+function doPost(e) {
+  const body = JSON.parse(e.postData.contents);
+  const action = body.action;
+
+  if (action === "getData") return getData();
+  if (action === "getSeasonBonus") return getSeasonBonus();
+  if (action === "saveMatch") return saveMatch(body);
+  if (action === "savePlayer") return savePlayer(body);
+  if (action === "addLog") return addLog(body);
+
+  return jsonResponse({ ok: false, error: "Acción no reconocida" });
+}
+
+function getData() {
+  const players = sheetToObjects("players");
+  const matches = sheetToObjects("matches");
+  const logs = sheetToObjects("logs");
+  const history = sheetToObjects("history");
+  const venues = sheetToObjects("venues");
+  const seasons = sheetToObjects("seasons");
+  const seasonBonus = sheetToObjects("seasonbonus");
+
+  // Integra los puntos iniciales también en cada jugador. Así la clasificación
+  // no depende de que el frontend procese correctamente un array auxiliar.
+  const active = seasons.filter(s => {
+    const v = String(s.active || s.Active || s.ACTIVE || s.activa || s.Activa || "").trim().toLowerCase();
+    return v === "si" || v === "sí" || v === "yes" || v === "true" || v === "1";
+  });
+  const activeSeasonId = active.length === 1 ? Number(active[0].seasonId ?? active[0].SeasonId ?? active[0].id) : null;
+  const bonusByPlayer = {};
+  if (Number.isFinite(activeSeasonId)) {
+    seasonBonus.forEach(b => {
+      const sid = Number(b.seasonId ?? b.SeasonId ?? b.SEASONID);
+      const player = String(b.player ?? b.Player ?? "").trim();
+      const points = Number(b.points ?? b.Points ?? 0);
+      if (sid === activeSeasonId && player && Number.isFinite(points)) {
+        bonusByPlayer[player] = (bonusByPlayer[player] || 0) + points;
+      }
+    });
+  }
+  const playersWithBonus = players.map(p => {
+    const name = String(p.name ?? p.Name ?? "").trim();
+    return Object.assign({}, p, { seasonBonusPoints: Number(bonusByPlayer[name] || 0) });
+  });
+
+  return jsonResponse({
+    ok: true,
+    version: BACKEND_VERSION,
+    players: playersWithBonus,
+    matches, logs, history, venues, seasons,
+    seasonBonus,
+    seasonbonus: seasonBonus,
+    activeSeasonId: activeSeasonId
+  });
+}
+
+
+function getSeasonBonus() {
+  const rows = sheetToObjects("seasonbonus");
+  return jsonResponse({ ok: true, version: BACKEND_VERSION, seasonBonus: rows, seasonbonus: rows });
+}
+
+function saveMatch(body) {
+  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("matches");
+  const rows = sheet.getDataRange().getValues();
+  const headers = rows[0];
+  const idCol = headers.indexOf("id");
+  const seasonIdCol = headers.indexOf("seasonId");
+
+  if (idCol === -1 || seasonIdCol === -1) {
+    return jsonResponse({ ok: false, error: "La hoja matches necesita las columnas id y seasonId" });
+  }
+  if (body.id === undefined || body.id === "" || body.seasonId === undefined || body.seasonId === "") {
+    return jsonResponse({ ok: false, error: "saveMatch requiere id y seasonId" });
+  }
+
+  let rowIndex = -1;
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][idCol]) === String(body.id) &&
+        String(rows[i][seasonIdCol]) === String(body.seasonId)) {
+      rowIndex = i + 1;
+      break;
+    }
+  }
+
+  let values;
+  if (rowIndex === -1) {
+    // Nueva partida: las columnas no enviadas nacen vacías.
+    values = headers.map(h => Object.prototype.hasOwnProperty.call(body, h) ? body[h] : "");
+    sheet.appendRow(values);
+  } else {
+    // Partida existente: actualización NO destructiva.
+    // Conserva cualquier columna que el frontend no haya enviado.
+    values = rows[rowIndex - 1].slice();
+    headers.forEach((h, i) => {
+      if (Object.prototype.hasOwnProperty.call(body, h)) values[i] = body[h];
+    });
+    sheet.getRange(rowIndex, 1, 1, headers.length).setValues([values]);
+  }
+
+  addLog({
+    user: body.updatedBy || "unknown",
+    action: "saveMatch",
+    details: JSON.stringify(body)
+  });
+
+  return jsonResponse({ ok: true });
+}
+
+function savePlayer(body) {
+  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("players");
+  const rows = sheet.getDataRange().getValues();
+  const headers = rows[0];
+  const idCol = headers.indexOf("id");
+
+  let rowIndex = -1;
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][idCol]) === String(body.id)) {
+      rowIndex = i + 1;
+      break;
+    }
+  }
+
+  let values;
+  if (rowIndex === -1) {
+    // Nueva partida: las columnas no enviadas nacen vacías.
+    values = headers.map(h => Object.prototype.hasOwnProperty.call(body, h) ? body[h] : "");
+    sheet.appendRow(values);
+  } else {
+    // Partida existente: actualización NO destructiva.
+    // Conserva cualquier columna que el frontend no haya enviado.
+    values = rows[rowIndex - 1].slice();
+    headers.forEach((h, i) => {
+      if (Object.prototype.hasOwnProperty.call(body, h)) values[i] = body[h];
+    });
+    sheet.getRange(rowIndex, 1, 1, headers.length).setValues([values]);
+  }
+
+  addLog({
+    user: body.name || "unknown",
+    action: "savePlayer",
+    details: JSON.stringify(body)
+  });
+
+  return jsonResponse({ ok: true });
+}
+
+function addLog(body) {
+  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("logs");
+  sheet.appendRow([
+    new Date(),
+    body.user || "",
+    body.action || "",
+    body.details || ""
+  ]);
+
+  return jsonResponse({ ok: true });
+}
+
+function sheetToObjects(sheetName) {
+  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(sheetName);
+  // Las hojas opcionales no deben tumbar todo getData si se eliminan.
+  if (!sheet) return [];
+  const rows = sheet.getDataRange().getValues();
+
+  if (rows.length < 2) return [];
+
+  const headers = rows[0];
+
+  return rows.slice(1).map(row => {
+    const obj = {};
+    headers.forEach((header, i) => {
+      // Normaliza cabeceras del Sheet: evita fallos silenciosos por espacios
+      // accidentales (p. ej. "seasonId " en lugar de "seasonId").
+      const key = String(header == null ? "" : header).trim();
+      if (key) obj[key] = row[i];
+    });
+    return obj;
+  });
+}
+
+function jsonResponse(data) {
+  return ContentService
+    .createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}

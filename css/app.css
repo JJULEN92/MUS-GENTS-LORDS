@@ -1,0 +1,58 @@
+/* V3.0-MODULAR — CSS extraído literalmente de V2 PROD. */
+body {
+      background:
+        linear-gradient(180deg, rgba(2,6,23,.78), rgba(2,6,23,.95)),
+        url('assets/background.jpg?v=0132') center center / cover fixed no-repeat;
+    }
+    main, header, section, nav {
+      position: relative;
+      z-index: 1;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(2,6,23,.35);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .hero-bg {
+      background: rgba(15,23,42,.86);
+      backdrop-filter: blur(8px);
+    }
+    .player-badge {
+      display:inline-flex; align-items:center; gap:.25rem;
+      padding:.25rem .5rem; border-radius:999px;
+      background:rgba(15,23,42,.85); border:1px solid rgba(51,65,85,.9);
+      font-size:.8rem; line-height:1.1;
+    }
+  
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+.hero-bg {
+      background: rgba(15,23,42,.88);
+      backdrop-filter: blur(6px);
+    }
+    .player-badge {
+      display:inline-flex; align-items:center; gap:.25rem;
+      padding:.25rem .5rem; border-radius:999px;
+      background:rgba(15,23,42,.85); border:1px solid rgba(51,65,85,.9);
+      font-size:.8rem; line-height:1.1;
+    }
+  
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+

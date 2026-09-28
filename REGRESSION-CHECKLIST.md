@@ -1,0 +1,21 @@
+# Checklist V2 -> V3.0
+
+- Login, persistencia de sesión, logout y admin.
+- Carga de players/matches/logs/history/venues/seasons.
+- Temporada activa.
+- Clasificación y desempates.
+- Avatares y penalizaciones.
+- All-Time Ranking.
+- Jornadas, orden y filtros.
+- Cálculo de vacas/juegos y temporadas legacy.
+- Introducción/edición de resultados.
+- Permisos de edición.
+- Confirmación por participante de pareja contraria.
+- Rechazo y motivo.
+- Auto-confirmación efectiva a 24 h.
+- Estados pending/confirmed/rejected/cancelled.
+- Estadísticas y parejas.
+- Perfiles, Hall of Fame, sedes y logs.
+- Backup admin.
+- PWA/install/service worker.
+- Comparación visual desktop/móvil.

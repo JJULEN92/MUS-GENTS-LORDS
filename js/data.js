@@ -1,0 +1,200 @@
+    async function loadData(skipBusyGuard = false) {
+      if (!skipBusyGuard && isBusyGuard()) return;
+      if (!skipBusyGuard) setBusy(true, "Actualizando datos...");
+      setStatus("Cargando datos...");
+      try {
+        const data = await api("getData");
+        if (!data.ok) throw new Error(data.error || "Error desconocido");
+        applyDataPayload(data);
+
+        // Fuente autoritativa del bonus: se consulta SIEMPRE seasonbonus por separado.
+        // Así evitamos depender de que getData y el despliegue del backend estén
+        // perfectamente sincronizados. Si esta llamada falla, conservamos el
+        // seasonBonus recibido en getData como fallback.
+        try {
+          const bonusData = await apiGet("getSeasonBonus");
+          if (!bonusData || !bonusData.ok) throw new Error(bonusData?.error || "getSeasonBonus no disponible");
+          const normalizedBonus = normalizeSeasonBonus(bonusData.seasonBonus || bonusData.seasonbonus || []);
+          state.seasonBonus = normalizedBonus;
+          // Si el backend desplegado es el correcto, esta fila debe llegar aquí.
+          // Se deja una traza clara en consola para futuras incidencias.
+          console.info("seasonbonus cargado", { version: bonusData.version || "sin-version", rows: normalizedBonus });
+        } catch (bonusErr) {
+          console.warn("No se pudo refrescar seasonbonus por separado; se usa el recibido en getData", bonusErr);
+        }
+        await persistExpiredAutoConfirmations();
+        renderAll();
+        setStatus("Datos actualizados");
+      } catch (err) {
+        console.error(err);
+        setStatus("Error cargando datos: " + err.message);
+      } finally {
+        if (!skipBusyGuard) setBusy(false);
+      }
+    }
+
+
+
+    function applyDataPayload(data) {
+      data = data || {};
+      state.players = normalizePlayers(data.players || []);
+      restoreLogin();
+      state.matches = data.matches || [];
+      state.logs = data.logs || [];
+      state.history = normalizeHistory(data.history || []);
+      state.venues = normalizeVenues(data.venues || []);
+      state.seasons = normalizeSeasons(data.seasons || []);
+      state.seasonBonus = normalizeSeasonBonus(data.seasonBonus || data.seasonbonus || []);
+      state.activeSeasonId = getActiveSeasonId();
+      state.activeSeason = getActiveSeasonLabel();
+    }
+
+    function normalizeSeasonBonus(rows) {
+      return (rows || []).map(r => {
+        const rawSeasonId = r.seasonId ?? r.SeasonId ?? r.SEASONID ?? "";
+        const player = normalizeName(r.player ?? r.Player ?? "");
+        const points = Number(r.points ?? r.Points ?? 0);
+        const reason = String(r.reason ?? r.Reason ?? "").trim();
+        const seasonId = Number(rawSeasonId);
+
+        return {
+          seasonId: Number.isFinite(seasonId) ? seasonId : null,
+          player,
+          points: Number.isFinite(points) ? points : 0,
+          reason
+        };
+      }).filter(r => r.seasonId !== null && r.player);
+    }
+
+    function normalizeHistory(history) {
+      return (history || []).filter(h => h.season || h.category || h.winners).map(h => ({
+        season: h.season || "",
+        category: h.category || "",
+        winners: h.winners || "",
+        notes: h.notes || ""
+      }));
+    }
+
+    function normalizeVenues(venues) {
+      return (venues || []).filter(v => v.name).map(v => ({
+        name: v.name || "",
+        type: v.type || "",
+        address: v.address || "",
+        mapsUrl: v.mapsUrl || "",
+        description: v.description || "",
+        image: v.image || ""
+      }));
+    }
+
+    function normalizeSeasons(seasons) {
+      return (seasons || []).map(s => {
+        const rawId = s.seasonId ?? s.SeasonId ?? s.SEASONID ?? s.id ?? s.ID ?? "";
+        const season = s.season ?? s.Season ?? s.SEASON ?? s.temporada ?? s.Temporada ?? "";
+        const active = s.active ?? s.Active ?? s.ACTIVE ?? s.activa ?? s.Activa ?? s.ACTIVA ?? "";
+        const label = s.label ?? s.Label ?? s.LABEL ?? s.nombre ?? s.Nombre ?? season;
+        const seasonId = Number(rawId);
+
+        return {
+          seasonId: Number.isFinite(seasonId) ? seasonId : null,
+          season: String(season || "").trim(),
+          active: String(active || "").trim(),
+          label: String(label || season || "").trim()
+        };
+      }).filter(s => s.seasonId !== null);
+    }
+
+    function getActiveSeasonId() {
+      const active = (state.seasons || []).filter(s => {
+        const value = String(s.active || "").trim().toLowerCase();
+        return value === "si" || value === "sí" || value === "yes" || value === "true" || value === "1";
+      });
+      if (active.length !== 1) {
+        console.error(`Configuración de temporadas inválida: se esperaba 1 activa y hay ${active.length}.`);
+        return null;
+      }
+      return active[0].seasonId;
+    }
+
+    function getSeasonById(seasonId) {
+      const id = Number(seasonId);
+      return (state.seasons || []).find(s => s.seasonId === id) || null;
+    }
+
+    function getActiveSeasonLabel() {
+      const active = getSeasonById(state.activeSeasonId);
+      return active?.label || active?.season || "Sin temporada activa";
+    }
+
+    function normalizePlayers(players) {
+      return players.filter(p => p.id !== "" && p.name).map(p => {
+        const rawAvatar = p.avatar || "";
+        const rawPhoto = p.photoUrl || p.photo || p.image || "";
+        const avatarLooksNumeric = rawAvatar !== "" && !isNaN(Number(rawAvatar));
+        return {
+          ...p,
+          id: String(p.id),
+          name: normalizeName(p.name),
+          role: p.role || "player",
+          penal: Number(p.penal || 0),
+          seasonBonusPoints: Number(p.seasonBonusPoints || 0),
+          avatarCount: avatarLooksNumeric ? Number(rawAvatar || 0) : Number(p.avatarCount || p.avatar_used || p.flagav || 0),
+          avatar: avatarLooksNumeric ? rawPhoto : rawAvatar,
+          description: p.description || p.descripcion || p.bio || "",
+          flagav: Number(p.flagav || 0),
+          flagpen: Number(p.flagpen || 0),
+          flagpa: Number(p.flagpa || 0),
+          flagwin: Number(p.flagwin || 0),
+          flagfinal: Number(p.flagfinal || 0),
+          flagcm: Number(p.flagcm || 0),
+          flagsf: Number(p.flagsf || 0)
+        };
+      });
+    }
+
+    function renderAll() {
+      renderLoginPlayers();
+      renderPlayerSelects();
+      state.calculatedStandings = calculateStandings();
+      renderStandings();
+      renderRoundDashboard();
+      renderStats();
+      renderPendingPanel();
+      renderMatches();
+      renderPlayers();
+      renderVenues();
+      renderHistory();
+      renderLogs();
+      renderActiveUser();
+      renderActiveSeasonLabels();
+      renderAdminControls();
+    }
+
+    function renderLoginPlayers() {
+      const options = '<option value="">Selecciona jugador</option>' + state.players.map(p =>
+        `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}${p.role === "admin" ? " 👑" : ""}</option>`
+      ).join("");
+
+      const oldSelect = document.getElementById("loginPlayer");
+      if (oldSelect) {
+        const current = oldSelect.value;
+        oldSelect.innerHTML = options;
+        oldSelect.value = current;
+      }
+
+      const screenSelect = document.getElementById("loginScreenPlayer");
+      if (screenSelect) {
+        const current = screenSelect.value;
+        screenSelect.innerHTML = options;
+        screenSelect.value = current;
+      }
+    }
+
+    function renderPlayerSelects() {
+      const options = '<option value="">Jugador</option>' + state.players.map(p => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`).join("");
+      document.querySelectorAll(".playerSelect").forEach(sel => {
+        const current = sel.value;
+        sel.innerHTML = options;
+        sel.value = current;
+      });
+    }
+
