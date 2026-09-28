@@ -1,8 +1,14 @@
 const SHEET_ID = "1kmLp6qs9sTmF2f0j6RzHPVfxZK7H97Hf04rseUEd6NE";
 
+const BACKEND_VERSION = "3.2.9";
+
 function doGet(e) {
+  const action = e && e.parameter ? String(e.parameter.action || "") : "";
+  if (action === "getSeasonBonus") return getSeasonBonus();
+  if (action === "getData") return getData();
   return jsonResponse({
     ok: true,
+    version: BACKEND_VERSION,
     message: "Backend Torneo Mus Gents & Lords activo"
   });
 }
@@ -54,6 +60,7 @@ function getData() {
 
   return jsonResponse({
     ok: true,
+    version: BACKEND_VERSION,
     players: playersWithBonus,
     matches, logs, history, venues, seasons,
     seasonBonus,
@@ -65,7 +72,7 @@ function getData() {
 
 function getSeasonBonus() {
   const rows = sheetToObjects("seasonbonus");
-  return jsonResponse({ ok: true, seasonBonus: rows, seasonbonus: rows });
+  return jsonResponse({ ok: true, version: BACKEND_VERSION, seasonBonus: rows, seasonbonus: rows });
 }
 
 function saveMatch(body) {

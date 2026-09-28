@@ -80,7 +80,7 @@ test('T24 admin puede confirmar siempre',()=>{ reset();setState({currentUser:{na
 // Integration/source guards for bugs found in production
 test('T29 loadData refresca seasonbonus siempre desde getSeasonBonus',()=>{
   const src=fs.readFileSync(path.join(root,'js','data.js'),'utf8');
-  ok(src.includes('const bonusData = await api("getSeasonBonus")'),'loadData debe consultar getSeasonBonus');
+  ok(src.includes('apiGet("getSeasonBonus")'),'loadData debe consultar getSeasonBonus');
   ok(!src.includes('if (!state.seasonBonus.length)'),'getSeasonBonus no debe depender de que getData venga vacío');
 });
 test('T30 Pozo renderiza DIF antes de JG',()=>{
@@ -103,3 +103,16 @@ let pass=0, fail=0;
 for(const t of tests){ try{ reset(); t.fn(); pass++; console.log(`PASS ${t.name}`);}catch(e){fail++;console.error(`FAIL ${t.name}: ${e.message}`);} }
 console.log(`\nRESULT: ${pass} PASS / ${fail} FAIL / ${tests.length} TOTAL`);
 process.exitCode = fail ? 1 : 0;
+
+
+test('T31 backend publica versión 3.2.9 y GET getSeasonBonus',()=>{
+  const src=fs.readFileSync(path.join(root,'backend','Code.gs'),'utf8');
+  ok(src.includes('BACKEND_VERSION = "3.2.9"'),'backend debe identificar la versión desplegada');
+  ok(src.includes('action === "getSeasonBonus"'),'doGet debe exponer getSeasonBonus');
+});
+test('T32 frontend obtiene seasonbonus por GET sin caché',()=>{
+  const apiSrc=fs.readFileSync(path.join(root,'js','api.js'),'utf8');
+  const dataSrc=fs.readFileSync(path.join(root,'js','data.js'),'utf8');
+  ok(apiSrc.includes('cache: "no-store"'),'GET diagnóstico debe evitar caché');
+  ok(dataSrc.includes('apiGet("getSeasonBonus")'),'loadData debe usar endpoint GET verificable');
+});

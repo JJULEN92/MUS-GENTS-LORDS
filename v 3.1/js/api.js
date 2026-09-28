@@ -45,3 +45,12 @@
         throw new Error("Respuesta inesperada del servidor: " + txt.slice(0, 200));
       }
     }
+
+
+    async function apiGet(action) {
+      const url = `${API_URL}?action=${encodeURIComponent(action)}&_=${Date.now()}`;
+      const res = await fetch(url, { method: "GET", cache: "no-store" });
+      const txt = await res.text();
+      try { return JSON.parse(txt); }
+      catch (e) { throw new Error("Respuesta GET inesperada del servidor: " + txt.slice(0, 200)); }
+    }

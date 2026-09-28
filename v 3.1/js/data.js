@@ -12,10 +12,13 @@
         // perfectamente sincronizados. Si esta llamada falla, conservamos el
         // seasonBonus recibido en getData como fallback.
         try {
-          const bonusData = await api("getSeasonBonus");
-          if (bonusData && bonusData.ok) {
-            state.seasonBonus = normalizeSeasonBonus(bonusData.seasonBonus || bonusData.seasonbonus || []);
-          }
+          const bonusData = await apiGet("getSeasonBonus");
+          if (!bonusData || !bonusData.ok) throw new Error(bonusData?.error || "getSeasonBonus no disponible");
+          const normalizedBonus = normalizeSeasonBonus(bonusData.seasonBonus || bonusData.seasonbonus || []);
+          state.seasonBonus = normalizedBonus;
+          // Si el backend desplegado es el correcto, esta fila debe llegar aquí.
+          // Se deja una traza clara en consola para futuras incidencias.
+          console.info("seasonbonus cargado", { version: bonusData.version || "sin-version", rows: normalizedBonus });
         } catch (bonusErr) {
           console.warn("No se pudo refrescar seasonbonus por separado; se usa el recibido en getData", bonusErr);
         }
