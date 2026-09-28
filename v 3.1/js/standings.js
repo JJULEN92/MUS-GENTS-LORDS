@@ -236,6 +236,7 @@
             <td class="p-2 text-center text-amber-400 font-black">${r.points}</td>
             <td class="p-2 text-center">${r.vacasWon}</td>
             <td class="p-2 text-center">${r.vacasLost}</td>
+            <td class="p-2 text-center font-bold">${r.jg - r.jp > 0 ? "+" : ""}${r.jg - r.jp}</td>
             <td class="p-2 text-center text-emerald-400">${r.jg}</td>
             <td class="p-2 text-center text-red-400">${r.jp}</td>
             <td class="p-2 text-center">${r.penal}</td>

@@ -7,18 +7,17 @@
         if (!data.ok) throw new Error(data.error || "Error desconocido");
         applyDataPayload(data);
 
-        // Fallback explícito: si getData no trae bonus, se consulta la hoja
-        // seasonbonus por separado. Evita que un despliegue/backend parcialmente
-        // actualizado deje los puntos iniciales silenciosamente a cero.
-        if (!state.seasonBonus.length) {
-          try {
-            const bonusData = await api("getSeasonBonus");
-            if (bonusData && bonusData.ok) {
-              state.seasonBonus = normalizeSeasonBonus(bonusData.seasonBonus || bonusData.seasonbonus || []);
-            }
-          } catch (bonusErr) {
-            console.warn("No se pudo cargar seasonbonus por separado", bonusErr);
+        // Fuente autoritativa del bonus: se consulta SIEMPRE seasonbonus por separado.
+        // Así evitamos depender de que getData y el despliegue del backend estén
+        // perfectamente sincronizados. Si esta llamada falla, conservamos el
+        // seasonBonus recibido en getData como fallback.
+        try {
+          const bonusData = await api("getSeasonBonus");
+          if (bonusData && bonusData.ok) {
+            state.seasonBonus = normalizeSeasonBonus(bonusData.seasonBonus || bonusData.seasonbonus || []);
           }
+        } catch (bonusErr) {
+          console.warn("No se pudo refrescar seasonbonus por separado; se usa el recibido en getData", bonusErr);
         }
         await persistExpiredAutoConfirmations();
         renderAll();

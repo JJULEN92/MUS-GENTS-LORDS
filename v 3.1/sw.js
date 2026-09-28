@@ -1,4 +1,4 @@
-const CACHE_NAME = "mus-gents-lords-v327";
+const CACHE_NAME = "mus-gents-lords-v328";
 const ASSETS = [
   "./?v=326",
   "./index.html?v=326",

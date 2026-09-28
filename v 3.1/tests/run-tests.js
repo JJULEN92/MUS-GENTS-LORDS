@@ -77,6 +77,22 @@ test('T22 pareja del autor tampoco confirma',()=>{ reset();setState({currentUser
 test('T23 rival sí puede confirmar',()=>{ reset();setState({currentUser:{name:'C',role:'player'}});ctx.__m=baseMatch({status:'pending',createdBy:'A'});eq(run('canConfirmMatch(__m)'),true); });
 test('T24 admin puede confirmar siempre',()=>{ reset();setState({currentUser:{name:'Admin',role:'admin'}});ctx.__m=baseMatch({status:'pending',createdBy:'A'});eq(run('canConfirmMatch(__m)'),true); });
 
+// Integration/source guards for bugs found in production
+test('T29 loadData refresca seasonbonus siempre desde getSeasonBonus',()=>{
+  const src=fs.readFileSync(path.join(root,'js','data.js'),'utf8');
+  ok(src.includes('const bonusData = await api("getSeasonBonus")'),'loadData debe consultar getSeasonBonus');
+  ok(!src.includes('if (!state.seasonBonus.length)'),'getSeasonBonus no debe depender de que getData venga vacío');
+});
+test('T30 Pozo renderiza DIF antes de JG',()=>{
+  const src=fs.readFileSync(path.join(root,'js','standings.js'),'utf8');
+  const start=src.indexOf('preferredBody.innerHTML');
+  const end=src.indexOf('const allTimeRows', start);
+  const block=src.slice(start,end);
+  const dif='${r.jg - r.jp > 0 ? "+" : ""}${r.jg - r.jp}';
+  ok(block.includes(dif),'El Pozo debe incluir la celda DIF');
+  ok(block.indexOf(dif) < block.indexOf('${r.jg}'),'DIF debe ir antes de JG');
+});
+
 // Status / auto confirmation
 test('T25 pending completo <24h sigue pending',()=>{ctx.__m=baseMatch({status:'pending',createdAt:new Date(Date.now()-23*36e5).toISOString()});eq(run('effectiveStatus(__m)'),'pending');});
 test('T26 pending completo >24h se considera confirmed',()=>{ctx.__m=baseMatch({status:'pending',createdAt:new Date(Date.now()-25*36e5).toISOString()});eq(run('effectiveStatus(__m)'),'confirmed');});
