@@ -134,6 +134,7 @@
           name: normalizeName(p.name),
           role: p.role || "player",
           penal: Number(p.penal || 0),
+          seasonBonusPoints: Number(p.seasonBonusPoints || 0),
           avatarCount: avatarLooksNumeric ? Number(rawAvatar || 0) : Number(p.avatarCount || p.avatar_used || p.flagav || 0),
           avatar: avatarLooksNumeric ? rawPhoto : rawAvatar,
           description: p.description || p.descripcion || p.bio || "",

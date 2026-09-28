@@ -56,6 +56,9 @@ test('T12B seasonBonus real del Sheet se normaliza y suma +3',()=>{ const raw=[{
 test('T12C seasonBonus se suma a puntos obtenidos en partidas',()=>{ const raw=[{seasonId:4,player:'A',points:3,reason:'Bonus'}]; ctx.__raw=raw; const normalized=JSON.parse(run('JSON.stringify(normalizeSeasonBonus(__raw))')); const s=standings(['A','B','C','D'],[baseMatch()],normalized);eq(s.find(x=>x.player==='A').points,6); });
 test('T12D integración getData real: seasonbonus -> state -> Alvaro pierde y conserva +3',()=>{ const payload={players:[{name:'A'},{name:'B'},{name:'Alvaro'},{name:'D'}],matches:[baseMatch({teamB_player1:'Alvaro'})],seasons:[{seasonId:4,Season:'2026-PRE',active:'SI'}],seasonbonus:[{seasonId:4,player:'Alvaro',points:3,reason:'Puto Amo temporada 3'}]}; ctx.__payload=payload; run('applyDataPayload(__payload)'); const s=JSON.parse(run('JSON.stringify(calculateStandings())')); const a=s.find(x=>x.player==='Alvaro'); eq(run('state.activeSeasonId'),4); eq(run('state.seasonBonus.length'),1); eq(a.pj,1); eq(a.points,3); });
 
+test('T12E bonus integrado por backend en player suma +3',()=>{ reset(); setState({players:[{name:'Alvaro',seasonBonusPoints:3}],matches:[],seasonBonus:[],activeSeasonId:4}); const s=JSON.parse(run('JSON.stringify(calculateStandings())'));eq(s.find(x=>x.player==='Alvaro').points,3); });
+test('T12F bonus backend + array auxiliar no se duplica',()=>{ reset(); setState({players:[{name:'Alvaro',seasonBonusPoints:3}],matches:[],seasonBonus:[{seasonId:4,player:'Alvaro',points:3}],activeSeasonId:4}); const s=JSON.parse(run('JSON.stringify(calculateStandings())'));eq(s.find(x=>x.player==='Alvaro').points,3); });
+
 // Season isolation
 test('T13 clasificación solo usa activeSeasonId',()=>{ const s=standings(['A','B','C','D'],[baseMatch({seasonId:4,id:'J1-M1'}),baseMatch({seasonId:3,Season:'2025-2026',id:'J1-M1'})]);eq(s.find(x=>x.player==='A').pj,1);eq(s.find(x=>x.player==='A').points,3); });
 

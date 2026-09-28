@@ -21,16 +21,44 @@ function doPost(e) {
 }
 
 function getData() {
+  const players = sheetToObjects("players");
+  const matches = sheetToObjects("matches");
+  const logs = sheetToObjects("logs");
+  const history = sheetToObjects("history");
+  const venues = sheetToObjects("venues");
+  const seasons = sheetToObjects("seasons");
+  const seasonBonus = sheetToObjects("seasonbonus");
+
+  // Integra los puntos iniciales también en cada jugador. Así la clasificación
+  // no depende de que el frontend procese correctamente un array auxiliar.
+  const active = seasons.filter(s => {
+    const v = String(s.active || s.Active || s.ACTIVE || s.activa || s.Activa || "").trim().toLowerCase();
+    return v === "si" || v === "sí" || v === "yes" || v === "true" || v === "1";
+  });
+  const activeSeasonId = active.length === 1 ? Number(active[0].seasonId ?? active[0].SeasonId ?? active[0].id) : null;
+  const bonusByPlayer = {};
+  if (Number.isFinite(activeSeasonId)) {
+    seasonBonus.forEach(b => {
+      const sid = Number(b.seasonId ?? b.SeasonId ?? b.SEASONID);
+      const player = String(b.player ?? b.Player ?? "").trim();
+      const points = Number(b.points ?? b.Points ?? 0);
+      if (sid === activeSeasonId && player && Number.isFinite(points)) {
+        bonusByPlayer[player] = (bonusByPlayer[player] || 0) + points;
+      }
+    });
+  }
+  const playersWithBonus = players.map(p => {
+    const name = String(p.name ?? p.Name ?? "").trim();
+    return Object.assign({}, p, { seasonBonusPoints: Number(bonusByPlayer[name] || 0) });
+  });
+
   return jsonResponse({
     ok: true,
-    players: sheetToObjects("players"),
-    matches: sheetToObjects("matches"),
-    logs: sheetToObjects("logs"),
-    history: sheetToObjects("history"),
-    venues: sheetToObjects("venues"),
-    seasons: sheetToObjects("seasons"),
-    seasonBonus: sheetToObjects("seasonbonus"),
-    seasonbonus: sheetToObjects("seasonbonus")
+    players: playersWithBonus,
+    matches, logs, history, venues, seasons,
+    seasonBonus,
+    seasonbonus: seasonBonus,
+    activeSeasonId: activeSeasonId
   });
 }
 
