@@ -143,7 +143,10 @@ function sheetToObjects(sheetName) {
   return rows.slice(1).map(row => {
     const obj = {};
     headers.forEach((header, i) => {
-      obj[header] = row[i];
+      // Normaliza cabeceras del Sheet: evita fallos silenciosos por espacios
+      // accidentales (p. ej. "seasonId " en lugar de "seasonId").
+      const key = String(header == null ? "" : header).trim();
+      if (key) obj[key] = row[i];
     });
     return obj;
   });
