@@ -12,6 +12,7 @@ function doPost(e) {
   const action = body.action;
 
   if (action === "getData") return getData();
+  if (action === "getSeasonBonus") return getSeasonBonus();
   if (action === "saveMatch") return saveMatch(body);
   if (action === "savePlayer") return savePlayer(body);
   if (action === "addLog") return addLog(body);
@@ -28,10 +29,16 @@ function getData() {
     history: sheetToObjects("history"),
     venues: sheetToObjects("venues"),
     seasons: sheetToObjects("seasons"),
-    seasonBonus: sheetToObjects("seasonbonus")
+    seasonBonus: sheetToObjects("seasonbonus"),
+    seasonbonus: sheetToObjects("seasonbonus")
   });
 }
 
+
+function getSeasonBonus() {
+  const rows = sheetToObjects("seasonbonus");
+  return jsonResponse({ ok: true, seasonBonus: rows, seasonbonus: rows });
+}
 
 function saveMatch(body) {
   const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("matches");

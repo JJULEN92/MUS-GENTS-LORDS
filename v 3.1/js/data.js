@@ -5,16 +5,21 @@
       try {
         const data = await api("getData");
         if (!data.ok) throw new Error(data.error || "Error desconocido");
-        state.players = normalizePlayers(data.players || []);
-        restoreLogin();
-        state.matches = data.matches || [];
-        state.logs = data.logs || [];
-        state.history = normalizeHistory(data.history || []);
-        state.venues = normalizeVenues(data.venues || []);
-        state.seasons = normalizeSeasons(data.seasons || []);
-        state.seasonBonus = normalizeSeasonBonus(data.seasonBonus || data.seasonbonus || []);
-        state.activeSeasonId = getActiveSeasonId();
-        state.activeSeason = getActiveSeasonLabel();
+        applyDataPayload(data);
+
+        // Fallback explícito: si getData no trae bonus, se consulta la hoja
+        // seasonbonus por separado. Evita que un despliegue/backend parcialmente
+        // actualizado deje los puntos iniciales silenciosamente a cero.
+        if (!state.seasonBonus.length) {
+          try {
+            const bonusData = await api("getSeasonBonus");
+            if (bonusData && bonusData.ok) {
+              state.seasonBonus = normalizeSeasonBonus(bonusData.seasonBonus || bonusData.seasonbonus || []);
+            }
+          } catch (bonusErr) {
+            console.warn("No se pudo cargar seasonbonus por separado", bonusErr);
+          }
+        }
         await persistExpiredAutoConfirmations();
         renderAll();
         setStatus("Datos actualizados");
@@ -27,6 +32,20 @@
     }
 
 
+
+    function applyDataPayload(data) {
+      data = data || {};
+      state.players = normalizePlayers(data.players || []);
+      restoreLogin();
+      state.matches = data.matches || [];
+      state.logs = data.logs || [];
+      state.history = normalizeHistory(data.history || []);
+      state.venues = normalizeVenues(data.venues || []);
+      state.seasons = normalizeSeasons(data.seasons || []);
+      state.seasonBonus = normalizeSeasonBonus(data.seasonBonus || data.seasonbonus || []);
+      state.activeSeasonId = getActiveSeasonId();
+      state.activeSeason = getActiveSeasonLabel();
+    }
 
     function normalizeSeasonBonus(rows) {
       return (rows || []).map(r => {

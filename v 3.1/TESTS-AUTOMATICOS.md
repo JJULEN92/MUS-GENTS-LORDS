@@ -1,4 +1,5 @@
-# Tests automáticos V3.2.5
+# Tests automáticos V3.2.6
 
-La batería se ejecuta automáticamente antes de entregar cada versión.
-Incluye pruebas específicas del flujo real `seasonbonus -> normalizeSeasonBonus -> calculateStandings`.
+Última ejecución: 31 tests / 31 PASS / 0 FAIL.
+
+Incluye test de integración de seasonbonus: respuesta estilo Apps Script -> normalización -> state -> calculateStandings. Caso real: seasonId 4, Alvaro +3, una partida perdida => 3 puntos.

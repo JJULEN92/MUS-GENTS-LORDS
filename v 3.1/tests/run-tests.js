@@ -16,7 +16,7 @@ const ctx = vm.createContext({
   document: fakeDocument,
   window: { addEventListener(){}, location:{}, matchMedia:()=>({matches:false,addEventListener(){}}) },
   navigator: {}, localStorage:{getItem(){return null},setItem(){},removeItem(){}},
-  alert(){}, prompt(){return null}, confirm(){return true}, setTimeout, clearTimeout, setInterval, clearInterval,
+  alert(){}, prompt(){return null}, confirm(){return true}, restoreLogin(){}, setTimeout, clearTimeout, setInterval, clearInterval,
   fetch: async()=>({json:async()=>({ok:true})})
 });
 
@@ -54,6 +54,7 @@ test('T11 seasonBonus aparece aun con 0 partidas',()=>{ const s=standings(['Alva
 test('T12 bonus de otra temporada no se aplica',()=>{ const s=standings(['Alvaro'],[],[{seasonId:3,player:'Alvaro',points:3}]);eq(s[0].points,0); });
 test('T12B seasonBonus real del Sheet se normaliza y suma +3',()=>{ const raw=[{seasonId:4,player:'Alvaro',points:3,reason:'Puto Amo temporada 3'}]; ctx.__raw=raw; const normalized=JSON.parse(run('JSON.stringify(normalizeSeasonBonus(__raw))')); const s=standings(['Alvaro'],[],normalized);eq(s.find(x=>x.player==='Alvaro').points,3);eq(s.find(x=>x.player==='Alvaro').pj,0); });
 test('T12C seasonBonus se suma a puntos obtenidos en partidas',()=>{ const raw=[{seasonId:4,player:'A',points:3,reason:'Bonus'}]; ctx.__raw=raw; const normalized=JSON.parse(run('JSON.stringify(normalizeSeasonBonus(__raw))')); const s=standings(['A','B','C','D'],[baseMatch()],normalized);eq(s.find(x=>x.player==='A').points,6); });
+test('T12D integración getData real: seasonbonus -> state -> Alvaro pierde y conserva +3',()=>{ const payload={players:[{name:'A'},{name:'B'},{name:'Alvaro'},{name:'D'}],matches:[baseMatch({teamB_player1:'Alvaro'})],seasons:[{seasonId:4,Season:'2026-PRE',active:'SI'}],seasonbonus:[{seasonId:4,player:'Alvaro',points:3,reason:'Puto Amo temporada 3'}]}; ctx.__payload=payload; run('applyDataPayload(__payload)'); const s=JSON.parse(run('JSON.stringify(calculateStandings())')); const a=s.find(x=>x.player==='Alvaro'); eq(run('state.activeSeasonId'),4); eq(run('state.seasonBonus.length'),1); eq(a.pj,1); eq(a.points,3); });
 
 // Season isolation
 test('T13 clasificación solo usa activeSeasonId',()=>{ const s=standings(['A','B','C','D'],[baseMatch({seasonId:4,id:'J1-M1'}),baseMatch({seasonId:3,Season:'2025-2026',id:'J1-M1'})]);eq(s.find(x=>x.player==='A').pj,1);eq(s.find(x=>x.player==='A').points,3); });
